@@ -1,3 +1,6 @@
+*.pb.go
+third_party/
+
 ### https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
 
 .vscode/*

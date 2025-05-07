@@ -1,0 +1,149 @@
+edition = "2023";
+
+package trippy.v1;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/go_features.proto";
+import "trippy/v1/oauth_config.proto";
+
+option go_package = "github.com/tzrikka/trippy/protos/v1";
+option features.(pb.go).api_level = API_OPAQUE;
+
+service TrippyService {
+    rpc CreateLink(CreateLinkRequest) returns (CreateLinkResponse) {
+        option (google.api.http) = {
+            post: "/v1/links"
+            body: "*"
+        };
+    }
+
+    rpc GetLink(GetLinkRequest) returns (GetLinkResponse) {
+        option (google.api.http) = {
+            get: "/v1/links/{link_id}"
+        };
+    }
+
+    // rpc UpdateLink(UpdateLinkRequest) returns (UpdateLinkResponse) {
+    //     option (google.api.http) = {
+    //         put: "/v1/links/{link_id}"
+    //     };
+    // }
+
+    // rpc DeleteLink(DeleteLinkRequest) returns (DeleteLinkResponse) {
+    //     option (google.api.http) = {
+    //         delete: "/v1/links/{link_id}"
+    //     };
+    // }
+
+    rpc SetCredentials(SetCredentialsRequest) returns (SetCredentialsResponse) {
+        option (google.api.http) = {
+            put: "/v1/links/{link_id}/credentials"
+            body: "*"
+        };
+    }
+
+    rpc GetCredentials(GetCredentialsRequest) returns (GetCredentialsResponse) {
+        option (google.api.http) = {
+            get: "/v1/links/{link_id}/credentials"
+        };
+    }
+
+    // rpc DeleteCredentials(DeleteCredentialsRequest) returns (DeleteCredentialsResponse) {
+    //     option (google.api.http) = {
+    //         delete: "/v1/links/{link_id}/credentials"
+    //     };
+    // }
+
+    rpc SetMetadata(SetMetadataRequest) returns (SetMetadataResponse) {
+        option (google.api.http) = {
+            put: "/v1/links/{link_id}/metadata"
+            body: "*"
+        };
+    }
+
+    rpc GetMetadata(GetMetadataRequest) returns (GetMetadataResponse) {
+        option (google.api.http) = {
+            get: "/v1/links/{link_id}/metadata"
+        };
+    }
+
+    // rpc DeleteMetadata(DeleteMetadataRequest) returns (DeleteMetadataResponse) {
+    //     option (google.api.http) = {
+    //         delete: "/v1/links/{link_id}/metadata"
+    //     };
+    // }
+}
+
+message CreateLinkRequest {
+    string type = 1 [(google.api.field_behavior) = REQUIRED];
+    OAuthConfig oauth_config = 2 [lazy = true];
+}
+
+message CreateLinkResponse {
+    string link_id = 1;
+}
+
+message GetLinkRequest {
+    string link_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message GetLinkResponse {
+    string type = 1;
+    OAuthConfig oauth_config = 2 [lazy = true];
+}
+
+// message UpdateLinkRequest {}
+
+// message UpdateLinkResponse {}
+
+// message DeleteLinkRequest {
+//     string link_id = 1 [(google.api.field_behavior) = REQUIRED];
+//     bool allow_missing = 2;
+// }
+
+// message DeleteLinkResponse {}
+
+message SetCredentialsRequest {
+    string link_id = 1 [(google.api.field_behavior) = REQUIRED];
+    string todo = 2;
+}
+
+message SetCredentialsResponse {}
+
+message GetCredentialsRequest {
+    string link_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message GetCredentialsResponse {
+    string todo = 1;
+}
+
+// message DeleteCredentialsRequest {
+//     string link_id = 1 [(google.api.field_behavior) = REQUIRED];
+//     bool allow_missing = 2;
+// }
+
+// message DeleteCredentialsResponse {}
+
+message SetMetadataRequest {
+    string link_id = 1 [(google.api.field_behavior) = REQUIRED];
+    string todo = 2;
+}
+
+message SetMetadataResponse {}
+
+message GetMetadataRequest {
+    string link_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message GetMetadataResponse {
+    string todo = 1;
+}
+
+// message DeleteMetadataRequest {
+//     string link_id = 1;
+//     bool allow_missing = 2;
+// }
+
+// message DeleteMetadataResponse {}

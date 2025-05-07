@@ -1,0 +1,23 @@
+edition = "2023";
+
+package trippy.v1;
+
+import "google/api/field_behavior.proto";
+import "google/protobuf/go_features.proto";
+
+option go_package = "github.com/tzrikka/trippy/protos/v1";
+option features.(pb.go).api_level = API_OPAQUE;
+
+message OAuthConfig {
+    string auth_url = 1;
+    reserved 2; // Device auth URL.
+    string token_url = 3;
+    int64 auth_style = 4;
+
+    string client_id = 5 [(google.api.field_behavior) = REQUIRED];
+    string client_secret = 6 [(google.api.field_behavior) = REQUIRED];
+    reserved 7; // Redirect URL.
+
+    repeated string scopes = 8;
+    map<string, string> opts = 9;
+}

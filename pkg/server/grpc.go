@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"net"
 
 	"github.com/lithammer/shortuuid/v4"
@@ -82,7 +83,10 @@ func (s *grpcServer) CreateLink(ctx context.Context, in *trippypb.CreateLinkRequ
 	}
 
 	l.Trace().Msg("secrets manager write success")
-	return trippypb.CreateLinkResponse_builder{LinkId: proto.String(id)}.Build(), nil
+	return trippypb.CreateLinkResponse_builder{
+		LinkId:      proto.String(id),
+		CredsFields: links.Types[t].CredsFields,
+	}.Build(), nil
 }
 
 func (s *grpcServer) GetLink(ctx context.Context, in *trippypb.GetLinkRequest) (*trippypb.GetLinkResponse, error) {
@@ -128,5 +132,68 @@ func (s *grpcServer) GetLink(ctx context.Context, in *trippypb.GetLinkRequest) (
 	return trippypb.GetLinkResponse_builder{
 		Type:        proto.String(t),
 		OauthConfig: m,
+		CredsFields: links.Types[t].CredsFields,
 	}.Build(), nil
+}
+
+func (s *grpcServer) SetCredentials(ctx context.Context, in *trippypb.SetCredentialsRequest) (*trippypb.SetCredentialsResponse, error) {
+	id := in.GetLinkId()
+	l := log.With().Str("grpc_method", "SetCredentials").Str("id", id).Logger()
+	l.Debug().Msg("received gRPC request")
+
+	if id == "" {
+		l.Warn().Msg("missing ID")
+		return nil, status.Error(codes.InvalidArgument, "missing ID")
+	}
+	if _, err := shortuuid.DefaultEncoder.Decode(id); err != nil {
+		l.Warn().Err(err).Msg("ID is an invalid short UUID")
+		return nil, status.Error(codes.InvalidArgument, "invalid ID")
+	}
+
+	j, err := json.Marshal(in.GetCreds())
+	if err != nil {
+		l.Err(err).Msg("failed to transform map into JSON")
+		return nil, status.Error(codes.Internal, "secrets manager parse error")
+	}
+
+	if len(j) > 2 { // Save only non-empty maps.
+		if err := s.sm.Set(ctx, id+"/creds", string(j)); err != nil {
+			l.Err(err).Msg("secrets manager write error")
+			return nil, status.Error(codes.Internal, "secrets manager write error")
+		}
+	}
+
+	l.Trace().Msg("secrets manager write success")
+	return &trippypb.SetCredentialsResponse{}, nil
+}
+
+func (s *grpcServer) GetCredentials(ctx context.Context, in *trippypb.GetCredentialsRequest) (*trippypb.GetCredentialsResponse, error) {
+	id := in.GetLinkId()
+	l := log.With().Str("grpc_method", "GetCredentials").Str("id", id).Logger()
+	l.Debug().Msg("received gRPC request")
+
+	if id == "" {
+		l.Warn().Msg("missing ID")
+		return nil, status.Error(codes.InvalidArgument, "missing ID")
+	}
+	if _, err := shortuuid.DefaultEncoder.Decode(id); err != nil {
+		l.Warn().Err(err).Msg("ID is an invalid short UUID")
+		return nil, status.Error(codes.InvalidArgument, "invalid ID")
+	}
+
+	j, err := s.sm.Get(ctx, id+"/creds")
+	if err != nil {
+		l.Err(err).Msg("secrets manager read error")
+		return nil, status.Error(codes.Internal, "secrets manager read error")
+	}
+
+	var m map[string]string
+	if j != "" {
+		if err := json.Unmarshal([]byte(j), &m); err != nil {
+			l.Err(err).Msg("failed to transform JSON into map")
+			return nil, status.Error(codes.Internal, "secrets manager parse error")
+		}
+	}
+
+	return trippypb.GetCredentialsResponse_builder{Creds: m}.Build(), nil
 }

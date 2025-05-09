@@ -37,7 +37,7 @@ func Creds(cmd *cli.Command) credentials.TransportCredentials {
 	// https://grpc.io/docs/languages/go/alts/
 	// https://github.com/grpc/grpc-go/tree/master/examples/features/authentication
 	// https://github.com/grpc/grpc-go/tree/master/examples/features/encryption
-	panic("not implemented yet")
+	panic("non-dev client credentials not implemented yet")
 }
 
 func InsecureCreds() credentials.TransportCredentials {

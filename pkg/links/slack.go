@@ -6,10 +6,10 @@ import (
 	"github.com/tzrikka/trippy/pkg/oauth"
 )
 
-// SlackOAuth adjusts the given [oauth.Config] for Slack (https://slack.com/).
+// slackOAuth adjusts the given [oauth.Config] for Slack (https://slack.com/).
 // Based on https://docs.slack.dev/authentication/installing-with-oauth
 // and https://docs.slack.dev/reference/methods/oauth.v2.access
-func SlackOAuth(o *oauth.Config) {
+func slackOAuth(o *oauth.Config) {
 	if o.Config.Endpoint.AuthURL == "" {
 		o.Config.Endpoint.AuthURL = "https://slack.com/oauth/v2/authorize"
 	}
@@ -24,11 +24,11 @@ func SlackOAuth(o *oauth.Config) {
 	o.Config.Scopes = append(o.Config.Scopes, "users:read")
 }
 
-// GovSlackOAuth adjusts the given [oauth.Config] for GovSlack (https://slack-gov.com/).
+// govSlackOAuth adjusts the given [oauth.Config] for GovSlack (https://slack-gov.com/).
 // Based on https://docs.slack.dev/authentication/installing-with-oauth
 // and https://docs.slack.dev/reference/methods/oauth.v2.access
 // and https://docs.slack.dev/govslack
-func GovSlackOAuth(o *oauth.Config) {
+func govSlackOAuth(o *oauth.Config) {
 	if o.Config.Endpoint.AuthURL == "" {
 		o.Config.Endpoint.AuthURL = "https://slack-gov.com/oauth/v2/authorize"
 	}

@@ -12,6 +12,7 @@ import (
 type Type struct {
 	Description string
 	OAuthFunc   func(*oauth.Config)
+	CredsFields []string
 }
 
 // Types is a map of all supported link types.
@@ -23,19 +24,18 @@ var Types = map[string]Type{
 	"slack-bot-token": {
 		Description: "Slack with a static bot token (https://docs.slack.dev/authentication/tokens#bot)",
 		OAuthFunc:   noOAuth,
+		CredsFields: []string{"bot_token_req", "app_token_opt"},
 	},
 	"slack-oauth": {
 		Description: "Slack with OAuth v2 (https://docs.slack.dev/authentication/installing-with-oauth)",
-		OAuthFunc:   SlackOAuth,
+		OAuthFunc:   slackOAuth,
+		CredsFields: oauthCredsFields,
 	},
 	"slack-oauth-gov": {
 		Description: "GovSlack with OAuth v2 (https://docs.slack.dev/govslack)",
-		OAuthFunc:   GovSlackOAuth,
+		OAuthFunc:   govSlackOAuth,
+		CredsFields: oauthCredsFields,
 	},
-}
-
-func noOAuth(o *oauth.Config) {
-	// Do nothing.
 }
 
 // ModifyOAuthConfigByType fills in all the missing OAuth
@@ -52,3 +52,10 @@ func ModifyOAuthByType(o *oauth.Config, linkType string) {
 	slices.Sort(o.Config.Scopes)
 	o.Config.Scopes = slices.Compact(o.Config.Scopes)
 }
+
+func noOAuth(o *oauth.Config) {
+	// Do nothing.
+}
+
+// oauthCredsFields is based on: https://pkg.go.dev/golang.org/x/oauth2#Token.
+var oauthCredsFields = []string{"access_token", "expiry", "refresh_token", "token_type"}

@@ -82,6 +82,7 @@ message CreateLinkRequest {
 
 message CreateLinkResponse {
     string link_id = 1;
+    repeated string creds_fields = 2;
 }
 
 message GetLinkRequest {
@@ -91,6 +92,7 @@ message GetLinkRequest {
 message GetLinkResponse {
     string type = 1;
     OAuthConfig oauth_config = 2 [lazy = true];
+    repeated string creds_fields = 3;
 }
 
 // message UpdateLinkRequest {}
@@ -106,7 +108,7 @@ message GetLinkResponse {
 
 message SetCredentialsRequest {
     string link_id = 1 [(google.api.field_behavior) = REQUIRED];
-    string todo = 2;
+    map<string, string> creds = 2;
 }
 
 message SetCredentialsResponse {}
@@ -116,7 +118,7 @@ message GetCredentialsRequest {
 }
 
 message GetCredentialsResponse {
-    string todo = 1;
+    map<string, string> creds = 1;
 }
 
 // message DeleteCredentialsRequest {
@@ -128,7 +130,7 @@ message GetCredentialsResponse {
 
 message SetMetadataRequest {
     string link_id = 1 [(google.api.field_behavior) = REQUIRED];
-    string todo = 2;
+    map<string, string> metadata = 2;
 }
 
 message SetMetadataResponse {}
@@ -138,7 +140,7 @@ message GetMetadataRequest {
 }
 
 message GetMetadataResponse {
-    string todo = 1;
+    map<string, string> metadata = 1;
 }
 
 // message DeleteMetadataRequest {

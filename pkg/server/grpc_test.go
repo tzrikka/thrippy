@@ -13,7 +13,7 @@ import (
 )
 
 func TestCreateLink(t *testing.T) {
-	addr, err := startGRPCServer(secrets.NewTestManager(), ":0")
+	addr, err := startGRPCServer(secrets.NewTestManager(), "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +85,7 @@ func TestCreateLink(t *testing.T) {
 }
 
 func TestGetLinkOAuth(t *testing.T) {
-	addr, err := startGRPCServer(secrets.NewTestManager(), ":0")
+	addr, err := startGRPCServer(secrets.NewTestManager(), "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -165,7 +165,7 @@ func TestGetLinkOAuth(t *testing.T) {
 }
 
 func TestGetLinkNonOAuth(t *testing.T) {
-	addr, err := startGRPCServer(secrets.NewTestManager(), ":0")
+	addr, err := startGRPCServer(secrets.NewTestManager(), "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
 	}

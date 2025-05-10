@@ -79,14 +79,14 @@ func TestLinkOAuthConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			lis, err := net.Listen("tcp", ":0")
+			lis, err := net.Listen("tcp", "127.0.0.1:0")
 			if err != nil {
 				t.Fatal(err)
 			}
 			s := grpc.NewServer()
 			trippypb.RegisterTrippyServiceServer(s, &server{resp: tt.resp, err: tt.respErr})
 			go func() {
-				s.Serve(lis)
+				_ = s.Serve(lis)
 			}()
 
 			got, err := LinkOAuthConfig(t.Context(), lis.Addr().String(), InsecureCreds(), "link ID")

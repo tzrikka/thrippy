@@ -195,7 +195,7 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 
 	l.Debug().Msg("successful OAuth token exchange")
 
-	// TODO: Pass to link-type-specific handling & saving.
+	// TODO: Pass to template-specific handling & saving.
 	l.Trace().Any("token", token).Send() // TODO: Remove this line!
 
 	htmlResponse(w, http.StatusOK, "You may now close this browser tab")
@@ -216,7 +216,7 @@ func htmlResponse(w http.ResponseWriter, status int, msg string) {
 		msg += "."
 	}
 
-	fmt.Fprintf(w, `<!DOCTYPE html>
+	_, _ = fmt.Fprintf(w, `<!DOCTYPE html>
 		<html>
 		<head>
 			<title>%s</title>

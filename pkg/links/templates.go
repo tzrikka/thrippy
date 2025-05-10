@@ -50,6 +50,10 @@ func ModifyOAuthByTemplate(o *oauth.Config, template string) {
 		return
 	}
 
+	if o == nil {
+		return
+	}
+
 	t.OAuthFunc(o)
 
 	slices.Sort(o.Config.Scopes)

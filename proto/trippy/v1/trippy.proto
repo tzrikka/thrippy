@@ -76,13 +76,13 @@ service TrippyService {
 }
 
 message CreateLinkRequest {
-    string type = 1 [(google.api.field_behavior) = REQUIRED];
+    string template = 1 [(google.api.field_behavior) = REQUIRED];
     OAuthConfig oauth_config = 2 [lazy = true];
 }
 
 message CreateLinkResponse {
     string link_id = 1;
-    repeated string creds_fields = 2;
+    repeated string credential_fields = 2;
 }
 
 message GetLinkRequest {
@@ -90,9 +90,9 @@ message GetLinkRequest {
 }
 
 message GetLinkResponse {
-    string type = 1;
+    string template = 1;
     OAuthConfig oauth_config = 2 [lazy = true];
-    repeated string creds_fields = 3;
+    repeated string credential_fields = 3;
 }
 
 // message UpdateLinkRequest {}
@@ -108,7 +108,7 @@ message GetLinkResponse {
 
 message SetCredentialsRequest {
     string link_id = 1 [(google.api.field_behavior) = REQUIRED];
-    map<string, string> creds = 2;
+    map<string, string> credentials = 2;
 }
 
 message SetCredentialsResponse {}
@@ -118,7 +118,7 @@ message GetCredentialsRequest {
 }
 
 message GetCredentialsResponse {
-    map<string, string> creds = 1;
+    map<string, string> credentials = 1;
 }
 
 // message DeleteCredentialsRequest {

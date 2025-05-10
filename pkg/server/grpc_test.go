@@ -33,14 +33,16 @@ func TestCreateLink(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "invalid_type",
-			req:     &trippypb.CreateLinkRequest{},
+			name: "invalid_template",
+			req: trippypb.CreateLinkRequest_builder{
+				Template: proto.String("bad-template-id"),
+			}.Build(),
 			wantErr: true,
 		},
 		{
 			name: "oauth_without_client_id",
 			req: trippypb.CreateLinkRequest_builder{
-				Type: proto.String("generic-oauth"),
+				Template: proto.String("generic"),
 				OauthConfig: trippypb.OAuthConfig_builder{
 					AuthUrl:      proto.String("111"),
 					ClientSecret: proto.String("222"),
@@ -51,7 +53,7 @@ func TestCreateLink(t *testing.T) {
 		{
 			name: "oauth_without_client_secret",
 			req: trippypb.CreateLinkRequest_builder{
-				Type: proto.String("generic-oauth"),
+				Template: proto.String("generic"),
 				OauthConfig: trippypb.OAuthConfig_builder{
 					AuthUrl:  proto.String("111"),
 					ClientId: proto.String("222"),
@@ -62,7 +64,7 @@ func TestCreateLink(t *testing.T) {
 		{
 			name: "generic_oauth",
 			req: trippypb.CreateLinkRequest_builder{
-				Type: proto.String("generic-oauth"),
+				Template: proto.String("generic"),
 				OauthConfig: trippypb.OAuthConfig_builder{
 					AuthUrl:      proto.String("111"),
 					ClientId:     proto.String("222"),
@@ -97,7 +99,7 @@ func TestGetLinkOAuth(t *testing.T) {
 
 	client := trippypb.NewTrippyServiceClient(conn)
 	resp1, err := client.CreateLink(t.Context(), trippypb.CreateLinkRequest_builder{
-		Type: proto.String("generic-oauth"),
+		Template: proto.String("generic"),
 		OauthConfig: trippypb.OAuthConfig_builder{
 			ClientId:     proto.String("111"),
 			ClientSecret: proto.String("222"),
@@ -177,7 +179,7 @@ func TestGetLinkNonOAuth(t *testing.T) {
 
 	client := trippypb.NewTrippyServiceClient(conn)
 	resp1, err := client.CreateLink(t.Context(), trippypb.CreateLinkRequest_builder{
-		Type: proto.String("slack-bot-token"),
+		Template: proto.String("slack-bot-token"),
 	}.Build())
 	if err != nil {
 		t.Fatalf("CreateLink() error = %v", err)
@@ -191,9 +193,9 @@ func TestGetLinkNonOAuth(t *testing.T) {
 		return
 	}
 
-	wantType := "slack-bot-token"
-	if got.GetType() != wantType {
-		t.Errorf("GetLink().GetType() = %q, want %q", got.GetType(), wantType)
+	wantTemplate := "slack-bot-token"
+	if got.GetTemplate() != wantTemplate {
+		t.Errorf("GetLink().GetTemplate() = %q, want %q", got.GetTemplate(), wantTemplate)
 	}
 	if got.GetOauthConfig() != nil {
 		t.Errorf("GetLink().GetOauthConfig() = %v, want nil", got.GetOauthConfig())

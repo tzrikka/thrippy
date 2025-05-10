@@ -46,7 +46,7 @@ func TestLinkOAuthConfig(t *testing.T) {
 		{
 			name: "invalid_oauth_error",
 			resp: trippypb.GetLinkResponse_builder{
-				Type:        proto.String("link-type"),
+				Template:    proto.String("template"),
 				OauthConfig: trippypb.OAuthConfig_builder{}.Build(),
 			}.Build(),
 			wantErr: true,
@@ -58,7 +58,7 @@ func TestLinkOAuthConfig(t *testing.T) {
 		{
 			name: "happy_path",
 			resp: trippypb.GetLinkResponse_builder{
-				Type: proto.String("link-type"),
+				Template: proto.String("template"),
 				OauthConfig: trippypb.OAuthConfig_builder{
 					AuthUrl:      proto.String("111"),
 					ClientId:     proto.String("222"),

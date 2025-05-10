@@ -1,30 +1,33 @@
-// Package links defines the configuration details of
-// well-known third-party services, as optional templates.
+// Package links defines the authentication details of well-known
+// third-party services, as templates for link creation, and special
+// logic per service to check the usability of private credentials.
 package links
 
 import (
 	"slices"
 
+	_ "golang.org/x/oauth2"
+
 	"github.com/tzrikka/trippy/pkg/oauth"
 )
 
-// Type represents the details of a supported link type.
-type Type struct {
+// Template defines the authentication details of a well-known third-party service.
+type Template struct {
 	Description string
 	OAuthFunc   func(*oauth.Config)
 	CredsFields []string
 }
 
-// Types is a map of all supported link types.
-var Types = map[string]Type{
-	"generic-oauth": {
-		Description: "Generic OAuth 2.0",
+// Templates is a map of all the link templates that Trippy recognizes and supports.
+var Templates = map[string]Template{
+	"generic": {
+		Description: "Generic link",
 		OAuthFunc:   noOAuth,
 	},
 	"slack-bot-token": {
 		Description: "Slack with a static bot token (https://docs.slack.dev/authentication/tokens#bot)",
 		OAuthFunc:   noOAuth,
-		CredsFields: []string{"bot_token_req", "app_token_opt"},
+		CredsFields: []string{"bot_token", "optional_app_token"},
 	},
 	"slack-oauth": {
 		Description: "Slack with OAuth v2 (https://docs.slack.dev/authentication/installing-with-oauth)",
@@ -38,11 +41,11 @@ var Types = map[string]Type{
 	},
 }
 
-// ModifyOAuthConfigByType fills in all the missing OAuth
+// ModifyOAuthByTemplate fills in all the missing OAuth
 // configuration details, based on the given link type ID.
 // It also normalizes (i.e. sorts and compacts) OAuth scopes.
-func ModifyOAuthByType(o *oauth.Config, linkType string) {
-	t, ok := Types[linkType]
+func ModifyOAuthByTemplate(o *oauth.Config, template string) {
+	t, ok := Templates[template]
 	if !ok {
 		return
 	}
@@ -57,5 +60,5 @@ func noOAuth(o *oauth.Config) {
 	// Do nothing.
 }
 
-// oauthCredsFields is based on: https://pkg.go.dev/golang.org/x/oauth2#Token.
+// oauthCredsFields is based on [oauth2.Token].
 var oauthCredsFields = []string{"access_token", "expiry", "refresh_token", "token_type"}

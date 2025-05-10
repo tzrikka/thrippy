@@ -51,20 +51,20 @@ func (s *grpcServer) CreateLink(ctx context.Context, in *trippypb.CreateLinkRequ
 	l := log.With().Str("grpc_method", "CreateLink").Str("id", id).Logger()
 	l.Debug().Msg("received gRPC request")
 
-	t := in.GetType()
-	if _, ok := links.Types[t]; !ok {
-		l.Warn().Str("type", t).Msg("invalid link type")
-		return nil, status.Error(codes.InvalidArgument, "invalid link type")
+	t := in.GetTemplate()
+	if _, ok := links.Templates[t]; !ok {
+		l.Warn().Str("template", t).Msg("invalid template")
+		return nil, status.Error(codes.InvalidArgument, "invalid template")
 	}
 
 	o := oauth.FromProto(in.GetOauthConfig())
-	links.ModifyOAuthByType(o, t)
+	links.ModifyOAuthByTemplate(o, t)
 	if o != nil && o.Config.Endpoint.AuthURL != "" && (o.Config.ClientID == "" || o.Config.ClientSecret == "") {
 		l.Warn().Msg("missing OAuth client ID and/or secret")
 		return nil, status.Error(codes.InvalidArgument, "missing OAuth client ID and/or secret")
 	}
 
-	if err := s.sm.Set(ctx, id+"/type", t); err != nil {
+	if err := s.sm.Set(ctx, id+"/template", t); err != nil {
 		l.Err(err).Msg("secrets manager write error")
 		return nil, status.Error(codes.Internal, "secrets manager write error")
 	}
@@ -84,8 +84,8 @@ func (s *grpcServer) CreateLink(ctx context.Context, in *trippypb.CreateLinkRequ
 
 	l.Trace().Msg("secrets manager write success")
 	return trippypb.CreateLinkResponse_builder{
-		LinkId:      proto.String(id),
-		CredsFields: links.Types[t].CredsFields,
+		LinkId:           proto.String(id),
+		CredentialFields: links.Templates[t].CredsFields,
 	}.Build(), nil
 }
 
@@ -103,7 +103,7 @@ func (s *grpcServer) GetLink(ctx context.Context, in *trippypb.GetLinkRequest) (
 		return nil, status.Error(codes.InvalidArgument, "invalid ID")
 	}
 
-	t, err := s.sm.Get(ctx, id+"/type")
+	t, err := s.sm.Get(ctx, id+"/template")
 	if err != nil {
 		l.Err(err).Msg("secrets manager read error")
 		return nil, status.Error(codes.Internal, "secrets manager read error")
@@ -130,9 +130,9 @@ func (s *grpcServer) GetLink(ctx context.Context, in *trippypb.GetLinkRequest) (
 	}
 
 	return trippypb.GetLinkResponse_builder{
-		Type:        proto.String(t),
-		OauthConfig: m,
-		CredsFields: links.Types[t].CredsFields,
+		Template:         proto.String(t),
+		OauthConfig:      m,
+		CredentialFields: links.Templates[t].CredsFields,
 	}.Build(), nil
 }
 
@@ -150,7 +150,7 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *trippypb.SetCredent
 		return nil, status.Error(codes.InvalidArgument, "invalid ID")
 	}
 
-	j, err := json.Marshal(in.GetCreds())
+	j, err := json.Marshal(in.GetCredentials())
 	if err != nil {
 		l.Err(err).Msg("failed to transform map into JSON")
 		return nil, status.Error(codes.Internal, "secrets manager parse error")
@@ -195,5 +195,5 @@ func (s *grpcServer) GetCredentials(ctx context.Context, in *trippypb.GetCredent
 		}
 	}
 
-	return trippypb.GetCredentialsResponse_builder{Creds: m}.Build(), nil
+	return trippypb.GetCredentialsResponse_builder{Credentials: m}.Build(), nil
 }

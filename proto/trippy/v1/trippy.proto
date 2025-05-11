@@ -30,11 +30,11 @@ service TrippyService {
     //     };
     // }
 
-    // rpc DeleteLink(DeleteLinkRequest) returns (DeleteLinkResponse) {
-    //     option (google.api.http) = {
-    //         delete: "/v1/links/{link_id}"
-    //     };
-    // }
+    rpc DeleteLink(DeleteLinkRequest) returns (DeleteLinkResponse) {
+        option (google.api.http) = {
+            delete: "/v1/links/{link_id}"
+        };
+    }
 
     rpc SetCredentials(SetCredentialsRequest) returns (SetCredentialsResponse) {
         option (google.api.http) = {
@@ -49,11 +49,11 @@ service TrippyService {
         };
     }
 
-    // rpc DeleteCredentials(DeleteCredentialsRequest) returns (DeleteCredentialsResponse) {
-    //     option (google.api.http) = {
-    //         delete: "/v1/links/{link_id}/credentials"
-    //     };
-    // }
+    rpc DeleteCredentials(DeleteCredentialsRequest) returns (DeleteCredentialsResponse) {
+        option (google.api.http) = {
+            delete: "/v1/links/{link_id}/credentials"
+        };
+    }
 
     rpc SetMetadata(SetMetadataRequest) returns (SetMetadataResponse) {
         option (google.api.http) = {
@@ -68,11 +68,11 @@ service TrippyService {
         };
     }
 
-    // rpc DeleteMetadata(DeleteMetadataRequest) returns (DeleteMetadataResponse) {
-    //     option (google.api.http) = {
-    //         delete: "/v1/links/{link_id}/metadata"
-    //     };
-    // }
+    rpc DeleteMetadata(DeleteMetadataRequest) returns (DeleteMetadataResponse) {
+        option (google.api.http) = {
+            delete: "/v1/links/{link_id}/metadata"
+        };
+    }
 }
 
 message CreateLinkRequest {
@@ -99,12 +99,12 @@ message GetLinkResponse {
 
 // message UpdateLinkResponse {}
 
-// message DeleteLinkRequest {
-//     string link_id = 1 [(google.api.field_behavior) = REQUIRED];
-//     bool allow_missing = 2;
-// }
+message DeleteLinkRequest {
+    string link_id = 1 [(google.api.field_behavior) = REQUIRED];
+    bool allow_missing = 2;
+}
 
-// message DeleteLinkResponse {}
+message DeleteLinkResponse {}
 
 message SetCredentialsRequest {
     string link_id = 1 [(google.api.field_behavior) = REQUIRED];
@@ -122,12 +122,12 @@ message GetCredentialsResponse {
     map<string, string> credentials = 1;
 }
 
-// message DeleteCredentialsRequest {
-//     string link_id = 1 [(google.api.field_behavior) = REQUIRED];
-//     bool allow_missing = 2;
-// }
+message DeleteCredentialsRequest {
+    string link_id = 1 [(google.api.field_behavior) = REQUIRED];
+    bool allow_missing = 2;
+}
 
-// message DeleteCredentialsResponse {}
+message DeleteCredentialsResponse {}
 
 message SetMetadataRequest {
     string link_id = 1 [(google.api.field_behavior) = REQUIRED];
@@ -144,9 +144,9 @@ message GetMetadataResponse {
     map<string, string> metadata = 1;
 }
 
-// message DeleteMetadataRequest {
-//     string link_id = 1;
-//     bool allow_missing = 2;
-// }
+message DeleteMetadataRequest {
+    string link_id = 1;
+    bool allow_missing = 2;
+}
 
-// message DeleteMetadataResponse {}
+message DeleteMetadataResponse {}

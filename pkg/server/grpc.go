@@ -174,12 +174,12 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *trippypb.SetCredent
 	}
 
 	if err := s.sm.Set(ctx, id+"/creds", string(j)); err != nil {
-		l.Err(err).Msg("secrets manager write error: creds")
+		l.Err(err).Msg("secrets manager write error")
 		return nil, status.Error(codes.Internal, "secrets manager write error")
 	}
 
 	if err := s.sm.Set(ctx, id+"/meta", metadata); err != nil {
-		l.Err(err).Msg("secrets manager write error: metadata")
+		l.Err(err).Msg("secrets manager write error")
 		return nil, status.Error(codes.Internal, "secrets manager write error")
 	}
 
@@ -216,4 +216,35 @@ func (s *grpcServer) GetCredentials(ctx context.Context, in *trippypb.GetCredent
 	}
 
 	return trippypb.GetCredentialsResponse_builder{Credentials: m}.Build(), nil
+}
+
+func (s *grpcServer) GetMetadata(ctx context.Context, in *trippypb.GetMetadataRequest) (*trippypb.GetMetadataResponse, error) {
+	id := in.GetLinkId()
+	l := log.With().Str("grpc_method", "GetMetadata").Str("id", id).Logger()
+	l.Debug().Msg("received gRPC request")
+
+	if id == "" {
+		l.Warn().Msg("missing ID")
+		return nil, status.Error(codes.InvalidArgument, "missing ID")
+	}
+	if _, err := shortuuid.DefaultEncoder.Decode(id); err != nil {
+		l.Warn().Err(err).Msg("ID is an invalid short UUID")
+		return nil, status.Error(codes.InvalidArgument, "invalid ID")
+	}
+
+	j, err := s.sm.Get(ctx, id+"/meta")
+	if err != nil {
+		l.Err(err).Msg("secrets manager read error")
+		return nil, status.Error(codes.Internal, "secrets manager read error")
+	}
+
+	var m map[string]string
+	if j != "" {
+		if err := json.Unmarshal([]byte(j), &m); err != nil {
+			l.Err(err).Msg("failed to convert JSON into map")
+			return nil, status.Error(codes.Internal, "secrets manager parse error")
+		}
+	}
+
+	return trippypb.GetMetadataResponse_builder{Metadata: m}.Build(), nil
 }

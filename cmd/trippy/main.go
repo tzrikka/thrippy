@@ -67,6 +67,7 @@ func main() {
 			startOAuthCommand(configFilePath),
 			setCredsCommand,
 			getCredsCommand,
+			getMetaCommand,
 		},
 		Flags:                 flags,
 		EnableShellCompletion: true,

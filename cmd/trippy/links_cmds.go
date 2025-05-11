@@ -121,9 +121,10 @@ var getLinkCommand = &cli.Command{
 			return err
 		}
 
-		fmt.Print("Template:  ", resp.GetTemplate(), "\n\n")
+		fmt.Println("Template: ", resp.GetTemplate())
 		o := oauth.ToString(resp.GetOauthConfig())
 		if o != "" {
+			fmt.Println("")
 			fmt.Println(o)
 		}
 		fmt.Println("\nExpected credential fields:", resp.GetCredentialFields())

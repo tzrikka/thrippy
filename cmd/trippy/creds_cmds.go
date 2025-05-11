@@ -129,7 +129,7 @@ var getCredsCommand = &cli.Command{
 		ks := slices.Collect(maps.Keys(kv))
 		sort.Strings(ks)
 		for _, k := range ks {
-			fmt.Printf("%-*s  %s\n", l, k, kv[k])
+			fmt.Printf("- %-*s  %s\n", l, k, kv[k])
 		}
 
 		return nil

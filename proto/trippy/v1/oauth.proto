@@ -9,9 +9,9 @@ option go_package = "github.com/tzrikka/trippy/protos/v1";
 option features.(pb.go).api_level = API_OPAQUE;
 
 message OAuthConfig {
-    string auth_url = 1;
+    string auth_url = 1 [(google.api.field_behavior) = REQUIRED];
     reserved 2; // Device auth URL.
-    string token_url = 3;
+    string token_url = 3 [(google.api.field_behavior) = REQUIRED];
     int64 auth_style = 4;
 
     string client_id = 5 [(google.api.field_behavior) = REQUIRED];
@@ -20,4 +20,12 @@ message OAuthConfig {
 
     repeated string scopes = 8;
     map<string, string> opts = 9;
+}
+
+// OAuthToken is based on https://pkg.go.dev/golang.org/x/oauth2#Token
+message OAuthToken {
+	string access_token = 1 [(google.api.field_behavior) = REQUIRED];
+    string expiry = 2 [(google.api.field_behavior) = REQUIRED]; // RFC-3339: "2006-01-02T15:04:05Z".
+    string refresh_token = 3;
+    string token_type = 4;
 }

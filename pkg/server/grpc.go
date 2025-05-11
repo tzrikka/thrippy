@@ -71,7 +71,7 @@ func (s *grpcServer) CreateLink(ctx context.Context, in *trippypb.CreateLinkRequ
 
 	j, err := o.ToJSON()
 	if err != nil {
-		l.Err(err).Msg("failed to transform proto into JSON")
+		l.Err(err).Msg("failed to convert proto into JSON")
 		return nil, status.Error(codes.Internal, "secrets manager parse error")
 	}
 
@@ -85,7 +85,7 @@ func (s *grpcServer) CreateLink(ctx context.Context, in *trippypb.CreateLinkRequ
 	l.Trace().Msg("secrets manager write success")
 	return trippypb.CreateLinkResponse_builder{
 		LinkId:           proto.String(id),
-		CredentialFields: links.Templates[t].CredsFields,
+		CredentialFields: links.Templates[t].CredFields(),
 	}.Build(), nil
 }
 
@@ -124,7 +124,7 @@ func (s *grpcServer) GetLink(ctx context.Context, in *trippypb.GetLinkRequest) (
 		m = &trippypb.OAuthConfig{}
 		err = protojson.Unmarshal([]byte(o), m)
 		if err != nil {
-			l.Err(err).Msg("failed to transform JSON into proto")
+			l.Err(err).Msg("failed to convert JSON into proto")
 			return nil, status.Error(codes.Internal, "secrets manager parse error")
 		}
 	}
@@ -132,7 +132,7 @@ func (s *grpcServer) GetLink(ctx context.Context, in *trippypb.GetLinkRequest) (
 	return trippypb.GetLinkResponse_builder{
 		Template:         proto.String(t),
 		OauthConfig:      m,
-		CredentialFields: links.Templates[t].CredsFields,
+		CredentialFields: links.Templates[t].CredFields(),
 	}.Build(), nil
 }
 
@@ -150,17 +150,37 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *trippypb.SetCredent
 		return nil, status.Error(codes.InvalidArgument, "invalid ID")
 	}
 
-	j, err := json.Marshal(in.GetCredentials())
+	template, err := s.sm.Get(ctx, id+"/template")
 	if err != nil {
-		l.Err(err).Msg("failed to transform map into JSON")
+		l.Err(err).Msg("secrets manager read error")
+		return nil, status.Error(codes.Internal, "secrets manager read error")
+	}
+	if template == "" {
+		l.Warn().Msg("link not found")
+		return nil, status.Error(codes.NotFound, "link not found")
+	}
+
+	token := in.GetToken()
+	j, err := protojson.Marshal(token)
+	if err != nil {
+		l.Err(err).Msg("failed to convert proto into JSON")
 		return nil, status.Error(codes.Internal, "secrets manager parse error")
 	}
 
-	if len(j) > 2 { // Save only non-empty maps.
-		if err := s.sm.Set(ctx, id+"/creds", string(j)); err != nil {
-			l.Err(err).Msg("secrets manager write error")
-			return nil, status.Error(codes.Internal, "secrets manager write error")
-		}
+	metadata, err := links.Templates[template].Check(in.GetGenericCreds(), oauth.TokenFromProto(token))
+	if err != nil {
+		l.Err(err).Msg("failed to check credentials / extract metadata")
+		return nil, status.Error(codes.Internal, "credentials check error")
+	}
+
+	if err := s.sm.Set(ctx, id+"/creds", string(j)); err != nil {
+		l.Err(err).Msg("secrets manager write error: creds")
+		return nil, status.Error(codes.Internal, "secrets manager write error")
+	}
+
+	if err := s.sm.Set(ctx, id+"/meta", metadata); err != nil {
+		l.Err(err).Msg("secrets manager write error: metadata")
+		return nil, status.Error(codes.Internal, "secrets manager write error")
 	}
 
 	l.Trace().Msg("secrets manager write success")
@@ -190,7 +210,7 @@ func (s *grpcServer) GetCredentials(ctx context.Context, in *trippypb.GetCredent
 	var m map[string]string
 	if j != "" {
 		if err := json.Unmarshal([]byte(j), &m); err != nil {
-			l.Err(err).Msg("failed to transform JSON into map")
+			l.Err(err).Msg("failed to convert JSON into map")
 			return nil, status.Error(codes.Internal, "secrets manager parse error")
 		}
 	}

@@ -81,8 +81,8 @@ var setCredsCommand = &cli.Command{
 
 		c := trippypb.NewTrippyServiceClient(conn)
 		_, err = c.SetCredentials(ctx, trippypb.SetCredentialsRequest_builder{
-			LinkId:      proto.String(cmd.Args().First()),
-			Credentials: cmd.StringMap("kv"),
+			LinkId:       proto.String(cmd.Args().First()),
+			GenericCreds: cmd.StringMap("kv"),
 		}.Build())
 		if err != nil {
 			return err

@@ -11,6 +11,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/urfave/cli/v3"
+	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -85,4 +86,32 @@ func LinkOAuthConfig(ctx context.Context, grpcAddr string, creds credentials.Tra
 	}
 
 	return o, nil
+}
+
+// SetOAuthCreds checks and saves the given OAuth token as the credentials
+// of the given link. This also includes settings new metadata for the link.
+func SetOAuthCreds(ctx context.Context, grpcAddr string, creds credentials.TransportCredentials, linkID string, t *oauth2.Token) error {
+	l := zerolog.Ctx(ctx)
+
+	conn, err := Connection(grpcAddr, creds)
+	if err != nil {
+		l.Error().Stack().Err(err).Send()
+		return err
+	}
+	defer conn.Close()
+
+	c := trippypb.NewTrippyServiceClient(conn)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	_, err = c.SetCredentials(ctx, trippypb.SetCredentialsRequest_builder{
+		LinkId: proto.String(linkID),
+		Token:  oauth.TokenToProto(t),
+	}.Build())
+	if err != nil {
+		l.Error().Stack().Err(err).Send()
+		return err
+	}
+
+	return nil
 }

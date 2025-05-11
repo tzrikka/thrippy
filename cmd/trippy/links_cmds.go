@@ -37,7 +37,7 @@ var linkTemplatesCommand = &cli.Command{
 		ids := slices.Collect(maps.Keys(links.Templates))
 		sort.Strings(ids)
 		for _, id := range ids {
-			fmt.Printf("%-*s  %s\n", l, id, links.Templates[id].Description)
+			fmt.Printf("%-*s  %s\n", l, id, links.Templates[id].Description())
 		}
 
 		return nil

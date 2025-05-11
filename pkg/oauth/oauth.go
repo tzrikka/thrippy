@@ -24,7 +24,7 @@ type Config struct {
 	Opts   map[string]string
 }
 
-// FromProto transforms a wire-protocol [trippypb.OAuthConfig]
+// FromProto converts a wire-protocol [trippypb.OAuthConfig]
 // message into a [Config] struct which is usable in Go.
 // This function returns nil if the input is also nil.
 func FromProto(c *trippypb.OAuthConfig) *Config {
@@ -76,7 +76,7 @@ func ToString(c *trippypb.OAuthConfig) string {
 	return strings.Join(lines, "\n")
 }
 
-// ToProto transforms this struct into a [trippypb.OAuthConfig]
+// ToProto converts this struct into a [trippypb.OAuthConfig]
 // protocol-buffer message, for transmission over gRPC.
 // This function returns nil if the receiver is nil.
 func (c *Config) ToProto() *trippypb.OAuthConfig {
@@ -97,7 +97,7 @@ func (c *Config) ToProto() *trippypb.OAuthConfig {
 	}.Build()
 }
 
-// ToJSON transforms this struct into a JSON representation of a
+// ToJSON converts this struct into a JSON representation of a
 // [trippypb.OAuthConfig] protocol-buffer message, for storage in the
 // secrets manager. This function returns "{}" if the receiver is nil.
 func (c *Config) ToJSON() (string, error) {
@@ -143,4 +143,44 @@ func (c *Config) authCodes() []oauth2.AuthCodeOption {
 		acs = append(acs, oauth2.SetAuthURLParam(k, v))
 	}
 	return acs
+}
+
+// TokenToProto converts the given [oauth2.Token] into a [trippypb.OAuthConfig]
+// protocol-buffer message, for transmission over gRPC and then storage.
+func TokenToProto(t *oauth2.Token) *trippypb.OAuthToken {
+	if t.Expiry.IsZero() && t.ExpiresIn > 0 { // If both are 0, the access token never expires.
+		t.Expiry = time.Now().Add(time.Second * time.Duration(t.ExpiresIn))
+	}
+
+	t.Expiry = t.Expiry.UTC() // Whether or not it was already populated.
+
+	o := trippypb.OAuthToken_builder{
+		AccessToken: proto.String(t.AccessToken),
+		Expiry:      proto.String(t.Expiry.Format(time.RFC3339)),
+	}.Build()
+
+	if t.RefreshToken != "" {
+		o.SetRefreshToken(t.RefreshToken)
+	}
+	if t.TokenType != "" {
+		o.SetTokenType(t.TokenType)
+	}
+
+	return o
+}
+
+// TokenFromProto converts a wire-protocol [trippypb.OAuthToken] message into an
+// [oauth2.Token] struct. This function returns nil if the input is also nil.
+func TokenFromProto(o *trippypb.OAuthToken) *oauth2.Token {
+	if o == nil {
+		return nil
+	}
+
+	t, _ := time.Parse(time.RFC3339, o.GetExpiry())
+	return &oauth2.Token{
+		AccessToken:  o.GetAccessToken(),
+		Expiry:       t,
+		RefreshToken: o.GetRefreshToken(),
+		TokenType:    o.GetTokenType(),
+	}
 }

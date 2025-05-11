@@ -5,7 +5,7 @@ package trippy.v1;
 import "google/api/annotations.proto";
 import "google/api/field_behavior.proto";
 import "google/protobuf/go_features.proto";
-import "trippy/v1/oauth_config.proto";
+import "trippy/v1/oauth.proto";
 
 option go_package = "github.com/tzrikka/trippy/protos/v1";
 option features.(pb.go).api_level = API_OPAQUE;
@@ -108,7 +108,8 @@ message GetLinkResponse {
 
 message SetCredentialsRequest {
     string link_id = 1 [(google.api.field_behavior) = REQUIRED];
-    map<string, string> credentials = 2;
+    map<string, string> generic_creds = 2;
+    OAuthToken token = 3;
 }
 
 message SetCredentialsResponse {}

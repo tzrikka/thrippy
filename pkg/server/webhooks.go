@@ -114,8 +114,8 @@ func (s *httpServer) oauthStartHandler(w http.ResponseWriter, r *http.Request) {
 	l.Debug().Str("url", o.Config.Endpoint.AuthURL).Msg("redirected HTTP request")
 }
 
-// oauthExchangeHandler receives a redirect back from a third-party
-// service's authorization endpoint (the OAuth 2.0 2nd leg), and exchanges
+// oauthExchangeHandler receives a redirect back from a third-party service's
+// authorization endpoint (the 2nd lef of the OAuth 2.0 flow), and exchanges
 // the received authorization code for an new access token (the 3rd leg).
 func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request) {
 	l := log.With().Str("url_path", r.URL.EscapedPath()).Logger()
@@ -192,12 +192,15 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 		htmlResponse(w, http.StatusForbidden, "OAuth code exchange error")
 		return
 	}
-
 	l.Debug().Msg("successful OAuth token exchange")
 
-	// TODO: Pass to template-specific handling & saving.
-	l.Trace().Any("token", token).Send() // TODO: Remove this line!
+	// Check the token, extract metadata with and about it, and save them.
+	if err := client.SetOAuthCreds(ctx, s.grpcAddr, s.grpcCreds, id, token); err != nil {
+		htmlResponse(w, http.StatusInternalServerError, "&nbsp;")
+		return
+	}
 
+	l.Debug().Msg("checked and saved OAuth token")
 	htmlResponse(w, http.StatusOK, "You may now close this browser tab")
 }
 

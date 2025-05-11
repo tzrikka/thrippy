@@ -3,6 +3,7 @@ package oauth
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"golang.org/x/oauth2"
 	"google.golang.org/protobuf/proto"
@@ -105,7 +106,7 @@ func TestToString(t *testing.T) {
 	}
 }
 
-func TestToProto(t *testing.T) {
+func TesConfigToProto(t *testing.T) {
 	tests := []struct {
 		name string
 		cfg  *Config
@@ -190,7 +191,7 @@ func TestToProto(t *testing.T) {
 	}
 }
 
-func TestToJSON(t *testing.T) {
+func TestConfigToJSON(t *testing.T) {
 	tests := []struct {
 		name    string
 		cfg     *Config
@@ -217,7 +218,7 @@ func TestToJSON(t *testing.T) {
 	}
 }
 
-func TestAuthCodes(t *testing.T) {
+func TestConfigAuthCodes(t *testing.T) {
 	tests := []struct {
 		name string
 		opts map[string]string
@@ -251,6 +252,67 @@ func TestAuthCodes(t *testing.T) {
 			c := &Config{Opts: tt.opts}
 			if got := c.authCodes(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Config.authCodes() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTokenToProto(t *testing.T) {
+	tests := []struct {
+		name string
+		t    *oauth2.Token
+		want *trippypb.OAuthToken
+	}{
+		{
+			name: "empty",
+			t:    &oauth2.Token{},
+			want: trippypb.OAuthToken_builder{
+				AccessToken: proto.String(""),
+				Expiry:      proto.String("0001-01-01T00:00:00Z"),
+			}.Build(),
+		},
+		{
+			name: "endless_access_token",
+			t:    &oauth2.Token{AccessToken: "access"},
+			want: trippypb.OAuthToken_builder{
+				AccessToken: proto.String("access"),
+				Expiry:      proto.String("0001-01-01T00:00:00Z"),
+			}.Build(),
+		},
+		{
+			name: "expiring_access_token",
+			t: &oauth2.Token{
+				AccessToken: "access",
+				Expiry:      time.Unix(1500000005, 1234),
+			},
+			want: trippypb.OAuthToken_builder{
+				AccessToken: proto.String("access"),
+				Expiry:      proto.String("2017-07-14T02:40:05Z"),
+			}.Build(),
+		},
+		{
+			name: "all_fields",
+			t: &oauth2.Token{
+				AccessToken:  "access",
+				TokenType:    "bearer",
+				RefreshToken: "refresh",
+				Expiry:       time.Unix(1500000005, 1234),
+				ExpiresIn:    1234,
+			},
+			want: trippypb.OAuthToken_builder{
+				AccessToken:  proto.String("access"),
+				Expiry:       proto.String("2017-07-14T02:40:05Z"),
+				RefreshToken: proto.String("refresh"),
+				TokenType:    proto.String("bearer"),
+			}.Build(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := TokenToProto(tt.t)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ToProto() = %v, want %v", got, tt.want)
 			}
 		})
 	}

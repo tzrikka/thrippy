@@ -1,43 +1,69 @@
 // Package links defines the authentication details of well-known
 // third-party services, as templates for link creation, and special
-// logic per service to check the usability of private credentials.
+// logic per service to check the usability of private credentials,
+// and return serialized metadata about them for storage.
 package links
 
 import (
 	"slices"
 
-	_ "golang.org/x/oauth2"
+	"golang.org/x/oauth2"
 
 	"github.com/tzrikka/trippy/pkg/oauth"
 )
 
 // Template defines the authentication details of a well-known third-party service.
 type Template struct {
-	Description string
-	OAuthFunc   func(*oauth.Config)
-	CredsFields []string
+	description string
+	credFields  []string
+	oauthFunc   func(*oauth.Config)
+	checkerFunc func(map[string]string, *oauth2.Token) (string, error)
 }
+
+func (t Template) Description() string {
+	return t.description
+}
+
+func (t Template) CredFields() []string {
+	if len(t.credFields) == 0 {
+		return nil
+	}
+	return slices.Clone(t.credFields)
+}
+
+// Check checks the usability of the provided credentials (either the map or
+// the token), and returns JSON-serialized metadata about them for storage.
+func (t Template) Check(m map[string]string, ot *oauth2.Token) (string, error) {
+	if t.checkerFunc == nil {
+		return "", nil
+	}
+	return t.checkerFunc(m, ot)
+}
+
+// oauthCredFields is based on [oauth2.Token].
+var oauthCredFields = []string{"access_token", "expiry", "refresh_token", "token_type"}
 
 // Templates is a map of all the link templates that Trippy recognizes and supports.
 var Templates = map[string]Template{
 	"generic": {
-		Description: "Generic link",
-		OAuthFunc:   noOAuth,
+		description: "Generic link",
 	},
 	"slack-bot-token": {
-		Description: "Slack with a static bot token (https://docs.slack.dev/authentication/tokens#bot)",
-		OAuthFunc:   noOAuth,
-		CredsFields: []string{"bot_token", "optional_app_token"},
+		description: "Slack with a static bot token (https://docs.slack.dev/authentication/tokens#bot)",
+		credFields:  []string{"bot_token", "optional_app_token"},
+		// TODO: checkerFunc
 	},
 	"slack-oauth": {
-		Description: "Slack with OAuth v2 (https://docs.slack.dev/authentication/installing-with-oauth)",
-		OAuthFunc:   slackOAuth,
-		CredsFields: oauthCredsFields,
+		description: "Slack with OAuth v2 (https://docs.slack.dev/authentication/installing-with-oauth)",
+		credFields:  oauthCredFields,
+		oauthFunc:   slackOAuth,
+		// TODO: checkerFunc
 	},
 	"slack-oauth-gov": {
-		Description: "GovSlack with OAuth v2 (https://docs.slack.dev/govslack)",
-		OAuthFunc:   govSlackOAuth,
-		CredsFields: oauthCredsFields,
+		description: "GovSlack with OAuth v2 (https://docs.slack.dev/govslack)",
+		credFields:  oauthCredFields,
+		oauthFunc:   govSlackOAuth,
+		// TODO: checkerFunc
 	},
 }
 
@@ -54,15 +80,10 @@ func ModifyOAuthByTemplate(o *oauth.Config, template string) {
 		return
 	}
 
-	t.OAuthFunc(o)
+	if t.oauthFunc != nil {
+		t.oauthFunc(o)
+	}
 
 	slices.Sort(o.Config.Scopes)
 	o.Config.Scopes = slices.Compact(o.Config.Scopes)
 }
-
-func noOAuth(o *oauth.Config) {
-	// Do nothing.
-}
-
-// oauthCredsFields is based on [oauth2.Token].
-var oauthCredsFields = []string{"access_token", "expiry", "refresh_token", "token_type"}

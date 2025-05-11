@@ -24,8 +24,8 @@ message OAuthConfig {
 
 // OAuthToken is based on https://pkg.go.dev/golang.org/x/oauth2#Token
 message OAuthToken {
-	string access_token = 1 [(google.api.field_behavior) = REQUIRED];
-    string expiry = 2 [(google.api.field_behavior) = REQUIRED]; // RFC-3339: "2006-01-02T15:04:05Z".
-    string refresh_token = 3;
-    string token_type = 4;
+	string access_token = 1 [json_name = "access_token"];;
+    string expiry = 2; // RFC-3339: "2006-01-02T15:04:05Z".
+    string refresh_token = 3 [json_name = "refresh_token"];
+    string token_type = 4 [json_name = "token_type"];
 }

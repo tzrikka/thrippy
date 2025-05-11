@@ -5,10 +5,12 @@
 package links
 
 import (
+	"context"
 	"slices"
 
 	"golang.org/x/oauth2"
 
+	"github.com/tzrikka/trippy/pkg/links/slack"
 	"github.com/tzrikka/trippy/pkg/oauth"
 )
 
@@ -17,7 +19,7 @@ type Template struct {
 	description string
 	credFields  []string
 	oauthFunc   func(*oauth.Config)
-	checkerFunc func(map[string]string, *oauth2.Token) (string, error)
+	checkerFunc func(context.Context, map[string]string, *oauth2.Token) (string, error)
 }
 
 func (t Template) Description() string {
@@ -33,11 +35,11 @@ func (t Template) CredFields() []string {
 
 // Check checks the usability of the provided credentials (either the map or
 // the token), and returns JSON-serialized metadata about them for storage.
-func (t Template) Check(m map[string]string, ot *oauth2.Token) (string, error) {
+func (t Template) Check(ctx context.Context, m map[string]string, ot *oauth2.Token) (string, error) {
 	if t.checkerFunc == nil {
 		return "", nil
 	}
-	return t.checkerFunc(m, ot)
+	return t.checkerFunc(ctx, m, ot)
 }
 
 // oauthCredFields is based on [oauth2.Token].
@@ -50,20 +52,20 @@ var Templates = map[string]Template{
 	},
 	"slack-bot-token": {
 		description: "Slack with a static bot token (https://docs.slack.dev/authentication/tokens#bot)",
-		credFields:  []string{"bot_token", "optional_app_token"},
-		// TODO: checkerFunc
+		credFields:  []string{"bot_token", "app_token_optional"},
+		checkerFunc: slack.BotTokenChecker,
 	},
 	"slack-oauth": {
 		description: "Slack with OAuth v2 (https://docs.slack.dev/authentication/installing-with-oauth)",
 		credFields:  oauthCredFields,
-		oauthFunc:   slackOAuth,
-		// TODO: checkerFunc
+		oauthFunc:   slack.OAuthModifier,
+		checkerFunc: slack.OAuthChecker,
 	},
 	"slack-oauth-gov": {
 		description: "GovSlack with OAuth v2 (https://docs.slack.dev/govslack)",
 		credFields:  oauthCredFields,
-		oauthFunc:   govSlackOAuth,
-		// TODO: checkerFunc
+		oauthFunc:   slack.GovOAuthModifier,
+		checkerFunc: slack.GovOAuthChecker,
 	},
 }
 

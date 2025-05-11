@@ -167,7 +167,7 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *trippypb.SetCredent
 		return nil, status.Error(codes.Internal, "secrets manager parse error")
 	}
 
-	metadata, err := links.Templates[template].Check(in.GetGenericCreds(), oauth.TokenFromProto(token))
+	metadata, err := links.Templates[template].Check(ctx, in.GetGenericCreds(), oauth.TokenFromProto(token))
 	if err != nil {
 		l.Err(err).Msg("failed to check credentials / extract metadata")
 		return nil, status.Error(codes.Internal, "credentials check error")

@@ -12,16 +12,17 @@ import (
 	"github.com/tzrikka/trippy/pkg/oauth"
 )
 
-// OAuthModifier adjusts the given [oauth.Config] for Slack (https://slack.com/).
-// Based on https://docs.slack.dev/authentication/installing-with-oauth
-// and https://docs.slack.dev/reference/methods/oauth.v2.access
+// OAuthModifier adjusts the given [oauth.Config] for Slack apps.
 func OAuthModifier(o *oauth.Config) {
+	// https://docs.slack.dev/authentication/installing-with-oauth
 	if o.Config.Endpoint.AuthURL == "" {
 		o.Config.Endpoint.AuthURL = "https://slack.com/oauth/v2/authorize"
 	}
+	// https://docs.slack.dev/reference/methods/oauth.v2.access
 	if o.Config.Endpoint.TokenURL == "" {
 		o.Config.Endpoint.TokenURL = "https://slack.com/api/oauth.v2.access"
 	}
+	// https://docs.slack.dev/authentication/installing-with-oauth
 	if o.Config.Endpoint.AuthStyle == oauth2.AuthStyleAutoDetect {
 		o.Config.Endpoint.AuthStyle = oauth2.AuthStyleInHeader
 	}
@@ -31,17 +32,19 @@ func OAuthModifier(o *oauth.Config) {
 	o.Config.Scopes = append(o.Config.Scopes, "users:read")
 }
 
-// GovOAuthModifier adjusts the given [oauth.Config] for GovSlack (https://slack-gov.com/).
-// Based on https://docs.slack.dev/authentication/installing-with-oauth
-// and https://docs.slack.dev/reference/methods/oauth.v2.access
-// and https://docs.slack.dev/govslack
+// GovOAuthModifier adjusts the given [oauth.Config] for [GovSlack] apps.
+//
+// [GovSlack]: https://docs.slack.dev/govslack
 func GovOAuthModifier(o *oauth.Config) {
+	// https://docs.slack.dev/authentication/installing-with-oauth
 	if o.Config.Endpoint.AuthURL == "" {
 		o.Config.Endpoint.AuthURL = "https://slack-gov.com/oauth/v2/authorize"
 	}
+	// https://docs.slack.dev/reference/methods/oauth.v2.access
 	if o.Config.Endpoint.TokenURL == "" {
 		o.Config.Endpoint.TokenURL = "https://slack-gov.com/api/oauth.v2.access"
 	}
+	// https://docs.slack.dev/authentication/installing-with-oauth
 	if o.Config.Endpoint.AuthStyle == oauth2.AuthStyleAutoDetect {
 		o.Config.Endpoint.AuthStyle = oauth2.AuthStyleInHeader
 	}
@@ -51,21 +54,21 @@ func GovOAuthModifier(o *oauth.Config) {
 	o.Config.Scopes = append(o.Config.Scopes, "users:read")
 }
 
-// BotTokenChecker checks the given static credentials for Slack (https://slack.com/).
+// BotTokenChecker checks the given static bot token for Slack.
 // Based on https://docs.slack.dev/reference/methods/auth.test
 // and https://docs.slack.dev/reference/methods/bots.info
 func BotTokenChecker(ctx context.Context, m map[string]string, _ *oauth2.Token) (string, error) {
 	return genericChecker(ctx, m["bot_token"], "https://slack.com")
 }
 
-// BotTokenChecker checks the given OAuth credentials for Slack (https://slack.com/).
+// BotTokenChecker checks the given OAuth token for Slack.
 // Based on https://docs.slack.dev/reference/methods/auth.test
 // and https://docs.slack.dev/reference/methods/bots.info
 func OAuthChecker(ctx context.Context, _ map[string]string, t *oauth2.Token) (string, error) {
 	return genericChecker(ctx, t.AccessToken, "https://slack.com")
 }
 
-// BotTokenChecker checks the given OAuth credentials for GovSlack (https://slack-gov.com/).
+// BotTokenChecker checks the given OAuth token for GovSlack.
 // Based on https://docs.slack.dev/reference/methods/auth.test
 // and https://docs.slack.dev/reference/methods/bots.info
 func GovOAuthChecker(ctx context.Context, _ map[string]string, t *oauth2.Token) (string, error) {

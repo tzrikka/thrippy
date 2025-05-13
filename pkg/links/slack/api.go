@@ -2,8 +2,12 @@ package slack
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+
+	"github.com/tzrikka/trippy/pkg/client"
 )
 
 // https://docs.slack.dev/reference/methods/auth.test
@@ -91,4 +95,26 @@ func botsInfo(ctx context.Context, baseURL, botToken string, authTest *authTestR
 	}
 
 	return &resp.Bot, nil
+}
+
+const (
+	mimeType = "application/json"
+)
+
+func get(ctx context.Context, url, botToken string, jsonResp any) error {
+	resp, err := client.HTTPRequest(ctx, http.MethodGet, url, mimeType, botToken)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(resp, jsonResp)
+}
+
+func post(ctx context.Context, url, botToken string, jsonResp any) error {
+	resp, err := client.HTTPRequest(ctx, http.MethodPost, url, mimeType, botToken)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(resp, jsonResp)
 }

@@ -123,6 +123,12 @@ func handler(t *testing.T, resp string) http.HandlerFunc {
 			t.Errorf("authorization header = %q, want %q", got, want)
 		}
 
-		_, _ = fmt.Fprint(w, resp)
+		n, err := fmt.Fprint(w, resp)
+		if err != nil {
+			t.Errorf("failed to write resp: %v", err)
+		}
+		if n != len(resp) {
+			t.Errorf("wrote %d resp bytes, want %d", n, len(resp))
+		}
 	})
 }

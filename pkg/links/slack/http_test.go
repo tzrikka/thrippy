@@ -123,6 +123,6 @@ func handler(t *testing.T, resp string) http.HandlerFunc {
 			t.Errorf("authorization header = %q, want %q", got, want)
 		}
 
-		fmt.Fprint(w, resp)
+		_, _ = fmt.Fprint(w, resp)
 	})
 }

@@ -55,7 +55,7 @@ type responseMetadata struct {
 // authTest checks the caller's authentication & identity.
 // Based on https://docs.slack.dev/reference/methods/auth.test (no scopes required).
 func authTest(ctx context.Context, baseURL, botToken string) (*authTestResponse, error) {
-	url := fmt.Sprintf("%s/api/auth.test", baseURL)
+	url := baseURL + "/api/auth.test"
 
 	resp := &authTestResponse{}
 	if err := post(ctx, url, botToken, resp); err != nil {

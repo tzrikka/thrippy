@@ -51,17 +51,6 @@ func TestCreateLink(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "oauth_without_client_secret",
-			req: trippypb.CreateLinkRequest_builder{
-				Template: proto.String("generic"),
-				OauthConfig: trippypb.OAuthConfig_builder{
-					AuthUrl:  proto.String("111"),
-					ClientId: proto.String("222"),
-				}.Build(),
-			}.Build(),
-			wantErr: true,
-		},
-		{
 			name: "generic_oauth",
 			req: trippypb.CreateLinkRequest_builder{
 				Template: proto.String("generic"),

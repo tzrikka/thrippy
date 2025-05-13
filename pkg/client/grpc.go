@@ -80,9 +80,9 @@ func LinkOAuthConfig(ctx context.Context, grpcAddr string, creds credentials.Tra
 	}
 
 	o := oauth.FromProto(resp.GetOauthConfig())
-	if o != nil && (o.Config.ClientID == "" || o.Config.ClientSecret == "") {
-		l.Error().Stack().Msg("empty OAuth client ID and/or secret")
-		return nil, errors.New("empty OAuth client ID and/or secret")
+	if o != nil && o.Config.ClientID == "" {
+		l.Error().Stack().Msg("empty OAuth client ID")
+		return nil, errors.New("empty OAuth client ID")
 	}
 
 	return o, nil

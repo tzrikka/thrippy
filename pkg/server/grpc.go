@@ -59,9 +59,9 @@ func (s *grpcServer) CreateLink(ctx context.Context, in *trippypb.CreateLinkRequ
 
 	o := oauth.FromProto(in.GetOauthConfig())
 	links.ModifyOAuthByTemplate(o, t)
-	if o != nil && o.Config.Endpoint.AuthURL != "" && (o.Config.ClientID == "" || o.Config.ClientSecret == "") {
-		l.Warn().Msg("missing OAuth client ID and/or secret")
-		return nil, status.Error(codes.InvalidArgument, "missing OAuth client ID and/or secret")
+	if o != nil && o.Config.Endpoint.AuthURL != "" && o.Config.ClientID == "" {
+		l.Warn().Msg("missing OAuth client ID")
+		return nil, status.Error(codes.InvalidArgument, "missing OAuth client ID")
 	}
 
 	if err := s.sm.Set(ctx, id+"/template", t); err != nil {

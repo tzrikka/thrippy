@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"html"
 	"net"
 	"net/http"
 	"strconv"
@@ -134,6 +135,7 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 		errParam = r.FormValue("error")
 	}
 	if errParam != "" {
+		errParam = html.EscapeString(errParam)
 		l.Warn().Msgf("OAuth error: %s", errParam)
 		htmlResponse(w, http.StatusBadRequest, errParam)
 		return

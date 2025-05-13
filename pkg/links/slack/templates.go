@@ -54,23 +54,20 @@ func GovOAuthModifier(o *oauth.Config) {
 	o.Config.Scopes = append(o.Config.Scopes, "users:read")
 }
 
-// BotTokenChecker checks the given static bot token for Slack.
-// Based on https://docs.slack.dev/reference/methods/auth.test
-// and https://docs.slack.dev/reference/methods/bots.info
+// BotTokenChecker checks the given static bot token for
+// Slack, and returns metadata about it in JSON format.
 func BotTokenChecker(ctx context.Context, m map[string]string, _ *oauth2.Token) (string, error) {
 	return genericChecker(ctx, m["bot_token"], "https://slack.com")
 }
 
-// BotTokenChecker checks the given OAuth token for Slack.
-// Based on https://docs.slack.dev/reference/methods/auth.test
-// and https://docs.slack.dev/reference/methods/bots.info
+// OAuthChecker checks the given static bot token for
+// Slack, and returns metadata about it in JSON format.
 func OAuthChecker(ctx context.Context, _ map[string]string, t *oauth2.Token) (string, error) {
 	return genericChecker(ctx, t.AccessToken, "https://slack.com")
 }
 
-// BotTokenChecker checks the given OAuth token for GovSlack.
-// Based on https://docs.slack.dev/reference/methods/auth.test
-// and https://docs.slack.dev/reference/methods/bots.info
+// GovOAuthChecker checks the given static bot token for
+// GovSlack, and returns metadata about it in JSON format.
 func GovOAuthChecker(ctx context.Context, _ map[string]string, t *oauth2.Token) (string, error) {
 	return genericChecker(ctx, t.AccessToken, "https://slack-gov.com")
 }

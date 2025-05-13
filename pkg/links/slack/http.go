@@ -20,6 +20,7 @@ func get(ctx context.Context, url, botToken string, jsonResp any) error {
 	if err != nil {
 		return err
 	}
+
 	return json.Unmarshal(resp, jsonResp)
 }
 
@@ -28,6 +29,7 @@ func post(ctx context.Context, url, botToken string, jsonResp any) error {
 	if err != nil {
 		return err
 	}
+
 	return json.Unmarshal(resp, jsonResp)
 }
 

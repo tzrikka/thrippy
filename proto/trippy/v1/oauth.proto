@@ -19,7 +19,8 @@ message OAuthConfig {
     reserved 7; // Redirect URL.
 
     repeated string scopes = 8;
-    map<string, string> opts = 9;
+
+    map<string, string> auth_codes = 9;
 }
 
 // OAuthToken is based on https://pkg.go.dev/golang.org/x/oauth2#Token

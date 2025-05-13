@@ -20,8 +20,8 @@ const (
 )
 
 type Config struct {
-	Config *oauth2.Config
-	Opts   map[string]string
+	Config    *oauth2.Config
+	AuthCodes map[string]string
 }
 
 // FromProto converts a wire-protocol [trippypb.OAuthConfig]
@@ -44,7 +44,7 @@ func FromProto(c *trippypb.OAuthConfig) *Config {
 			},
 			Scopes: c.GetScopes(),
 		},
-		Opts: c.GetOpts(),
+		AuthCodes: c.GetAuthCodes(),
 	}
 }
 
@@ -57,20 +57,20 @@ func ToString(c *trippypb.OAuthConfig) string {
 	}
 
 	lines := []string{
-		"Auth URL:  " + c.GetAuthUrl(),
-		"Token URL: " + c.GetTokenUrl(),
-		"Client ID: " + c.GetClientId(),
-		"C. Secret: " + c.GetClientSecret(),
+		"Auth URL:   " + c.GetAuthUrl(),
+		"Token URL:  " + c.GetTokenUrl(),
+		"Client ID:  " + c.GetClientId(),
+		"Cli Secret: " + c.GetClientSecret(),
 	}
 
 	scopes := c.GetScopes()
 	if len(scopes) > 0 {
-		lines = append(lines, fmt.Sprintf("Scopes:    %v", scopes))
+		lines = append(lines, fmt.Sprintf("Scopes:     %v", scopes))
 	}
 
-	opts := c.GetOpts()
-	if len(opts) > 0 {
-		lines = append(lines, fmt.Sprintf("Options:   %v", opts))
+	acs := c.GetAuthCodes()
+	if len(acs) > 0 {
+		lines = append(lines, fmt.Sprintf("Auth Codes: %v", acs))
 	}
 
 	return strings.Join(lines, "\n")
@@ -92,8 +92,8 @@ func (c *Config) ToProto() *trippypb.OAuthConfig {
 		ClientId:     proto.String(c.Config.ClientID),
 		ClientSecret: proto.String(c.Config.ClientSecret),
 
-		Scopes: c.Config.Scopes,
-		Opts:   c.Opts,
+		Scopes:    c.Config.Scopes,
+		AuthCodes: c.AuthCodes,
 	}.Build()
 }
 
@@ -139,7 +139,7 @@ func (c *Config) Exchange(ctx context.Context, code string) (*oauth2.Token, erro
 
 func (c *Config) authCodes() []oauth2.AuthCodeOption {
 	var acs []oauth2.AuthCodeOption
-	for k, v := range c.Opts {
+	for k, v := range c.AuthCodes {
 		acs = append(acs, oauth2.SetAuthURLParam(k, v))
 	}
 	return acs

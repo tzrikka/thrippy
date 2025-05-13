@@ -62,11 +62,11 @@ func TestFromProto(t *testing.T) {
 		{
 			name: "opts",
 			oac: trippypb.OAuthConfig_builder{
-				Opts: map[string]string{"aaa": "111", "bbb": "222"},
+				AuthCodes: map[string]string{"aaa": "111", "bbb": "222"},
 			}.Build(),
 			want: &Config{
-				Config: &oauth2.Config{},
-				Opts:   map[string]string{"aaa": "111", "bbb": "222"},
+				Config:    &oauth2.Config{},
+				AuthCodes: map[string]string{"aaa": "111", "bbb": "222"},
 			},
 		},
 	}
@@ -168,8 +168,8 @@ func TesConfigToProto(t *testing.T) {
 		{
 			name: "opts",
 			cfg: &Config{
-				Config: &oauth2.Config{},
-				Opts:   map[string]string{"aaa": "111", "bbb": "222"},
+				Config:    &oauth2.Config{},
+				AuthCodes: map[string]string{"aaa": "111", "bbb": "222"},
 			},
 			want: trippypb.OAuthConfig_builder{
 				AuthUrl:      proto.String(""),
@@ -177,7 +177,7 @@ func TesConfigToProto(t *testing.T) {
 				AuthStyle:    proto.Int64(0),
 				ClientId:     proto.String(""),
 				ClientSecret: proto.String(""),
-				Opts:         map[string]string{"aaa": "111", "bbb": "222"},
+				AuthCodes:    map[string]string{"aaa": "111", "bbb": "222"},
 			}.Build(),
 		},
 	}
@@ -221,7 +221,7 @@ func TestConfigToJSON(t *testing.T) {
 func TestConfigAuthCodes(t *testing.T) {
 	tests := []struct {
 		name string
-		opts map[string]string
+		acs  map[string]string
 		want []oauth2.AuthCodeOption
 	}{
 		{
@@ -229,7 +229,7 @@ func TestConfigAuthCodes(t *testing.T) {
 		},
 		{
 			name: "offline",
-			opts: map[string]string{
+			acs: map[string]string{
 				"access_type": "offline",
 			},
 			want: []oauth2.AuthCodeOption{
@@ -238,7 +238,7 @@ func TestConfigAuthCodes(t *testing.T) {
 		},
 		{
 			name: "consent",
-			opts: map[string]string{
+			acs: map[string]string{
 				"prompt": "consent",
 			},
 			want: []oauth2.AuthCodeOption{
@@ -249,7 +249,7 @@ func TestConfigAuthCodes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &Config{Opts: tt.opts}
+			c := &Config{AuthCodes: tt.acs}
 			if got := c.authCodes(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Config.authCodes() = %v, want %v", got, tt.want)
 			}

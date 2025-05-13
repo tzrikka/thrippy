@@ -160,17 +160,27 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *trippypb.SetCredent
 		return nil, status.Error(codes.NotFound, "link not found")
 	}
 
+	// Credentials to store: either an OAuth token or a
+	// generic string map - whichever of them isn't empty.
 	token := in.GetToken()
+	m := in.GetGenericCreds()
 	j, err := protojson.Marshal(token)
 	if err != nil {
 		l.Err(err).Msg("failed to convert proto into JSON")
 		return nil, status.Error(codes.Internal, "secrets manager parse error")
 	}
+	if len(j) <= 2 {
+		j, err = json.Marshal(m)
+		if err != nil {
+			l.Err(err).Msg("failed to convert credentials into JSON")
+			return nil, status.Error(codes.Internal, "secrets manager parse error")
+		}
+	}
 
-	metadata, err := links.Templates[template].Check(ctx, in.GetGenericCreds(), oauth.TokenFromProto(token))
+	metadata, err := links.Templates[template].Check(ctx, m, oauth.TokenFromProto(token))
 	if err != nil {
 		l.Err(err).Msg("failed to check credentials / extract metadata")
-		return nil, status.Error(codes.Internal, "credentials check error")
+		return nil, status.Error(codes.Internal, "credentials check error: "+err.Error())
 	}
 
 	if err := s.sm.Set(ctx, id+"/creds", string(j)); err != nil {

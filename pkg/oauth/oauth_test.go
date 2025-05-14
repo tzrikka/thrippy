@@ -34,7 +34,7 @@ func TestFromProto(t *testing.T) {
 			},
 		},
 		{
-			name: "auth_and _token_urls",
+			name: "auth_and_token_urls",
 			oac: trippypb.OAuthConfig_builder{
 				AuthUrl:  proto.String("auth"),
 				TokenUrl: proto.String("token"),
@@ -60,7 +60,7 @@ func TestFromProto(t *testing.T) {
 			},
 		},
 		{
-			name: "opts",
+			name: "auth_codes",
 			oac: trippypb.OAuthConfig_builder{
 				AuthCodes: map[string]string{"aaa": "111", "bbb": "222"},
 			}.Build(),
@@ -106,7 +106,7 @@ func TestToString(t *testing.T) {
 	}
 }
 
-func TesConfigToProto(t *testing.T) {
+func TestConfigToProto(t *testing.T) {
 	tests := []struct {
 		name string
 		cfg  *Config
@@ -166,7 +166,7 @@ func TesConfigToProto(t *testing.T) {
 			}.Build(),
 		},
 		{
-			name: "opts",
+			name: "auth_codes",
 			cfg: &Config{
 				Config:    &oauth2.Config{},
 				AuthCodes: map[string]string{"aaa": "111", "bbb": "222"},

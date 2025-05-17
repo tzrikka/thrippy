@@ -1,7 +1,3 @@
-// Package client provides minimal and lightweight wrappers for some
-// gRPC client functionalities. It is meant to facilitate code reuse,
-// not to provide a complete native layer on top of the Trippy gRPC
-// service (proto/.../trippy.proto).
 package client
 
 import (
@@ -86,6 +82,46 @@ func LinkOAuthConfig(ctx context.Context, grpcAddr string, creds credentials.Tra
 	}
 
 	return o, nil
+}
+
+// AddGitHubCreds adds the given GitHub base URL and app installation ID to the given
+// link's existing credentials. This also includes settings new metadata for the link.
+func AddGitHubCreds(ctx context.Context, grpcAddr string, creds credentials.TransportCredentials, linkID, installID, url string) error {
+	l := zerolog.Ctx(ctx)
+
+	conn, err := Connection(grpcAddr, creds)
+	if err != nil {
+		l.Error().Stack().Err(err).Send()
+		return err
+	}
+	defer conn.Close()
+
+	c := trippypb.NewTrippyServiceClient(conn)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	resp, err := c.GetCredentials(ctx, trippypb.GetCredentialsRequest_builder{
+		LinkId: proto.String(linkID),
+	}.Build())
+	if err != nil {
+		l.Error().Stack().Err(err).Send()
+		return err
+	}
+
+	m := resp.GetCredentials()
+	m["install_id"] = installID
+	m["api_base_url"] = url
+
+	_, err = c.SetCredentials(ctx, trippypb.SetCredentialsRequest_builder{
+		LinkId:       proto.String(linkID),
+		GenericCreds: m,
+	}.Build())
+	if err != nil {
+		l.Error().Stack().Err(err).Send()
+		return err
+	}
+
+	return nil
 }
 
 // SetOAuthCreds checks and saves the given OAuth token as the credentials

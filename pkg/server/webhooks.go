@@ -15,6 +15,7 @@ import (
 	"google.golang.org/grpc/credentials"
 
 	"github.com/tzrikka/trippy/pkg/client"
+	"github.com/tzrikka/trippy/pkg/links/github"
 )
 
 const (
@@ -167,15 +168,6 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// Exchange the received authorization code for an access token, potentially
-	// including a refresh token (this is the 3rd leg of the OAuth 2.0 flow).
-	code := r.FormValue("code")
-	if code == "" {
-		l.Warn().Any("query", r.URL.Query()).Msg("forbidden: missing OAuth code parameter")
-		htmlResponse(w, http.StatusForbidden, "Missing OAuth code parameter")
-		return
-	}
-
 	ctx := l.WithContext(r.Context())
 	o, err := client.LinkOAuthConfig(ctx, s.grpcAddr, s.grpcCreds, id)
 	if err != nil {
@@ -185,6 +177,44 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	if o == nil {
 		l.Warn().Err(err).Msg("bad request: link not found")
 		htmlResponse(w, http.StatusBadRequest, "Link not found")
+		return
+	}
+
+	// Special case: requests to install GitHub apps by users who are
+	// not authorized to approve them can't continue. For more details, see:
+	// https://docs.github.com/en/apps/using-github-apps/installing-a-github-app-from-a-third-party#requirements-to-install-a-github-app
+	setupAction := r.FormValue("setup_action")
+	if setupAction == "request" {
+		l.Warn().Err(err).Msg("GitHub app installation requested by user who can't approve it")
+		htmlResponse(w, http.StatusForbidden, "Installation must be approved by an organization owner")
+	}
+
+	// Special case: GitHub apps that use generated JWTs don't require a
+	// user or app-installation token (the 3rd leg of the OAuth 2.0 flow).
+	installID := r.FormValue("installation_id")
+	if (setupAction == "install" || setupAction == "update") && installID != "" {
+		l = l.With().Str("setup_action", setupAction).Str("install_id", installID).Logger()
+		l.Debug().Msg("successful GitHub app installation")
+
+		// Check the app installation, extract metadata with and about it, and save them.
+		ctx := l.WithContext(r.Context())
+		url := github.APIBaseURL(github.AuthBaseURL(o))
+		if err := client.AddGitHubCreds(ctx, s.grpcAddr, s.grpcCreds, id, installID, url); err != nil {
+			htmlResponse(w, http.StatusInternalServerError, "&nbsp;")
+			return
+		}
+
+		l.Debug().Msg("checked and saved the GitHub installation")
+		htmlResponse(w, http.StatusOK, "You may now close this browser tab")
+		return
+	}
+
+	// Exchange the received authorization code for an access token, potentially
+	// including a refresh token (this is the 3rd leg of the OAuth 2.0 flow).
+	code := r.FormValue("code")
+	if code == "" {
+		l.Warn().Any("query", r.URL.Query()).Msg("forbidden: missing OAuth code parameter")
+		htmlResponse(w, http.StatusForbidden, "Missing OAuth code parameter")
 		return
 	}
 

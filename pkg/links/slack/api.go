@@ -101,6 +101,7 @@ const (
 	mimeType = "application/json"
 )
 
+// get is a Slack-specific HTTP GET wrapper for [client.HTTPRequest].
 func get(ctx context.Context, url, botToken string, jsonResp any) error {
 	resp, err := client.HTTPRequest(ctx, http.MethodGet, url, mimeType, botToken)
 	if err != nil {
@@ -110,6 +111,7 @@ func get(ctx context.Context, url, botToken string, jsonResp any) error {
 	return json.Unmarshal(resp, jsonResp)
 }
 
+// post is a Slack-specific HTTP POST wrapper for [client.HTTPRequest].
 func post(ctx context.Context, url, botToken string, jsonResp any) error {
 	resp, err := client.HTTPRequest(ctx, http.MethodPost, url, mimeType, botToken)
 	if err != nil {

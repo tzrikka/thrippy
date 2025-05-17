@@ -22,6 +22,7 @@ const (
 type Config struct {
 	Config    *oauth2.Config
 	AuthCodes map[string]string
+	Params    map[string]string
 }
 
 // FromProto converts a wire-protocol [trippypb.OAuthConfig]
@@ -45,6 +46,7 @@ func FromProto(c *trippypb.OAuthConfig) *Config {
 			Scopes: c.GetScopes(),
 		},
 		AuthCodes: c.GetAuthCodes(),
+		Params:    c.GetParams(),
 	}
 }
 

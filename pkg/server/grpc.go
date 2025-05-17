@@ -6,6 +6,7 @@ import (
 	"net"
 
 	"github.com/lithammer/shortuuid/v4"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -103,35 +104,14 @@ func (s *grpcServer) GetLink(ctx context.Context, in *trippypb.GetLinkRequest) (
 		return nil, status.Error(codes.InvalidArgument, "invalid ID")
 	}
 
-	t, err := s.sm.Get(ctx, id+"/template")
+	t, o, err := s.templateAndOAuth(l.WithContext(ctx), id)
 	if err != nil {
-		l.Err(err).Msg("secrets manager read error")
-		return nil, status.Error(codes.Internal, "secrets manager read error")
-	}
-	if t == "" {
-		l.Warn().Msg("link not found")
-		return nil, status.Error(codes.NotFound, "link not found")
-	}
-
-	o, err := s.sm.Get(ctx, id+"/oauth")
-	if err != nil {
-		l.Err(err).Msg("secrets manager read error")
-		return nil, status.Error(codes.Internal, "secrets manager read error")
-	}
-
-	var m *trippypb.OAuthConfig
-	if o != "" {
-		m = &trippypb.OAuthConfig{}
-		err = protojson.Unmarshal([]byte(o), m)
-		if err != nil {
-			l.Err(err).Msg("failed to convert JSON into proto")
-			return nil, status.Error(codes.Internal, "secrets manager parse error")
-		}
+		return nil, err
 	}
 
 	return trippypb.GetLinkResponse_builder{
 		Template:         proto.String(t),
-		OauthConfig:      m,
+		OauthConfig:      o,
 		CredentialFields: links.Templates[t].CredFields(),
 	}.Build(), nil
 }
@@ -150,14 +130,9 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *trippypb.SetCredent
 		return nil, status.Error(codes.InvalidArgument, "invalid ID")
 	}
 
-	template, err := s.sm.Get(ctx, id+"/template")
+	template, c, err := s.templateAndOAuth(l.WithContext(ctx), id)
 	if err != nil {
-		l.Err(err).Msg("secrets manager read error")
-		return nil, status.Error(codes.Internal, "secrets manager read error")
-	}
-	if template == "" {
-		l.Warn().Msg("link not found")
-		return nil, status.Error(codes.NotFound, "link not found")
+		return nil, err
 	}
 
 	// Credentials to store: either an OAuth token or a
@@ -177,7 +152,7 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *trippypb.SetCredent
 		}
 	}
 
-	metadata, err := links.Templates[template].Check(ctx, m, oauth.TokenFromProto(token))
+	metadata, err := links.Templates[template].Check(ctx, m, oauth.FromProto(c), oauth.TokenFromProto(token))
 	if err != nil {
 		l.Err(err).Msg("failed to check credentials / extract metadata")
 		return nil, status.Error(codes.Internal, "credentials check error: "+err.Error())
@@ -195,6 +170,38 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *trippypb.SetCredent
 
 	l.Trace().Msg("secrets manager write success")
 	return &trippypb.SetCredentialsResponse{}, nil
+}
+
+func (s *grpcServer) templateAndOAuth(ctx context.Context, id string) (string, *trippypb.OAuthConfig, error) {
+	l := zerolog.Ctx(ctx)
+
+	t, err := s.sm.Get(ctx, id+"/template")
+	if err != nil {
+		l.Error().Stack().Err(err).Msg("secrets manager read error")
+		return "", nil, status.Error(codes.Internal, "secrets manager read error")
+	}
+	if t == "" {
+		l.Warn().Stack().Msg("link not found")
+		return "", nil, status.Error(codes.NotFound, "link not found")
+	}
+
+	o, err := s.sm.Get(ctx, id+"/oauth")
+	if err != nil {
+		l.Error().Stack().Err(err).Msg("secrets manager read error")
+		return "", nil, status.Error(codes.Internal, "secrets manager read error")
+	}
+
+	var m *trippypb.OAuthConfig
+	if o != "" {
+		m = &trippypb.OAuthConfig{}
+		err = protojson.Unmarshal([]byte(o), m)
+		if err != nil {
+			l.Err(err).Msg("failed to convert JSON into proto")
+			return "", nil, status.Error(codes.Internal, "secrets manager parse error")
+		}
+	}
+
+	return t, m, nil
 }
 
 func (s *grpcServer) GetCredentials(ctx context.Context, in *trippypb.GetCredentialsRequest) (*trippypb.GetCredentialsResponse, error) {

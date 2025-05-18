@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -84,7 +85,7 @@ func JWTChecker(ctx context.Context, m map[string]string, o *oauth.Config, _ *oa
 		Slug:         resp["slug"].(string),
 		OwnerLogin:   owner["login"].(string),
 		OwnerType:    strings.ToLower(owner["type"].(string)),
-		AppUpdatedAt: resp["updated_at"].(string),
+		AppUpdatedAt: normalizeRFC3339(resp["updated_at"].(string)),
 	}
 
 	// The above must be specified manually by the user, but the following
@@ -112,7 +113,7 @@ func JWTChecker(ctx context.Context, m map[string]string, o *oauth.Config, _ *oa
 	meta.Permissions = strings.Replace(perms, "map", "", 1)
 	meta.TargetLogin = acct["login"].(string)
 	meta.TargetType = strings.ToLower(acct["type"].(string))
-	meta.InstallUpdatedAt = resp["updated_at"].(string)
+	meta.InstallUpdatedAt = normalizeRFC3339(resp["updated_at"].(string))
 	meta.InstallURL = resp["html_url"].(string)
 
 	j, err := json.Marshal(meta)
@@ -137,6 +138,12 @@ type appMetadata struct {
 	TargetType       string `json:"install_target_type"`
 	InstallUpdatedAt string `json:"install_updated_at"`
 	InstallURL       string `json:"install_url"`
+}
+
+// normalizeRFC3339 ensures that the given timestamp is in
+// RFC-3339 format, and that it does not contain sub-seconds.
+func normalizeRFC3339(t string) string {
+	return regexp.MustCompile(`\.\d+Z`).ReplaceAllString(t, "Z")
 }
 
 // UserChecker checks the given OAuth token,

@@ -1,4 +1,4 @@
-// Trippy manages authentication configurations
+// Thrippy manages authentication configurations
 // and tokens for third-party (3P) services.
 package main
 
@@ -16,12 +16,12 @@ import (
 	"github.com/urfave/cli-altsrc/v3/toml"
 	"github.com/urfave/cli/v3"
 
-	"github.com/tzrikka/trippy/pkg/secrets"
+	"github.com/tzrikka/thrippy/pkg/secrets"
 	"github.com/tzrikka/xdg"
 )
 
 const (
-	configDirName  = "trippy"
+	configDirName  = "thrippy"
 	configFileName = "config.toml"
 
 	configDirPerm  = 0o700
@@ -46,7 +46,7 @@ func main() {
 			Usage:   "gRPC server address and port",
 			Value:   net.JoinHostPort("", strconv.Itoa(defaultGRPCPort)),
 			Sources: cli.NewValueSourceChain(
-				cli.EnvVar("TRIPPY_GRPC_ADDRESS"),
+				cli.EnvVar("THRIPPY_GRPC_ADDRESS"),
 				toml.TOML("grpc.address", configFilePath),
 			),
 		},
@@ -56,7 +56,7 @@ func main() {
 	flags = append(flags, secrets.VaultFlags(configFilePath)...)
 
 	cmd := &cli.Command{
-		Name:    "trippy",
+		Name:    "thrippy",
 		Usage:   "Manage third-party auth configs and tokens",
 		Version: buildInfo.Main.Version,
 		Commands: []*cli.Command{

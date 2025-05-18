@@ -13,24 +13,24 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/tzrikka/trippy/pkg/oauth"
-	trippypb "github.com/tzrikka/trippy/proto/trippy/v1"
+	"github.com/tzrikka/thrippy/pkg/oauth"
+	thrippypb "github.com/tzrikka/thrippy/proto/thrippy/v1"
 )
 
 type server struct {
-	trippypb.UnimplementedTrippyServiceServer
-	resp *trippypb.GetLinkResponse
+	thrippypb.UnimplementedThrippyServiceServer
+	resp *thrippypb.GetLinkResponse
 	err  error
 }
 
-func (s *server) GetLink(_ context.Context, _ *trippypb.GetLinkRequest) (*trippypb.GetLinkResponse, error) {
+func (s *server) GetLink(_ context.Context, _ *thrippypb.GetLinkRequest) (*thrippypb.GetLinkResponse, error) {
 	return s.resp, s.err
 }
 
 func TestLinkOAuthConfig(t *testing.T) {
 	tests := []struct {
 		name    string
-		resp    *trippypb.GetLinkResponse
+		resp    *thrippypb.GetLinkResponse
 		respErr error
 		want    *oauth.Config
 		wantErr bool
@@ -45,9 +45,9 @@ func TestLinkOAuthConfig(t *testing.T) {
 		},
 		{
 			name: "invalid_oauth_error",
-			resp: trippypb.GetLinkResponse_builder{
+			resp: thrippypb.GetLinkResponse_builder{
 				Template:    proto.String("template"),
-				OauthConfig: trippypb.OAuthConfig_builder{}.Build(),
+				OauthConfig: thrippypb.OAuthConfig_builder{}.Build(),
 			}.Build(),
 			wantErr: true,
 		},
@@ -57,9 +57,9 @@ func TestLinkOAuthConfig(t *testing.T) {
 		},
 		{
 			name: "happy_path",
-			resp: trippypb.GetLinkResponse_builder{
+			resp: thrippypb.GetLinkResponse_builder{
 				Template: proto.String("template"),
-				OauthConfig: trippypb.OAuthConfig_builder{
+				OauthConfig: thrippypb.OAuthConfig_builder{
 					AuthUrl:      proto.String("111"),
 					ClientId:     proto.String("222"),
 					ClientSecret: proto.String("333"),
@@ -84,7 +84,7 @@ func TestLinkOAuthConfig(t *testing.T) {
 				t.Fatal(err)
 			}
 			s := grpc.NewServer()
-			trippypb.RegisterTrippyServiceServer(s, &server{resp: tt.resp, err: tt.respErr})
+			thrippypb.RegisterThrippyServiceServer(s, &server{resp: tt.resp, err: tt.respErr})
 			go func() {
 				_ = s.Serve(lis)
 			}()

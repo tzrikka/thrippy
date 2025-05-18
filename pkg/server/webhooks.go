@@ -14,8 +14,8 @@ import (
 	"github.com/urfave/cli/v3"
 	"google.golang.org/grpc/credentials"
 
-	"github.com/tzrikka/trippy/pkg/client"
-	"github.com/tzrikka/trippy/pkg/links/github"
+	"github.com/tzrikka/thrippy/pkg/client"
+	"github.com/tzrikka/thrippy/pkg/links/github"
 )
 
 const (
@@ -45,7 +45,7 @@ func newHTTPServer(cmd *cli.Command) *httpServer {
 }
 
 // run starts an HTTP server for OAuth webhooks.
-// This is blocking, to keep the Trippy server running.
+// This is blocking, to keep the Thrippy server running.
 func (s *httpServer) run() error {
 	http.HandleFunc("GET /start", s.oauthStartHandler)
 	http.HandleFunc("POST /start", s.oauthStartHandler)
@@ -130,7 +130,7 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	// First, check for errors reported by the third-party,
-	// e.g. the user failed/refused to authorize Trippy.
+	// e.g. the user failed/refused to authorize Thrippy.
 	errParam := r.FormValue("error_description")
 	if errParam == "" {
 		errParam = r.FormValue("error")
@@ -143,7 +143,7 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	// If the state parameter is missing, it means the OAuth flow was not
-	// initiated by Trippy, so we can't do anything with the results.
+	// initiated by Thrippy, so we can't do anything with the results.
 	state := r.FormValue("state")
 	if state == "" {
 		l.Warn().Msg("forbidden: missing OAuth state parameter")

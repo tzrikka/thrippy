@@ -12,7 +12,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
-	trippypb "github.com/tzrikka/trippy/proto/trippy/v1"
+	thrippypb "github.com/tzrikka/thrippy/proto/thrippy/v1"
 )
 
 const (
@@ -39,8 +39,8 @@ type Config struct {
 // message into a [Config] struct which is a usable receiver in Go.
 // This function returns nil if the input is also nil.
 //
-// [OAuthConfig]: https://github.com/tzrikka/trippy/blob/main/proto/trippy/v1/oauth.proto
-func FromProto(c *trippypb.OAuthConfig) *Config {
+// [OAuthConfig]: https://github.com/tzrikka/thrippy/blob/main/proto/thrippy/v1/oauth.proto
+func FromProto(c *thrippypb.OAuthConfig) *Config {
 	if c == nil {
 		return nil
 	}
@@ -66,8 +66,8 @@ func FromProto(c *trippypb.OAuthConfig) *Config {
 // protocol-buffer message, for pretty-printing in the CLI application.
 // This function returns an empty string if the input is nil.
 //
-// [OAuthConfig]: https://github.com/tzrikka/trippy/blob/main/proto/trippy/v1/oauth.proto
-func ToString(c *trippypb.OAuthConfig) string {
+// [OAuthConfig]: https://github.com/tzrikka/thrippy/blob/main/proto/thrippy/v1/oauth.proto
+func ToString(c *thrippypb.OAuthConfig) string {
 	if c.GetAuthUrl() == "" {
 		return ""
 	}
@@ -95,13 +95,13 @@ func ToString(c *trippypb.OAuthConfig) string {
 // ToProto converts this struct into an [OAuthConfig] protocol-buffer message,
 // for transmission over gRPC. This function returns nil if the receiver is nil.
 //
-// [OAuthConfig]: https://github.com/tzrikka/trippy/blob/main/proto/trippy/v1/oauth.proto
-func (c *Config) ToProto() *trippypb.OAuthConfig {
+// [OAuthConfig]: https://github.com/tzrikka/thrippy/blob/main/proto/thrippy/v1/oauth.proto
+func (c *Config) ToProto() *thrippypb.OAuthConfig {
 	if c == nil {
 		return nil
 	}
 
-	return trippypb.OAuthConfig_builder{
+	return thrippypb.OAuthConfig_builder{
 		AuthUrl:   proto.String(c.Config.Endpoint.AuthURL),
 		TokenUrl:  proto.String(c.Config.Endpoint.TokenURL),
 		AuthStyle: proto.Int64(int64(c.Config.Endpoint.AuthStyle)),
@@ -118,7 +118,7 @@ func (c *Config) ToProto() *trippypb.OAuthConfig {
 // protocol-buffer message, for storage in the secrets manager.
 // This function returns "{}" if the receiver is nil.
 //
-// [OAuthConfig]: https://github.com/tzrikka/trippy/blob/main/proto/trippy/v1/oauth.proto
+// [OAuthConfig]: https://github.com/tzrikka/thrippy/blob/main/proto/thrippy/v1/oauth.proto
 func (c *Config) ToJSON() (string, error) {
 	if c == nil {
 		return "{}", nil
@@ -167,15 +167,15 @@ func (c *Config) authCodes() []oauth2.AuthCodeOption {
 // TokenToProto converts the given [oauth2.Token] into an [OAuthConfig]
 // protocol-buffer message, for transmission over gRPC and then storage.
 //
-// [OAuthConfig]: https://github.com/tzrikka/trippy/blob/main/proto/trippy/v1/oauth.proto
-func TokenToProto(t *oauth2.Token) *trippypb.OAuthToken {
+// [OAuthConfig]: https://github.com/tzrikka/thrippy/blob/main/proto/thrippy/v1/oauth.proto
+func TokenToProto(t *oauth2.Token) *thrippypb.OAuthToken {
 	if t.Expiry.IsZero() && t.ExpiresIn > 0 { // If both are 0, the access token never expires.
 		t.Expiry = time.Now().Add(time.Second * time.Duration(t.ExpiresIn))
 	}
 
 	t.Expiry = t.Expiry.UTC() // Whether or not it was already populated.
 
-	o := trippypb.OAuthToken_builder{
+	o := thrippypb.OAuthToken_builder{
 		AccessToken: proto.String(t.AccessToken),
 		Expiry:      proto.String(t.Expiry.Format(time.RFC3339)),
 	}.Build()
@@ -193,8 +193,8 @@ func TokenToProto(t *oauth2.Token) *trippypb.OAuthToken {
 // TokenFromProto converts a wire-protocol [OAuthToken] message into an
 // [oauth2.Token] struct. This function returns nil if the input is also nil.
 //
-// [OAuthConfig]: https://github.com/tzrikka/trippy/blob/main/proto/trippy/v1/oauth.proto
-func TokenFromProto(o *trippypb.OAuthToken) *oauth2.Token {
+// [OAuthConfig]: https://github.com/tzrikka/thrippy/blob/main/proto/thrippy/v1/oauth.proto
+func TokenFromProto(o *thrippypb.OAuthToken) *oauth2.Token {
 	if o == nil {
 		return nil
 	}

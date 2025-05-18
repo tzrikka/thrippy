@@ -14,8 +14,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/tzrikka/trippy/pkg/client"
-	"github.com/tzrikka/trippy/pkg/oauth"
+	"github.com/tzrikka/thrippy/pkg/client"
+	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
 const (

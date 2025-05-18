@@ -1,6 +1,6 @@
 # Personal Access Tokens (PAT)
 
-Trippy setup:
+Thrippy setup:
 
 1. `create-link --template github-user-pat`
 2. `set-creds <link ID> --kv "pat=..."`

@@ -1,4 +1,4 @@
-// Package server implements Trippy's gRPC service,
+// Package server implements Thrippy's gRPC service,
 // and an HTTP server for OAuth webhooks.
 package server
 
@@ -11,10 +11,10 @@ import (
 	"github.com/rs/zerolog/pkgerrors"
 	"github.com/urfave/cli/v3"
 
-	"github.com/tzrikka/trippy/pkg/secrets"
+	"github.com/tzrikka/thrippy/pkg/secrets"
 )
 
-// Start initializes the Trippy server's network I/O and logging.
+// Start initializes the Thrippy server's network I/O and logging.
 func Start(_ context.Context, cmd *cli.Command) error {
 	initLog(cmd.Bool("dev"))
 
@@ -30,7 +30,7 @@ func Start(_ context.Context, cmd *cli.Command) error {
 	return newHTTPServer(cmd).run()
 }
 
-// initLog initializes the logger for the Trippy server, based
+// initLog initializes the logger for the Thrippy server, based
 // on whether the server is running in development mode or not.
 func initLog(devMode bool) {
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack

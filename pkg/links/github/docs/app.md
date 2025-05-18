@@ -5,7 +5,7 @@
 App settings:
 
 - Post-installation setup URL: `https://ADDRESS/callback`\
-  (`ADDRESS` is Trippy's public address for HTTP webhooks - see the `server` command's `-w` flag)
+  (`ADDRESS` is Thrippy's public address for HTTP webhooks - see the `server` command's `-w` flag)
 - Post-installation redirect on update: yes
 - Generate a private key
 
@@ -15,7 +15,7 @@ Details to copy:
 - Client ID
 - Downloaded private key PEM file
 
-Trippy setup:
+Thrippy setup:
 
 1. `create-link --template github-app-jwt --oauth 'client_id: "..." params: { key: "app_name" value: "..."}'`
 2. `set-creds <link ID> --kv "client_id=..." --kv "private_key=..."`
@@ -29,14 +29,14 @@ App settings:
 
 - Generate a client secret
 - Callback URL: `https://ADDRESS/callback`\
-  (`ADDRESS` is Trippy's public address for HTTP webhooks - see the `server` command's `-w` flag)
+  (`ADDRESS` is Thrippy's public address for HTTP webhooks - see the `server` command's `-w` flag)
 
 Details to copy:
 
 - Client ID
 - Client secret
 
-Trippy setup:
+Thrippy setup:
 
 1. `create-link --template github-app-user --oauth 'client_id: "..." client_secret: "..."'`
 2. `start-oauth <link ID>`

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/tzrikka/trippy/pkg/client"
+	"github.com/tzrikka/thrippy/pkg/client"
 )
 
 // https://docs.slack.dev/reference/methods/auth.test

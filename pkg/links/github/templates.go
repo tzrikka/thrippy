@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/tzrikka/trippy/pkg/oauth"
+	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
 // AppAuthzModifier adjusts the given [oauth.Config] for GitHub
@@ -89,7 +89,7 @@ func JWTChecker(ctx context.Context, m map[string]string, o *oauth.Config, _ *oa
 	}
 
 	// The above must be specified manually by the user, but the following
-	// is optional - until Trippy adds the installation ID automatically.
+	// is optional - until Thrippy adds the installation ID automatically.
 	installID := m["install_id"]
 	if installID == "" {
 		j, err := json.Marshal(meta)
@@ -140,8 +140,7 @@ type appMetadata struct {
 	InstallURL       string `json:"install_url"`
 }
 
-// normalizeRFC3339 ensures that the given timestamp is in
-// RFC-3339 format, and that it does not contain sub-seconds.
+// normalizeRFC3339 strips sub-seconds from RFC-3339 timestamp strings.
 func normalizeRFC3339(t string) string {
 	return regexp.MustCompile(`\.\d+Z`).ReplaceAllString(t, "Z")
 }

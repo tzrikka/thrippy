@@ -8,13 +8,13 @@ import (
 	"golang.org/x/oauth2"
 	"google.golang.org/protobuf/proto"
 
-	trippypb "github.com/tzrikka/trippy/proto/trippy/v1"
+	thrippypb "github.com/tzrikka/thrippy/proto/thrippy/v1"
 )
 
 func TestFromProto(t *testing.T) {
 	tests := []struct {
 		name string
-		oac  *trippypb.OAuthConfig
+		oac  *thrippypb.OAuthConfig
 		want *Config
 	}{
 		{
@@ -22,7 +22,7 @@ func TestFromProto(t *testing.T) {
 		},
 		{
 			name: "client_id_and_secret",
-			oac: trippypb.OAuthConfig_builder{
+			oac: thrippypb.OAuthConfig_builder{
 				ClientId:     proto.String("id"),
 				ClientSecret: proto.String("secret"),
 			}.Build(),
@@ -35,7 +35,7 @@ func TestFromProto(t *testing.T) {
 		},
 		{
 			name: "auth_and_token_urls",
-			oac: trippypb.OAuthConfig_builder{
+			oac: thrippypb.OAuthConfig_builder{
 				AuthUrl:  proto.String("auth"),
 				TokenUrl: proto.String("token"),
 			}.Build(),
@@ -50,7 +50,7 @@ func TestFromProto(t *testing.T) {
 		},
 		{
 			name: "scopes",
-			oac: trippypb.OAuthConfig_builder{
+			oac: thrippypb.OAuthConfig_builder{
 				Scopes: []string{"111", "222"},
 			}.Build(),
 			want: &Config{
@@ -61,7 +61,7 @@ func TestFromProto(t *testing.T) {
 		},
 		{
 			name: "auth_codes",
-			oac: trippypb.OAuthConfig_builder{
+			oac: thrippypb.OAuthConfig_builder{
 				AuthCodes: map[string]string{"aaa": "111", "bbb": "222"},
 			}.Build(),
 			want: &Config{
@@ -71,7 +71,7 @@ func TestFromProto(t *testing.T) {
 		},
 		{
 			name: "params",
-			oac: trippypb.OAuthConfig_builder{
+			oac: thrippypb.OAuthConfig_builder{
 				Params: map[string]string{"aaa": "111", "bbb": "222"},
 			}.Build(),
 			want: &Config{
@@ -93,7 +93,7 @@ func TestFromProto(t *testing.T) {
 func TestToString(t *testing.T) {
 	tests := []struct {
 		name string
-		oac  *trippypb.OAuthConfig
+		oac  *thrippypb.OAuthConfig
 		want string
 	}{
 		{
@@ -102,7 +102,7 @@ func TestToString(t *testing.T) {
 		},
 		{
 			name: "empty",
-			oac:  trippypb.OAuthConfig_builder{}.Build(),
+			oac:  thrippypb.OAuthConfig_builder{}.Build(),
 			want: "",
 		},
 	}
@@ -120,7 +120,7 @@ func TestConfigToProto(t *testing.T) {
 	tests := []struct {
 		name string
 		cfg  *Config
-		want *trippypb.OAuthConfig
+		want *thrippypb.OAuthConfig
 	}{
 		{
 			name: "nil",
@@ -135,7 +135,7 @@ func TestConfigToProto(t *testing.T) {
 					},
 				},
 			},
-			want: trippypb.OAuthConfig_builder{
+			want: thrippypb.OAuthConfig_builder{
 				AuthUrl:      proto.String("auth"),
 				TokenUrl:     proto.String("token"),
 				AuthStyle:    proto.Int64(0),
@@ -151,7 +151,7 @@ func TestConfigToProto(t *testing.T) {
 					ClientSecret: "secret",
 				},
 			},
-			want: trippypb.OAuthConfig_builder{
+			want: thrippypb.OAuthConfig_builder{
 				AuthUrl:      proto.String(""),
 				TokenUrl:     proto.String(""),
 				AuthStyle:    proto.Int64(0),
@@ -166,7 +166,7 @@ func TestConfigToProto(t *testing.T) {
 					Scopes: []string{"111", "222"},
 				},
 			},
-			want: trippypb.OAuthConfig_builder{
+			want: thrippypb.OAuthConfig_builder{
 				AuthUrl:      proto.String(""),
 				TokenUrl:     proto.String(""),
 				AuthStyle:    proto.Int64(0),
@@ -181,7 +181,7 @@ func TestConfigToProto(t *testing.T) {
 				Config:    &oauth2.Config{},
 				AuthCodes: map[string]string{"aaa": "111", "bbb": "222"},
 			},
-			want: trippypb.OAuthConfig_builder{
+			want: thrippypb.OAuthConfig_builder{
 				AuthUrl:      proto.String(""),
 				TokenUrl:     proto.String(""),
 				AuthStyle:    proto.Int64(0),
@@ -271,12 +271,12 @@ func TestTokenToProto(t *testing.T) {
 	tests := []struct {
 		name string
 		t    *oauth2.Token
-		want *trippypb.OAuthToken
+		want *thrippypb.OAuthToken
 	}{
 		{
 			name: "empty",
 			t:    &oauth2.Token{},
-			want: trippypb.OAuthToken_builder{
+			want: thrippypb.OAuthToken_builder{
 				AccessToken: proto.String(""),
 				Expiry:      proto.String("0001-01-01T00:00:00Z"),
 			}.Build(),
@@ -284,7 +284,7 @@ func TestTokenToProto(t *testing.T) {
 		{
 			name: "endless_access_token",
 			t:    &oauth2.Token{AccessToken: "access"},
-			want: trippypb.OAuthToken_builder{
+			want: thrippypb.OAuthToken_builder{
 				AccessToken: proto.String("access"),
 				Expiry:      proto.String("0001-01-01T00:00:00Z"),
 			}.Build(),
@@ -295,7 +295,7 @@ func TestTokenToProto(t *testing.T) {
 				AccessToken: "access",
 				Expiry:      time.Unix(1500000005, 1234),
 			},
-			want: trippypb.OAuthToken_builder{
+			want: thrippypb.OAuthToken_builder{
 				AccessToken: proto.String("access"),
 				Expiry:      proto.String("2017-07-14T02:40:05Z"),
 			}.Build(),
@@ -309,7 +309,7 @@ func TestTokenToProto(t *testing.T) {
 				Expiry:       time.Unix(1500000005, 1234),
 				ExpiresIn:    1234,
 			},
-			want: trippypb.OAuthToken_builder{
+			want: thrippypb.OAuthToken_builder{
 				AccessToken:  proto.String("access"),
 				Expiry:       proto.String("2017-07-14T02:40:05Z"),
 				RefreshToken: proto.String("refresh"),

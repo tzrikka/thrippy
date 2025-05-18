@@ -7,11 +7,11 @@
 //   - Infisical ("infisical")
 //
 // Configuration in environment variables:
-//   - TRIPPY_SECRETS_PROVIDER
-//   - TRIPPY_SECRETS_NAMESPACE
+//   - THRIPPY_SECRETS_PROVIDER
+//   - THRIPPY_SECRETS_NAMESPACE
 //   - VAULT_ADDR
 //
-// Configuration in the file "$XDG_CONFIG_HOME/trippy/config.toml":
+// Configuration in the file "$XDG_CONFIG_HOME/thrippy/config.toml":
 //
 //	[secrets]
 //	provider = "in-memory"
@@ -50,7 +50,7 @@ func ManagerFlags(configFilePath altsrc.StringSourcer) []cli.Flag {
 			Name:  "secrets-provider",
 			Value: defaultProvider,
 			Sources: cli.NewValueSourceChain(
-				cli.EnvVar("TRIPPY_SECRETS_PROVIDER"),
+				cli.EnvVar("THRIPPY_SECRETS_PROVIDER"),
 				toml.TOML("secrets.provider", configFilePath),
 			),
 			Hidden: true,
@@ -69,7 +69,7 @@ func ManagerFlags(configFilePath altsrc.StringSourcer) []cli.Flag {
 			Name:  "secrets-namespace",
 			Value: defaultNamespace,
 			Sources: cli.NewValueSourceChain(
-				cli.EnvVar("TRIPPY_SECRETS_NAMESPACE"),
+				cli.EnvVar("THRIPPY_SECRETS_NAMESPACE"),
 				toml.TOML("secrets.namespace", configFilePath),
 			),
 			Hidden: true,
@@ -135,5 +135,5 @@ func (m *genericWrapper) Delete(ctx context.Context, key string) error {
 }
 
 func (m *genericWrapper) namespaced(key string) string {
-	return fmt.Sprintf("trippy/%s/%s", m.namespace, key)
+	return fmt.Sprintf("thrippy/%s/%s", m.namespace, key)
 }

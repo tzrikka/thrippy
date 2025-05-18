@@ -13,16 +13,16 @@ import (
 	"google.golang.org/protobuf/encoding/prototext"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/tzrikka/trippy/pkg/client"
-	"github.com/tzrikka/trippy/pkg/links"
-	"github.com/tzrikka/trippy/pkg/oauth"
-	trippypb "github.com/tzrikka/trippy/proto/trippy/v1"
+	"github.com/tzrikka/thrippy/pkg/client"
+	"github.com/tzrikka/thrippy/pkg/links"
+	"github.com/tzrikka/thrippy/pkg/oauth"
+	thrippypb "github.com/tzrikka/thrippy/proto/thrippy/v1"
 )
 
 var linkTemplatesCommand = &cli.Command{
 	Name:      "link-templates",
 	Usage:     "Lists all available templates for link creation",
-	UsageText: "trippy link-templates",
+	UsageText: "thrippy link-templates",
 	Category:  "link",
 	Action: func(_ context.Context, _ *cli.Command) error {
 		// Maximum length of template ID (for pretty-printing).
@@ -47,7 +47,7 @@ var linkTemplatesCommand = &cli.Command{
 var createLinkCommand = &cli.Command{
 	Name:      "create-link",
 	Usage:     "Creates a new link configuration",
-	UsageText: "trippy create-link [global options] --template <...> [--oauth <...>]",
+	UsageText: "thrippy create-link [global options] --template <...> [--oauth <...>]",
 	Category:  "link",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
@@ -65,9 +65,9 @@ var createLinkCommand = &cli.Command{
 		&cli.StringFlag{
 			Name:    "oauth",
 			Aliases: []string{"o"},
-			Usage:   `"trippy.v1.OAuthConfig" proto message`,
+			Usage:   `"thrippy.v1.OAuthConfig" proto message`,
 			Validator: func(v string) error {
-				return prototext.Unmarshal([]byte(v), &trippypb.OAuthConfig{})
+				return prototext.Unmarshal([]byte(v), &thrippypb.OAuthConfig{})
 			},
 		},
 	},
@@ -80,11 +80,11 @@ var createLinkCommand = &cli.Command{
 
 		// Syntax already checked by the flag's validator
 		// (semantics will be checked by the server).
-		o := &trippypb.OAuthConfig{}
+		o := &thrippypb.OAuthConfig{}
 		_ = prototext.Unmarshal([]byte(cmd.String("oauth")), o)
 
-		c := trippypb.NewTrippyServiceClient(conn)
-		resp, err := c.CreateLink(ctx, trippypb.CreateLinkRequest_builder{
+		c := thrippypb.NewThrippyServiceClient(conn)
+		resp, err := c.CreateLink(ctx, thrippypb.CreateLinkRequest_builder{
 			Template:    proto.String(cmd.String("template")),
 			OauthConfig: o,
 		}.Build())
@@ -100,7 +100,7 @@ var createLinkCommand = &cli.Command{
 var getLinkCommand = &cli.Command{
 	Name:      "get-link",
 	Usage:     "Retrieves a specific link's configuration",
-	UsageText: "trippy get-link [global options] <link ID>",
+	UsageText: "thrippy get-link [global options] <link ID>",
 	Category:  "link",
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		if err := checkLinkIDArg(cmd); err != nil {
@@ -113,8 +113,8 @@ var getLinkCommand = &cli.Command{
 		}
 		defer conn.Close()
 
-		c := trippypb.NewTrippyServiceClient(conn)
-		resp, err := c.GetLink(ctx, trippypb.GetLinkRequest_builder{
+		c := thrippypb.NewThrippyServiceClient(conn)
+		resp, err := c.GetLink(ctx, thrippypb.GetLinkRequest_builder{
 			LinkId: proto.String(cmd.Args().First()),
 		}.Build())
 		if err != nil {

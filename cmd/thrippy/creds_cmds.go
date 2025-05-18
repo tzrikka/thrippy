@@ -14,8 +14,8 @@ import (
 	"github.com/urfave/cli/v3"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/tzrikka/trippy/pkg/client"
-	trippypb "github.com/tzrikka/trippy/proto/trippy/v1"
+	"github.com/tzrikka/thrippy/pkg/client"
+	thrippypb "github.com/tzrikka/thrippy/proto/thrippy/v1"
 )
 
 // startOAuthCommand is a function rather than a var because it
@@ -24,13 +24,13 @@ func startOAuthCommand(configFilePath altsrc.StringSourcer) *cli.Command {
 	return &cli.Command{
 		Name:      "start-oauth",
 		Usage:     "Starts a 3-legged OAuth 2.0 flow for a specific link",
-		UsageText: "trippy start-oauth [--base-url <http[s]://host:port>] <link ID>",
+		UsageText: "thrippy start-oauth [--base-url <http[s]://host:port>] <link ID>",
 		Category:  "link credentials",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "base-url",
 				Aliases: []string{"u"},
-				Usage:   "Trippy HTTP server's base URL",
+				Usage:   "Thrippy HTTP server's base URL",
 				Value:   fmt.Sprintf("http://127.0.0.1:%d", defaultHTTPPort),
 				Sources: cli.NewValueSourceChain(
 					toml.TOML("client.webhook_base_url", configFilePath),
@@ -61,7 +61,7 @@ func startOAuthCommand(configFilePath altsrc.StringSourcer) *cli.Command {
 var setCredsCommand = &cli.Command{
 	Name:        "set-creds",
 	Usage:       "Sets static credentials for a specific link",
-	UsageText:   `trippy set-creds [global options] <link ID> --kv "key=value" [--kv ...]`,
+	UsageText:   `thrippy set-creds [global options] <link ID> --kv "key=value" [--kv ...]`,
 	Description: "Note that this command overwrites existing data, it does not append to it",
 	Category:    "link credentials",
 	Flags: []cli.Flag{
@@ -81,8 +81,8 @@ var setCredsCommand = &cli.Command{
 		}
 		defer conn.Close()
 
-		c := trippypb.NewTrippyServiceClient(conn)
-		_, err = c.SetCredentials(ctx, trippypb.SetCredentialsRequest_builder{
+		c := thrippypb.NewThrippyServiceClient(conn)
+		_, err = c.SetCredentials(ctx, thrippypb.SetCredentialsRequest_builder{
 			LinkId:       proto.String(cmd.Args().First()),
 			GenericCreds: cmd.StringMap("kv"),
 		}.Build())
@@ -97,7 +97,7 @@ var setCredsCommand = &cli.Command{
 var getCredsCommand = &cli.Command{
 	Name:      "get-creds",
 	Usage:     "Retrieves all saved credentials for a specific link",
-	UsageText: "trippy get-creds [global options] <link ID>",
+	UsageText: "thrippy get-creds [global options] <link ID>",
 	Category:  "link credentials",
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		if err := checkLinkIDArg(cmd); err != nil {
@@ -110,8 +110,8 @@ var getCredsCommand = &cli.Command{
 		}
 		defer conn.Close()
 
-		c := trippypb.NewTrippyServiceClient(conn)
-		resp, err := c.GetCredentials(ctx, trippypb.GetCredentialsRequest_builder{
+		c := thrippypb.NewThrippyServiceClient(conn)
+		resp, err := c.GetCredentials(ctx, thrippypb.GetCredentialsRequest_builder{
 			LinkId: proto.String(cmd.Args().First()),
 		}.Build())
 		if err != nil {

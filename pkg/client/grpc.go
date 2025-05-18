@@ -15,8 +15,8 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/tzrikka/trippy/pkg/oauth"
-	trippypb "github.com/tzrikka/trippy/proto/trippy/v1"
+	"github.com/tzrikka/thrippy/pkg/oauth"
+	thrippypb "github.com/tzrikka/thrippy/proto/thrippy/v1"
 )
 
 const (
@@ -61,11 +61,11 @@ func LinkOAuthConfig(ctx context.Context, grpcAddr string, creds credentials.Tra
 	}
 	defer conn.Close()
 
-	c := trippypb.NewTrippyServiceClient(conn)
+	c := thrippypb.NewThrippyServiceClient(conn)
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	resp, err := c.GetLink(ctx, trippypb.GetLinkRequest_builder{
+	resp, err := c.GetLink(ctx, thrippypb.GetLinkRequest_builder{
 		LinkId: proto.String(linkID),
 	}.Build())
 	if err != nil {
@@ -97,11 +97,11 @@ func AddGitHubCreds(ctx context.Context, grpcAddr string, creds credentials.Tran
 	}
 	defer conn.Close()
 
-	c := trippypb.NewTrippyServiceClient(conn)
+	c := thrippypb.NewThrippyServiceClient(conn)
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	resp, err := c.GetCredentials(ctx, trippypb.GetCredentialsRequest_builder{
+	resp, err := c.GetCredentials(ctx, thrippypb.GetCredentialsRequest_builder{
 		LinkId: proto.String(linkID),
 	}.Build())
 	if err != nil {
@@ -113,7 +113,7 @@ func AddGitHubCreds(ctx context.Context, grpcAddr string, creds credentials.Tran
 	m["install_id"] = installID
 	m["api_base_url"] = url
 
-	_, err = c.SetCredentials(ctx, trippypb.SetCredentialsRequest_builder{
+	_, err = c.SetCredentials(ctx, thrippypb.SetCredentialsRequest_builder{
 		LinkId:       proto.String(linkID),
 		GenericCreds: m,
 	}.Build())
@@ -137,11 +137,11 @@ func SetOAuthCreds(ctx context.Context, grpcAddr string, creds credentials.Trans
 	}
 	defer conn.Close()
 
-	c := trippypb.NewTrippyServiceClient(conn)
+	c := thrippypb.NewThrippyServiceClient(conn)
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	_, err = c.SetCredentials(ctx, trippypb.SetCredentialsRequest_builder{
+	_, err = c.SetCredentials(ctx, thrippypb.SetCredentialsRequest_builder{
 		LinkId: proto.String(linkID),
 		Token:  oauth.TokenToProto(t),
 	}.Build())

@@ -10,14 +10,14 @@ import (
 	"github.com/urfave/cli/v3"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/tzrikka/trippy/pkg/client"
-	trippypb "github.com/tzrikka/trippy/proto/trippy/v1"
+	"github.com/tzrikka/thrippy/pkg/client"
+	thrippypb "github.com/tzrikka/thrippy/proto/thrippy/v1"
 )
 
 var getMetaCommand = &cli.Command{
 	Name:      "get-meta",
 	Usage:     "Retrieves all saved metadata for a specific link",
-	UsageText: "trippy get-meta [global options] <link ID>",
+	UsageText: "thrippy get-meta [global options] <link ID>",
 	Category:  "link metadata",
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		if err := checkLinkIDArg(cmd); err != nil {
@@ -30,8 +30,8 @@ var getMetaCommand = &cli.Command{
 		}
 		defer conn.Close()
 
-		c := trippypb.NewTrippyServiceClient(conn)
-		resp, err := c.GetMetadata(ctx, trippypb.GetMetadataRequest_builder{
+		c := thrippypb.NewThrippyServiceClient(conn)
+		resp, err := c.GetMetadata(ctx, thrippypb.GetMetadataRequest_builder{
 			LinkId: proto.String(cmd.Args().First()),
 		}.Build())
 		if err != nil {

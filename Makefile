@@ -18,10 +18,10 @@ third-party-deps:
 .PHONY: go
 go:
 	go generate
-	go build ./cmd/trippy
+	go build ./cmd/thrippy
 
 .PHONY: clean
 clean:
-	rm proto/trippy/v1/*.pb.go
+	rm proto/thrippy/v1/*.pb.go
 	rm -rf third_party
-	rm trippy
+	rm thrippy

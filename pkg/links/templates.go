@@ -10,9 +10,9 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/tzrikka/trippy/pkg/links/github"
-	"github.com/tzrikka/trippy/pkg/links/slack"
-	"github.com/tzrikka/trippy/pkg/oauth"
+	"github.com/tzrikka/thrippy/pkg/links/github"
+	"github.com/tzrikka/thrippy/pkg/links/slack"
+	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
 // Template defines the authentication details
@@ -50,7 +50,7 @@ func (t Template) Check(ctx context.Context, m map[string]string, oc *oauth.Conf
 // OAuthCredFields is a standard based on [oauth2.Token].
 var OAuthCredFields = []string{"access_token", "expiry", "refresh_token", "token_type"}
 
-// Templates is a map of all the link templates that Trippy recognizes and supports.
+// Templates is a map of all the link templates that Thrippy recognizes and supports.
 var Templates = map[string]Template{
 	"generic": {
 		description: "Generic link",
@@ -62,7 +62,7 @@ var Templates = map[string]Template{
 		},
 		credFields: []string{
 			"client_id", "private_key", // Must be entered manually.
-			"api_base_url", "install_id", // Added automatically by Trippy.
+			"api_base_url", "install_id", // Added automatically by Thrippy.
 		},
 		oauthFunc:   github.AppInstallModifier,
 		checkerFunc: github.JWTChecker,

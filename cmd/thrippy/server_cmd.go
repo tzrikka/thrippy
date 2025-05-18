@@ -7,14 +7,14 @@ import (
 	"github.com/urfave/cli-altsrc/v3/toml"
 	"github.com/urfave/cli/v3"
 
-	"github.com/tzrikka/trippy/pkg/server"
+	"github.com/tzrikka/thrippy/pkg/server"
 )
 
 func serverCommand(configFilePath altsrc.StringSourcer) *cli.Command {
 	return &cli.Command{
 		Name:      "server",
-		Usage:     "Starts a local Trippy server",
-		UsageText: "trippy server [global options] [command options]",
+		Usage:     "Starts a local Thrippy server",
+		UsageText: "thrippy server [global options] [command options]",
 		Action:    server.Start,
 		Flags: []cli.Flag{
 			&cli.IntFlag{
@@ -23,7 +23,7 @@ func serverCommand(configFilePath altsrc.StringSourcer) *cli.Command {
 				Usage:   "local port number for HTTP webhooks",
 				Value:   defaultHTTPPort,
 				Sources: cli.NewValueSourceChain(
-					cli.EnvVar("TRIPPY_WEBHOOK_PORT"),
+					cli.EnvVar("THRIPPY_WEBHOOK_PORT"),
 					toml.TOML("server.webhook_port", configFilePath),
 				),
 				Validator: validatePort,
@@ -34,7 +34,7 @@ func serverCommand(configFilePath altsrc.StringSourcer) *cli.Command {
 				Usage:    "public address for HTTP webhooks",
 				Required: true,
 				Sources: cli.NewValueSourceChain(
-					cli.EnvVar("TRIPPY_WEBHOOK_ADDRESS"),
+					cli.EnvVar("THRIPPY_WEBHOOK_ADDRESS"),
 					toml.TOML("server.webhook_address", configFilePath),
 				),
 			},
@@ -43,7 +43,7 @@ func serverCommand(configFilePath altsrc.StringSourcer) *cli.Command {
 				Aliases: []string{"u"},
 				Usage:   "optional destination for OAuth callbacks without a state",
 				Sources: cli.NewValueSourceChain(
-					cli.EnvVar("TRIPPY_FALLBACK_URL"),
+					cli.EnvVar("THRIPPY_FALLBACK_URL"),
 					toml.TOML("server.fallback_url", configFilePath),
 				),
 			},

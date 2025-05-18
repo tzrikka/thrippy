@@ -1,16 +1,16 @@
 edition = "2023";
 
-package trippy.v1;
+package thrippy.v1;
 
 import "google/api/annotations.proto";
 import "google/api/field_behavior.proto";
 import "google/protobuf/go_features.proto";
-import "trippy/v1/oauth.proto";
+import "thrippy/v1/oauth.proto";
 
-option go_package = "github.com/tzrikka/trippy/protos/v1";
+option go_package = "github.com/tzrikka/thrippy/protos/v1";
 option features.(pb.go).api_level = API_OPAQUE;
 
-service TrippyService {
+service ThrippyService {
     rpc CreateLink(CreateLinkRequest) returns (CreateLinkResponse) {
         option (google.api.http) = {
             post: "/v1/links"

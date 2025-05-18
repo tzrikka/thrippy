@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/tzrikka/trippy/pkg/oauth"
+	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
 const (

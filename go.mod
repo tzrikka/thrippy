@@ -1,4 +1,4 @@
-module github.com/tzrikka/trippy
+module github.com/tzrikka/thrippy
 
 go 1.24.3
 

@@ -14,21 +14,21 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/tzrikka/trippy/pkg/links"
-	"github.com/tzrikka/trippy/pkg/oauth"
-	"github.com/tzrikka/trippy/pkg/secrets"
-	trippypb "github.com/tzrikka/trippy/proto/trippy/v1"
+	"github.com/tzrikka/thrippy/pkg/links"
+	"github.com/tzrikka/thrippy/pkg/oauth"
+	"github.com/tzrikka/thrippy/pkg/secrets"
+	thrippypb "github.com/tzrikka/thrippy/proto/thrippy/v1"
 )
 
 type grpcServer struct {
-	trippypb.UnimplementedTrippyServiceServer
+	thrippypb.UnimplementedThrippyServiceServer
 	sm secrets.Manager
 }
 
-// startGRPCServer starts a gRPC server for the [Trippy service]. This
-// is non-blocking, in order to let Trippy run an HTTP server as well.
+// startGRPCServer starts a gRPC server for the [Thrippy service]. This
+// is non-blocking, in order to let Thrippy run an HTTP server as well.
 //
-// [Trippy service]: https://github.com/tzrikka/trippy/blob/main/proto/trippy/v1/trippy.proto
+// [Thrippy service]: https://github.com/tzrikka/thrippy/blob/main/proto/thrippy/v1/thrippy.proto
 func startGRPCServer(sm secrets.Manager, addr string) (string, error) {
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -37,7 +37,7 @@ func startGRPCServer(sm secrets.Manager, addr string) (string, error) {
 	}
 
 	srv := grpc.NewServer()
-	trippypb.RegisterTrippyServiceServer(srv, &grpcServer{sm: sm})
+	thrippypb.RegisterThrippyServiceServer(srv, &grpcServer{sm: sm})
 	go func() {
 		err = srv.Serve(lis)
 		if err != nil {
@@ -49,7 +49,7 @@ func startGRPCServer(sm secrets.Manager, addr string) (string, error) {
 	return lis.Addr().String(), nil
 }
 
-func (s *grpcServer) CreateLink(ctx context.Context, in *trippypb.CreateLinkRequest) (*trippypb.CreateLinkResponse, error) {
+func (s *grpcServer) CreateLink(ctx context.Context, in *thrippypb.CreateLinkRequest) (*thrippypb.CreateLinkResponse, error) {
 	id := shortuuid.New()
 	l := log.With().Str("grpc_method", "CreateLink").Str("id", id).Logger()
 	l.Debug().Msg("received gRPC request")
@@ -86,13 +86,13 @@ func (s *grpcServer) CreateLink(ctx context.Context, in *trippypb.CreateLinkRequ
 	}
 
 	l.Trace().Msg("secrets manager write success")
-	return trippypb.CreateLinkResponse_builder{
+	return thrippypb.CreateLinkResponse_builder{
 		LinkId:           proto.String(id),
 		CredentialFields: links.Templates[t].CredFields(),
 	}.Build(), nil
 }
 
-func (s *grpcServer) GetLink(ctx context.Context, in *trippypb.GetLinkRequest) (*trippypb.GetLinkResponse, error) {
+func (s *grpcServer) GetLink(ctx context.Context, in *thrippypb.GetLinkRequest) (*thrippypb.GetLinkResponse, error) {
 	id := in.GetLinkId()
 	l := log.With().Str("grpc_method", "GetLink").Str("id", id).Logger()
 	l.Debug().Msg("received gRPC request")
@@ -111,14 +111,14 @@ func (s *grpcServer) GetLink(ctx context.Context, in *trippypb.GetLinkRequest) (
 		return nil, err
 	}
 
-	return trippypb.GetLinkResponse_builder{
+	return thrippypb.GetLinkResponse_builder{
 		Template:         proto.String(t),
 		OauthConfig:      o,
 		CredentialFields: links.Templates[t].CredFields(),
 	}.Build(), nil
 }
 
-func (s *grpcServer) SetCredentials(ctx context.Context, in *trippypb.SetCredentialsRequest) (*trippypb.SetCredentialsResponse, error) {
+func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCredentialsRequest) (*thrippypb.SetCredentialsResponse, error) {
 	id := in.GetLinkId()
 	l := log.With().Str("grpc_method", "SetCredentials").Str("id", id).Logger()
 	l.Debug().Msg("received gRPC request")
@@ -171,10 +171,10 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *trippypb.SetCredent
 	}
 
 	l.Trace().Msg("secrets manager write success")
-	return &trippypb.SetCredentialsResponse{}, nil
+	return &thrippypb.SetCredentialsResponse{}, nil
 }
 
-func (s *grpcServer) templateAndOAuth(ctx context.Context, id string) (string, *trippypb.OAuthConfig, error) {
+func (s *grpcServer) templateAndOAuth(ctx context.Context, id string) (string, *thrippypb.OAuthConfig, error) {
 	l := zerolog.Ctx(ctx)
 
 	t, err := s.sm.Get(ctx, id+"/template")
@@ -193,9 +193,9 @@ func (s *grpcServer) templateAndOAuth(ctx context.Context, id string) (string, *
 		return "", nil, status.Error(codes.Internal, "secrets manager read error")
 	}
 
-	var m *trippypb.OAuthConfig
+	var m *thrippypb.OAuthConfig
 	if o != "" {
-		m = &trippypb.OAuthConfig{}
+		m = &thrippypb.OAuthConfig{}
 		err = protojson.Unmarshal([]byte(o), m)
 		if err != nil {
 			l.Err(err).Msg("failed to convert JSON into proto")
@@ -206,7 +206,7 @@ func (s *grpcServer) templateAndOAuth(ctx context.Context, id string) (string, *
 	return t, m, nil
 }
 
-func (s *grpcServer) GetCredentials(ctx context.Context, in *trippypb.GetCredentialsRequest) (*trippypb.GetCredentialsResponse, error) {
+func (s *grpcServer) GetCredentials(ctx context.Context, in *thrippypb.GetCredentialsRequest) (*thrippypb.GetCredentialsResponse, error) {
 	id := in.GetLinkId()
 	l := log.With().Str("grpc_method", "GetCredentials").Str("id", id).Logger()
 
@@ -215,10 +215,10 @@ func (s *grpcServer) GetCredentials(ctx context.Context, in *trippypb.GetCredent
 		return nil, err
 	}
 
-	return trippypb.GetCredentialsResponse_builder{Credentials: m}.Build(), nil
+	return thrippypb.GetCredentialsResponse_builder{Credentials: m}.Build(), nil
 }
 
-func (s *grpcServer) GetMetadata(ctx context.Context, in *trippypb.GetMetadataRequest) (*trippypb.GetMetadataResponse, error) {
+func (s *grpcServer) GetMetadata(ctx context.Context, in *thrippypb.GetMetadataRequest) (*thrippypb.GetMetadataResponse, error) {
 	id := in.GetLinkId()
 	l := log.With().Str("grpc_method", "GetMetadata").Str("id", id).Logger()
 
@@ -227,7 +227,7 @@ func (s *grpcServer) GetMetadata(ctx context.Context, in *trippypb.GetMetadataRe
 		return nil, err
 	}
 
-	return trippypb.GetMetadataResponse_builder{Metadata: m}.Build(), nil
+	return thrippypb.GetMetadataResponse_builder{Metadata: m}.Build(), nil
 }
 
 func (s *grpcServer) getSecrets(ctx context.Context, linkID, keySuffix string) (map[string]string, error) {

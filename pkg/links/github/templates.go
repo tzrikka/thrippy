@@ -39,9 +39,9 @@ func AppAuthzModifier(o *oauth.Config) {
 func AppInstallModifier(o *oauth.Config) {
 	baseURL := AuthBaseURL(o)
 
-	appsDir := "apps" // github.com
+	appsDir := "apps" // In github.com.
 	if baseURL != DefaultBaseURL {
-		appsDir = "github-apps" // GitHub Enterprise Server (GHES)
+		appsDir = "github-apps" // GitHub Enterprise Server (GHES).
 	}
 
 	appName := o.Params["app_name"]

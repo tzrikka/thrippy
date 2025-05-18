@@ -33,7 +33,15 @@ func TestHTMLResponse(t *testing.T) {
 			}))
 			defer s.Close()
 
-			resp, err := http.Get(s.URL)
+			req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, s.URL, http.NoBody)
+			if err != nil {
+				t.Errorf("failed to create HTTP request: %v", err)
+				return
+			}
+
+			resp, err := http.DefaultClient.Do(req)
+			_ = resp.Body.Close()
+
 			if err != nil {
 				t.Errorf("htmlResponse() error = %v", err)
 				return

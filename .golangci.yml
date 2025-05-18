@@ -15,7 +15,7 @@ linters:
     - gocheckcompilerdirectives
     - gocritic
     - godot
-    - godox
+    # - godox
     - gosec
     - gosmopolitan
     - intrange

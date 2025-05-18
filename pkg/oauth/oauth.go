@@ -26,9 +26,11 @@ const (
 //
 // If specified and recognized, parameter values are injected into
 // [oauth2.Endpoint] URLs in the [oauth2.Config] by the function
-// [links.ModifyOAuthByTemplate], during [server.CreateLink] calls.
-// Either way, they are discarded when storing OAuth configurations
-// in the secrets manager.
+// [links.ModifyOAuthByTemplate], when the gRPC server is creating
+// a new link. Either way, they are discarded when storing OAuth
+// configurations in the secrets manager.
+//
+// [links.ModifyOAuthByTemplate]: https://pkg.go.dev/github.com/tzrikka/thrippy/pkg/links#ModifyOAuthByTemplate
 type Config struct {
 	Config    *oauth2.Config
 	AuthCodes map[string]string

@@ -20,14 +20,12 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Install tools
+      - name: Install protoc
+        uses: arduino/setup-protoc@v3
+        with:
+          version: "31.x"  # https://github.com/protocolbuffers/protobuf/releases
+      - name: Install deps
         run: |
-          echo $HOME
-          echo $PATH
-          pwd
-          ls .
-          ls $GOPATH/bin
-          ls $HOME/go/bin
           make tool-deps
           make third-party-deps
           go install gotest.tools/gotestsum@latest

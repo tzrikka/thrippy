@@ -1,5 +1,6 @@
-// Thrippy manages authentication configurations
-// and tokens for third-party (3P) services.
+// Thrippy manages authentication configurations and secret tokens for
+// third-party (3P) services. It supports both static and OAuth 2.0
+// credentials, and it is designed to be both simple and secure.
 package main
 
 import (

@@ -29,7 +29,7 @@ func Creds(cmd *cli.Command) credentials.TransportCredentials {
 		return InsecureCreds()
 	}
 
-	// With flags defined in main.go:
+	// TODO: With flags defined in main.go:
 	// https://grpc.io/docs/guides/auth/
 	// https://grpc.io/docs/languages/go/alts/
 	// https://github.com/grpc/grpc-go/tree/master/examples/features/authentication
@@ -37,6 +37,7 @@ func Creds(cmd *cli.Command) credentials.TransportCredentials {
 	panic("non-dev client credentials not implemented yet")
 }
 
+// InsecureCreds should be used only in unit tests.
 func InsecureCreds() credentials.TransportCredentials {
 	return insecure.NewCredentials()
 }

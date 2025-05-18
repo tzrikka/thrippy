@@ -25,8 +25,10 @@ type grpcServer struct {
 	sm secrets.Manager
 }
 
-// startGRPCServer starts a gRPC server for the Trippy service (proto/.../trippy.proto).
-// This function is non-blocking, in order to let Trippy run an HTTP server as well.
+// startGRPCServer starts a gRPC server for the [Trippy service]. This
+// is non-blocking, in order to let Trippy run an HTTP server as well.
+//
+// [Trippy service]: https://github.com/tzrikka/trippy/blob/main/proto/trippy/v1/trippy.proto
 func startGRPCServer(sm secrets.Manager, addr string) (string, error) {
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -207,29 +209,10 @@ func (s *grpcServer) templateAndOAuth(ctx context.Context, id string) (string, *
 func (s *grpcServer) GetCredentials(ctx context.Context, in *trippypb.GetCredentialsRequest) (*trippypb.GetCredentialsResponse, error) {
 	id := in.GetLinkId()
 	l := log.With().Str("grpc_method", "GetCredentials").Str("id", id).Logger()
-	l.Debug().Msg("received gRPC request")
 
-	if id == "" {
-		l.Warn().Msg("missing ID")
-		return nil, status.Error(codes.InvalidArgument, "missing ID")
-	}
-	if _, err := shortuuid.DefaultEncoder.Decode(id); err != nil {
-		l.Warn().Err(err).Msg("ID is an invalid short UUID")
-		return nil, status.Error(codes.InvalidArgument, "invalid ID")
-	}
-
-	j, err := s.sm.Get(ctx, id+"/creds")
+	m, err := s.getSecrets(l.WithContext(ctx), id, "/creds")
 	if err != nil {
-		l.Err(err).Msg("secrets manager read error")
-		return nil, status.Error(codes.Internal, "secrets manager read error")
-	}
-
-	var m map[string]string
-	if j != "" {
-		if err := json.Unmarshal([]byte(j), &m); err != nil {
-			l.Err(err).Msg("failed to convert JSON into map")
-			return nil, status.Error(codes.Internal, "secrets manager parse error")
-		}
+		return nil, err
 	}
 
 	return trippypb.GetCredentialsResponse_builder{Credentials: m}.Build(), nil
@@ -238,18 +221,29 @@ func (s *grpcServer) GetCredentials(ctx context.Context, in *trippypb.GetCredent
 func (s *grpcServer) GetMetadata(ctx context.Context, in *trippypb.GetMetadataRequest) (*trippypb.GetMetadataResponse, error) {
 	id := in.GetLinkId()
 	l := log.With().Str("grpc_method", "GetMetadata").Str("id", id).Logger()
+
+	m, err := s.getSecrets(l.WithContext(ctx), id, "/meta")
+	if err != nil {
+		return nil, err
+	}
+
+	return trippypb.GetMetadataResponse_builder{Metadata: m}.Build(), nil
+}
+
+func (s *grpcServer) getSecrets(ctx context.Context, linkID, keySuffix string) (map[string]string, error) {
+	l := zerolog.Ctx(ctx)
 	l.Debug().Msg("received gRPC request")
 
-	if id == "" {
+	if linkID == "" {
 		l.Warn().Msg("missing ID")
 		return nil, status.Error(codes.InvalidArgument, "missing ID")
 	}
-	if _, err := shortuuid.DefaultEncoder.Decode(id); err != nil {
+	if _, err := shortuuid.DefaultEncoder.Decode(linkID); err != nil {
 		l.Warn().Err(err).Msg("ID is an invalid short UUID")
 		return nil, status.Error(codes.InvalidArgument, "invalid ID")
 	}
 
-	j, err := s.sm.Get(ctx, id+"/meta")
+	j, err := s.sm.Get(ctx, linkID+keySuffix)
 	if err != nil {
 		l.Err(err).Msg("secrets manager read error")
 		return nil, status.Error(codes.Internal, "secrets manager read error")
@@ -263,5 +257,5 @@ func (s *grpcServer) GetMetadata(ctx context.Context, in *trippypb.GetMetadataRe
 		}
 	}
 
-	return trippypb.GetMetadataResponse_builder{Metadata: m}.Build(), nil
+	return m, nil
 }

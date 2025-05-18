@@ -18,6 +18,8 @@ import (
 	trippypb "github.com/tzrikka/trippy/proto/trippy/v1"
 )
 
+// startOAuthCommand is a function rather than a var because it
+// depends on the runtime return value of [configDir] and [configFile].
 func startOAuthCommand(configFilePath altsrc.StringSourcer) *cli.Command {
 	return &cli.Command{
 		Name:      "start-oauth",

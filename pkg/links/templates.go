@@ -15,7 +15,8 @@ import (
 	"github.com/tzrikka/trippy/pkg/oauth"
 )
 
-// Template defines the authentication details of a well-known third-party service.
+// Template defines the authentication details
+// of a well-known third-party service.
 type Template struct {
 	description string
 	links       []string
@@ -46,8 +47,8 @@ func (t Template) Check(ctx context.Context, m map[string]string, oc *oauth.Conf
 	return t.checkerFunc(ctx, m, oc, ot)
 }
 
-// oauthCredFields is a standard based on [oauth2.Token].
-var oauthCredFields = []string{"access_token", "expiry", "refresh_token", "token_type"}
+// OAuthCredFields is a standard based on [oauth2.Token].
+var OAuthCredFields = []string{"access_token", "expiry", "refresh_token", "token_type"}
 
 // Templates is a map of all the link templates that Trippy recognizes and supports.
 var Templates = map[string]Template{
@@ -71,7 +72,7 @@ var Templates = map[string]Template{
 		links: []string{
 			"https://docs.github.com/en/apps/using-github-apps/authorizing-github-apps",
 		},
-		credFields:  append([]string{"base_url_optional"}, oauthCredFields...),
+		credFields:  append([]string{"base_url_optional"}, OAuthCredFields...),
 		oauthFunc:   github.AppAuthzModifier,
 		checkerFunc: github.UserChecker,
 	},
@@ -97,8 +98,8 @@ var Templates = map[string]Template{
 		links: []string{
 			"https://docs.slack.dev/authentication/installing-with-oauth",
 		},
-		credFields:  oauthCredFields,
-		oauthFunc:   slack.OAuthModifier,
+		credFields:  OAuthCredFields,
+		oauthFunc:   slack.OAuthModifier(slack.DefaultBaseURL),
 		checkerFunc: slack.OAuthChecker,
 	},
 	"slack-oauth-gov": {
@@ -107,8 +108,8 @@ var Templates = map[string]Template{
 			"https://docs.slack.dev/authentication/installing-with-oauth",
 			"https://docs.slack.dev/govslack",
 		},
-		credFields:  oauthCredFields,
-		oauthFunc:   slack.GovOAuthModifier,
+		credFields:  OAuthCredFields,
+		oauthFunc:   slack.OAuthModifier(slack.GovBaseURL),
 		checkerFunc: slack.GovOAuthChecker,
 	},
 }

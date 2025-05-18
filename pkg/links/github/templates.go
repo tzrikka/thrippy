@@ -39,7 +39,7 @@ func AppInstallModifier(o *oauth.Config) {
 	baseURL := AuthBaseURL(o)
 
 	appsDir := "apps" // github.com
-	if baseURL != defaultBaseURL {
+	if baseURL != DefaultBaseURL {
 		appsDir = "github-apps" // GitHub Enterprise Server (GHES)
 	}
 
@@ -140,7 +140,7 @@ type appMetadata struct {
 }
 
 // UserChecker checks the given OAuth token,
-// or static Personal Access Token (PAT) for GitHub. Based on
+// or static Personal Access Token (PAT) for GitHub. Based on:
 // https://docs.github.com/en/rest/users/users#get-the-authenticated-user
 func UserChecker(ctx context.Context, m map[string]string, o *oauth.Config, t *oauth2.Token) (string, error) {
 	if o == nil {

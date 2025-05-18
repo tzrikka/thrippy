@@ -9,7 +9,6 @@ import (
 
 type httpTestResponse struct {
 	slackResponse
-
 	Response string `json:"response,omitempty"`
 }
 
@@ -43,6 +42,7 @@ func TestGet(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := httptest.NewUnstartedServer(handler(t, tt.respBody))
@@ -94,6 +94,7 @@ func TestPost(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := httptest.NewUnstartedServer(handler(t, tt.respBody))

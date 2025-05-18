@@ -12,64 +12,52 @@ import (
 	"github.com/tzrikka/trippy/pkg/oauth"
 )
 
-// OAuthModifier adjusts the given [oauth.Config] for Slack apps.
-func OAuthModifier(o *oauth.Config) {
-	// https://docs.slack.dev/authentication/installing-with-oauth
-	if o.Config.Endpoint.AuthURL == "" {
-		o.Config.Endpoint.AuthURL = "https://slack.com/oauth/v2/authorize"
-	}
-	// https://docs.slack.dev/reference/methods/oauth.v2.access
-	if o.Config.Endpoint.TokenURL == "" {
-		o.Config.Endpoint.TokenURL = "https://slack.com/api/oauth.v2.access"
-	}
-	// https://docs.slack.dev/authentication/installing-with-oauth
-	if o.Config.Endpoint.AuthStyle == oauth2.AuthStyleAutoDetect {
-		o.Config.Endpoint.AuthStyle = oauth2.AuthStyleInHeader
-	}
+const (
+	DefaultBaseURL = "https://slack.com"
+	GovBaseURL     = "https://slack-gov.com" // https://docs.slack.dev/govslack
+)
 
-	// https://docs.slack.dev/reference/scopes/users.read
-	// (required by https://docs.slack.dev/reference/methods/bots.info).
-	o.Config.Scopes = append(o.Config.Scopes, "users:read")
-}
+// OAuthModifier returns a function that adjusts an [oauth.Config] for Slack
+// apps, based on the given base URL ([DefaultBaseURL] or [GovBaseURL]).
+func OAuthModifier(baseURL string) func(*oauth.Config) {
+	return func(o *oauth.Config) {
+		// https://docs.slack.dev/authentication/installing-with-oauth
+		if o.Config.Endpoint.AuthURL == "" {
+			o.Config.Endpoint.AuthURL = baseURL + "/oauth/v2/authorize"
+		}
 
-// GovOAuthModifier adjusts the given [oauth.Config] for [GovSlack] apps.
-//
-// [GovSlack]: https://docs.slack.dev/govslack
-func GovOAuthModifier(o *oauth.Config) {
-	// https://docs.slack.dev/authentication/installing-with-oauth
-	if o.Config.Endpoint.AuthURL == "" {
-		o.Config.Endpoint.AuthURL = "https://slack-gov.com/oauth/v2/authorize"
-	}
-	// https://docs.slack.dev/reference/methods/oauth.v2.access
-	if o.Config.Endpoint.TokenURL == "" {
-		o.Config.Endpoint.TokenURL = "https://slack-gov.com/api/oauth.v2.access"
-	}
-	// https://docs.slack.dev/authentication/installing-with-oauth
-	if o.Config.Endpoint.AuthStyle == oauth2.AuthStyleAutoDetect {
-		o.Config.Endpoint.AuthStyle = oauth2.AuthStyleInHeader
-	}
+		// https://docs.slack.dev/reference/methods/oauth.v2.access
+		if o.Config.Endpoint.TokenURL == "" {
+			o.Config.Endpoint.TokenURL = baseURL + "/api/oauth.v2.access"
+		}
 
-	// https://docs.slack.dev/reference/scopes/users.read
-	// (required by https://docs.slack.dev/reference/methods/bots.info).
-	o.Config.Scopes = append(o.Config.Scopes, "users:read")
+		// https://docs.slack.dev/authentication/installing-with-oauth
+		if o.Config.Endpoint.AuthStyle == oauth2.AuthStyleAutoDetect {
+			o.Config.Endpoint.AuthStyle = oauth2.AuthStyleInHeader
+		}
+
+		// https://docs.slack.dev/reference/scopes/users.read
+		// (required by https://docs.slack.dev/reference/methods/bots.info).
+		o.Config.Scopes = append(o.Config.Scopes, "users:read")
+	}
 }
 
 // BotTokenChecker checks the given static bot token for
 // Slack, and returns metadata about it in JSON format.
 func BotTokenChecker(ctx context.Context, m map[string]string, _ *oauth.Config, _ *oauth2.Token) (string, error) {
-	return genericChecker(ctx, m["bot_token"], "https://slack.com")
+	return genericChecker(ctx, m["bot_token"], DefaultBaseURL)
 }
 
 // OAuthChecker checks the given static bot token for
 // Slack, and returns metadata about it in JSON format.
 func OAuthChecker(ctx context.Context, _ map[string]string, _ *oauth.Config, t *oauth2.Token) (string, error) {
-	return genericChecker(ctx, t.AccessToken, "https://slack.com")
+	return genericChecker(ctx, t.AccessToken, DefaultBaseURL)
 }
 
 // GovOAuthChecker checks the given static bot token for
 // GovSlack, and returns metadata about it in JSON format.
 func GovOAuthChecker(ctx context.Context, _ map[string]string, _ *oauth.Config, t *oauth2.Token) (string, error) {
-	return genericChecker(ctx, t.AccessToken, "https://slack-gov.com")
+	return genericChecker(ctx, t.AccessToken, GovBaseURL)
 }
 
 func genericChecker(ctx context.Context, botToken, baseURL string) (string, error) {

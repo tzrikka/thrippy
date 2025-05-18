@@ -19,20 +19,20 @@ import (
 )
 
 const (
-	defaultBaseURL = "https://github.com"
+	DefaultBaseURL = "https://github.com"
 	badBaseURL     = "https://bad-base-url"
 )
 
-// AuthBaseURL returns the base URL for GitHub: either "https://github.com"
+// AuthBaseURL returns the base URL for GitHub: either [DefaultBaseURL]
 // or a link-specific URL for GitHub Enterprise Server (GHES).
 func AuthBaseURL(o *oauth.Config) string {
-	baseURL, ok := o.Params["base_url"]
+	baseURL, ok := o.Params["base_url"] // Link creation.
 	if !ok {
-		baseURL = o.Config.Endpoint.AuthURL
+		baseURL = o.Config.Endpoint.AuthURL // Anytime afterwards.
 	}
 
 	if baseURL == "" {
-		return defaultBaseURL
+		return DefaultBaseURL
 	}
 
 	// Custom base URL for GitHub Enterprise Server (GHES): normalize it.
@@ -57,16 +57,18 @@ func AuthBaseURL(o *oauth.Config) string {
 	return u.String()
 }
 
-// APIBaseURL transforms the given GitHub base URL into an API endpoint URL. Based on
-// https://docs.github.com/en/enterprise-server/apps/sharing-github-apps/making-your-github-app-available-for-github-enterprise-server#the-app-code-must-use-the-correct-urls
+// APIBaseURL transforms the given GitHub base URL
+// into an API endpoint URL, based on [this].
+//
+// [this]: https://docs.github.com/en/enterprise-server/apps/sharing-github-apps/making-your-github-app-available-for-github-enterprise-server#the-app-code-must-use-the-correct-urls
 func APIBaseURL(baseURL string) string {
-	if baseURL == defaultBaseURL {
+	if baseURL == DefaultBaseURL {
 		return "https://api.github.com"
 	}
 	return baseURL + "/api/v3"
 }
 
-// generateJWT generates a JSON Web Token (JWT) for a GitHub app. Based on
+// generateJWT generates a JSON Web Token (JWT) for a GitHub app. Based on:
 // https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app
 func generateJWT(clientID, privateKey string) (string, error) {
 	// Input sanity checks.

@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	maxSize = 1 << 20 // 2^20 bytes = 1 MiB
+	maxSize = 1 << 20 // 2^20 bytes = 1 MiB.
 )
 
 func HTTPRequest(ctx context.Context, httpMethod, url, mimeType, token string) ([]byte, error) {

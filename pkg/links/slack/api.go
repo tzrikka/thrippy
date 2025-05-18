@@ -13,7 +13,6 @@ import (
 // https://docs.slack.dev/reference/methods/auth.test
 type authTestResponse struct {
 	slackResponse
-
 	URL                 string `json:"url"`
 	Team                string `json:"team"`
 	User                string `json:"user"`
@@ -28,7 +27,6 @@ type authTestResponse struct {
 // https://docs.slack.dev/reference/methods/bots.info
 type botsInfoResponse struct {
 	slackResponse
-
 	Bot bot `json:"bot"`
 }
 

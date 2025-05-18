@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestCredFields(t *testing.T) {
+func TestTemplateCredFields(t *testing.T) {
 	tests := []struct {
 		name       string
 		credFields []string

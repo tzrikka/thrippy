@@ -69,6 +69,16 @@ func TestFromProto(t *testing.T) {
 				AuthCodes: map[string]string{"aaa": "111", "bbb": "222"},
 			},
 		},
+		{
+			name: "params",
+			oac: trippypb.OAuthConfig_builder{
+				Params: map[string]string{"aaa": "111", "bbb": "222"},
+			}.Build(),
+			want: &Config{
+				Config: &oauth2.Config{},
+				Params: map[string]string{"aaa": "111", "bbb": "222"},
+			},
+		},
 	}
 
 	for _, tt := range tests {

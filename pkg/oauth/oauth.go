@@ -19,15 +19,27 @@ const (
 	timeout = time.Second * 3
 )
 
+// Config contains the complete OAuth 2.0 configutation of a link:
+// primarily the [oauth2.Config], but also optional [oauth2.AuthCodeOption]
+// key-value pairs, and optional [oauth2.Endpoint] URL parameters
+// that some links recognize.
+//
+// If specified and recognized, parameter values are injected into
+// [oauth2.Endpoint] URLs in the [oauth2.Config] by the function
+// [links.ModifyOAuthByTemplate], during [server.CreateLink] calls.
+// Either way, they are discarded when storing OAuth configurations
+// in the secrets manager.
 type Config struct {
 	Config    *oauth2.Config
 	AuthCodes map[string]string
 	Params    map[string]string
 }
 
-// FromProto converts a wire-protocol [trippypb.OAuthConfig]
-// message into a [Config] struct which is usable in Go.
+// FromProto converts a wire-protocol [OAuthConfig] protocol-buffer
+// message into a [Config] struct which is a usable receiver in Go.
 // This function returns nil if the input is also nil.
+//
+// [OAuthConfig]: https://github.com/tzrikka/trippy/blob/main/proto/trippy/v1/oauth.proto
 func FromProto(c *trippypb.OAuthConfig) *Config {
 	if c == nil {
 		return nil
@@ -50,9 +62,11 @@ func FromProto(c *trippypb.OAuthConfig) *Config {
 	}
 }
 
-// ToString returns a human-readable string representation of a
-// [trippypb.OAuthConfig] message, for pretty-printing in the CLI.
+// ToString returns a human-readable string representation of an [OAuthConfig]
+// protocol-buffer message, for pretty-printing in the CLI application.
 // This function returns an empty string if the input is nil.
+//
+// [OAuthConfig]: https://github.com/tzrikka/trippy/blob/main/proto/trippy/v1/oauth.proto
 func ToString(c *trippypb.OAuthConfig) string {
 	if c.GetAuthUrl() == "" {
 		return ""
@@ -78,9 +92,10 @@ func ToString(c *trippypb.OAuthConfig) string {
 	return strings.Join(lines, "\n")
 }
 
-// ToProto converts this struct into a [trippypb.OAuthConfig]
-// protocol-buffer message, for transmission over gRPC.
-// This function returns nil if the receiver is nil.
+// ToProto converts this struct into an [OAuthConfig] protocol-buffer message,
+// for transmission over gRPC. This function returns nil if the receiver is nil.
+//
+// [OAuthConfig]: https://github.com/tzrikka/trippy/blob/main/proto/trippy/v1/oauth.proto
 func (c *Config) ToProto() *trippypb.OAuthConfig {
 	if c == nil {
 		return nil
@@ -99,9 +114,11 @@ func (c *Config) ToProto() *trippypb.OAuthConfig {
 	}.Build()
 }
 
-// ToJSON converts this struct into a JSON representation of a
-// [trippypb.OAuthConfig] protocol-buffer message, for storage in the
-// secrets manager. This function returns "{}" if the receiver is nil.
+// ToJSON converts this struct into a JSON representation of an [OAuthConfig]
+// protocol-buffer message, for storage in the secrets manager.
+// This function returns "{}" if the receiver is nil.
+//
+// [OAuthConfig]: https://github.com/tzrikka/trippy/blob/main/proto/trippy/v1/oauth.proto
 func (c *Config) ToJSON() (string, error) {
 	if c == nil {
 		return "{}", nil
@@ -147,8 +164,10 @@ func (c *Config) authCodes() []oauth2.AuthCodeOption {
 	return acs
 }
 
-// TokenToProto converts the given [oauth2.Token] into a [trippypb.OAuthConfig]
+// TokenToProto converts the given [oauth2.Token] into an [OAuthConfig]
 // protocol-buffer message, for transmission over gRPC and then storage.
+//
+// [OAuthConfig]: https://github.com/tzrikka/trippy/blob/main/proto/trippy/v1/oauth.proto
 func TokenToProto(t *oauth2.Token) *trippypb.OAuthToken {
 	if t.Expiry.IsZero() && t.ExpiresIn > 0 { // If both are 0, the access token never expires.
 		t.Expiry = time.Now().Add(time.Second * time.Duration(t.ExpiresIn))
@@ -171,8 +190,10 @@ func TokenToProto(t *oauth2.Token) *trippypb.OAuthToken {
 	return o
 }
 
-// TokenFromProto converts a wire-protocol [trippypb.OAuthToken] message into an
+// TokenFromProto converts a wire-protocol [OAuthToken] message into an
 // [oauth2.Token] struct. This function returns nil if the input is also nil.
+//
+// [OAuthConfig]: https://github.com/tzrikka/trippy/blob/main/proto/trippy/v1/oauth.proto
 func TokenFromProto(o *trippypb.OAuthToken) *oauth2.Token {
 	if o == nil {
 		return nil

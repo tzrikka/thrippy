@@ -259,7 +259,6 @@ func htmlResponse(w http.ResponseWriter, status int, msg string) {
 		<body>
 			<h1>%s</h1>
 			<p>%s</p>
-			<script>window.open("", "_self").close();</script>
 		</body>
 		</html>`,
 		title, header, msg)

@@ -1,8 +1,49 @@
 package server
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"testing"
 )
+
+func TestHTMLResponse(t *testing.T) {
+	tests := []struct {
+		name   string
+		status int
+		msg    string
+	}{
+		{
+			name:   "ok",
+			status: http.StatusOK,
+		},
+		{
+			name:   "bad_request",
+			status: http.StatusBadRequest,
+		},
+		{
+			name:   "internal_server_error",
+			status: http.StatusInternalServerError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				htmlResponse(w, tt.status, tt.msg)
+			}))
+			defer s.Close()
+
+			resp, err := http.Get(s.URL)
+			if err != nil {
+				t.Errorf("htmlResponse() error = %v", err)
+				return
+			}
+			if resp.StatusCode != tt.status {
+				t.Errorf("htmlResponse() status = %d, want %d", resp.StatusCode, tt.status)
+			}
+		})
+	}
+}
 
 func TestConstructStateParam(t *testing.T) {
 	tests := []struct {

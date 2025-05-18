@@ -1,6 +1,7 @@
 package server
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/lithammer/shortuuid/v4"
@@ -167,7 +168,7 @@ func TestGetLinkNonOAuth(t *testing.T) {
 	defer conn.Close()
 
 	client := thrippypb.NewThrippyServiceClient(conn)
-	resp1, err := client.CreateLink(t.Context(), thrippypb.CreateLinkRequest_builder{
+	resp, err := client.CreateLink(t.Context(), thrippypb.CreateLinkRequest_builder{
 		Template: proto.String("slack-bot-token"),
 	}.Build())
 	if err != nil {
@@ -175,7 +176,7 @@ func TestGetLinkNonOAuth(t *testing.T) {
 	}
 
 	got, err := client.GetLink(t.Context(), thrippypb.GetLinkRequest_builder{
-		LinkId: proto.String(resp1.GetLinkId()),
+		LinkId: proto.String(resp.GetLinkId()),
 	}.Build())
 	if err != nil {
 		t.Errorf("GetLink() error = %v", err)
@@ -188,5 +189,90 @@ func TestGetLinkNonOAuth(t *testing.T) {
 	}
 	if got.GetOauthConfig() != nil {
 		t.Errorf("GetLink().GetOauthConfig() = %v, want nil", got.GetOauthConfig())
+	}
+}
+
+func TestSetAndGetCredentials(t *testing.T) {
+	addr, err := startGRPCServer(secrets.NewTestManager(), "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	creds := grpc.WithTransportCredentials(insecure.NewCredentials())
+	conn, err := grpc.NewClient(addr, creds)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+
+	client := thrippypb.NewThrippyServiceClient(conn)
+	resp1, err := client.CreateLink(t.Context(), thrippypb.CreateLinkRequest_builder{
+		Template: proto.String("generic"),
+		OauthConfig: thrippypb.OAuthConfig_builder{
+			ClientId:     proto.String("111"),
+			ClientSecret: proto.String("222"),
+		}.Build(),
+	}.Build())
+	if err != nil {
+		t.Fatalf("CreateLink() error = %v", err)
+	}
+
+	tests := []struct {
+		name string
+		req  *thrippypb.SetCredentialsRequest
+		want map[string]string
+	}{
+		{
+			name: "generic_creds",
+			req: thrippypb.SetCredentialsRequest_builder{
+				LinkId: proto.String(resp1.GetLinkId()),
+				GenericCreds: map[string]string{
+					"aaa": "111",
+					"bbb": "222",
+				},
+			}.Build(),
+			want: map[string]string{
+				"aaa": "111",
+				"bbb": "222",
+			},
+		},
+		{
+			name: "token",
+			req: thrippypb.SetCredentialsRequest_builder{
+				LinkId: proto.String(resp1.GetLinkId()),
+				Token: thrippypb.OAuthToken_builder{
+					AccessToken:  proto.String("access_token"),
+					Expiry:       proto.String("2025-05-17T10:11:12Z"),
+					RefreshToken: proto.String("refresh_token"),
+				}.Build(),
+			}.Build(),
+			want: map[string]string{
+				"access_token":  "access_token",
+				"expiry":        "2025-05-17T10:11:12Z",
+				"refresh_token": "refresh_token",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := client.SetCredentials(t.Context(), tt.req)
+			if err != nil {
+				t.Errorf("SetCredentials() error = %v", err)
+				return
+			}
+
+			got, err := client.GetCredentials(t.Context(), thrippypb.GetCredentialsRequest_builder{
+				LinkId: proto.String(resp1.GetLinkId()),
+			}.Build())
+			if err != nil {
+				t.Errorf("GetCredentials() error = %v", err)
+				return
+			}
+
+			if !reflect.DeepEqual(got.GetCredentials(), tt.want) {
+				t.Errorf("GetCredentials() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

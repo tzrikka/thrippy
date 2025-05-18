@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/vault/api v1.16.0
 	github.com/lithammer/shortuuid/v4 v4.2.0
 	github.com/rs/zerolog v1.34.0
-	github.com/tzrikka/xdg v1.2.1
+	github.com/tzrikka/xdg v1.2.2
 	github.com/urfave/cli-altsrc/v3 v3.0.1
 	github.com/urfave/cli/v3 v3.3.3
 	golang.org/x/oauth2 v0.30.0

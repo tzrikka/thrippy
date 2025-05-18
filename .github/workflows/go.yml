@@ -20,8 +20,11 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Install gotestsum
-        run: go install gotest.tools/gotestsum@latest
+      - name: Install tools
+        run: |
+          make tool-deps
+          make third-party-deps
+          go install gotest.tools/gotestsum@latest
       - name: Build
         run: |
           go generate

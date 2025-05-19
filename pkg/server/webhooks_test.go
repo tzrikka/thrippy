@@ -40,15 +40,16 @@ func TestHTMLResponse(t *testing.T) {
 			}
 
 			resp, err := http.DefaultClient.Do(req)
-			_ = resp.Body.Close()
-
 			if err != nil {
-				t.Errorf("htmlResponse() error = %v", err)
+				t.Errorf("HTTP request error = %v", err)
 				return
 			}
+
 			if resp.StatusCode != tt.status {
 				t.Errorf("htmlResponse() status = %d, want %d", resp.StatusCode, tt.status)
 			}
+
+			_ = resp.Body.Close()
 		})
 	}
 }

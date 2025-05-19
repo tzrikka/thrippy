@@ -28,6 +28,23 @@ func VaultFlags(configFilePath altsrc.StringSourcer) []cli.Flag {
 			),
 			Hidden: true,
 		},
+		&cli.StringFlag{
+			Name: "secrets-vault-cacert",
+			Sources: cli.NewValueSourceChain(
+				cli.EnvVar(vault.EnvVaultCACert),
+				toml.TOML("secrets.vault.cacert", configFilePath),
+			),
+			Hidden:    true,
+			TakesFile: true,
+		},
+		&cli.StringFlag{
+			Name: "secrets-vault-token",
+			Sources: cli.NewValueSourceChain(
+				cli.EnvVar(vault.EnvVaultToken),
+				toml.TOML("secrets.vault.token", configFilePath),
+			),
+			Hidden: true,
+		},
 	}
 }
 
@@ -39,10 +56,19 @@ func newVaultProvider(cmd *cli.Command) (Manager, error) {
 	cfg := vault.DefaultConfig()
 	cfg.Address = cmd.String("secrets-vault-address")
 
+	cacert := cmd.String("secrets-vault-cacert")
+	if cacert != "" {
+		if err := cfg.ConfigureTLS(&vault.TLSConfig{CACert: cacert}); err != nil {
+			return nil, err
+		}
+	}
+
 	client, err := vault.NewClient(cfg)
 	if err != nil {
 		return nil, err
 	}
+
+	client.SetToken(cmd.String("secrets-vault-token"))
 
 	return &vaultProvider{client: client.KVv2("secret")}, nil
 }

@@ -10,6 +10,8 @@
 //   - THRIPPY_SECRETS_PROVIDER
 //   - THRIPPY_SECRETS_NAMESPACE
 //   - VAULT_ADDR
+//   - VAULT_CACERT
+//   - VAULT_TOKEN
 //
 // Configuration in the file "$XDG_CONFIG_HOME/thrippy/config.toml":
 //
@@ -19,6 +21,8 @@
 //
 //	[secrets.vault]
 //	address = "https://127.0.0.1:8200"
+//	cacert = "/path/to/vault-ca.pem"
+//	token = "..."
 //
 // Notes:
 //   - The in-memory provider is used by default when specifying the "--dev" flag,

@@ -1,9 +1,12 @@
-all: go
+.PHONY: go
+go:
+	go generate
+	go build ./cmd/thrippy
 
 # https://protobuf.dev/installation/
 # https://grpc.io/docs/languages/go/quickstart/
-.PHONY: tool-deps
-tool-deps:
+.PHONY: protoc-plugins
+protoc-plugins:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
@@ -15,10 +18,7 @@ third-party-deps:
 	curl --create-dirs https://raw.githubusercontent.com/googleapis/googleapis/master/google/api/field_behavior.proto -o third_party/google/api/field_behavior.proto
 	curl --create-dirs https://raw.githubusercontent.com/googleapis/googleapis/master/google/api/http.proto           -o third_party/google/api/http.proto
 
-.PHONY: go
-go:
-	go generate
-	go build ./cmd/thrippy
+all: protoc-plugins third-party-deps go
 
 .PHONY: clean
 clean:

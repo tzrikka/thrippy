@@ -182,6 +182,27 @@ func (c *Config) authCodes() []oauth2.AuthCodeOption {
 	return acs
 }
 
+// RefreshToken returns a refreshed version of the given [oauth2.Token],
+// as a map for storage in the secrets manager and transmission to the user,
+// assuming that we already checked that it's no longer [oauth2.Token.Valid].
+func (c *Config) RefreshToken(ctx context.Context, t *oauth2.Token, force bool) (map[string]string, error) {
+	if force {
+		t.AccessToken = ""
+	}
+
+	t, err := c.Config.TokenSource(ctx, t).Token()
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]string{
+		"access_token":  t.AccessToken,
+		"expiry":        t.Expiry.UTC().Format(time.RFC3339),
+		"refresh_token": t.RefreshToken,
+		"token_type":    t.TokenType,
+	}, nil
+}
+
 // TokenToProto converts the given [oauth2.Token] into an [OAuthConfig]
 // protocol-buffer message, for transmission over gRPC and then storage.
 //
@@ -206,6 +227,24 @@ func TokenToProto(t *oauth2.Token) *thrippypb.OAuthToken {
 	}
 
 	return o
+}
+
+// TokenFromMap converts a map from the secrets manager into an [oauth2.Token]
+// struct. This function returns nil if the input is also nil.
+func TokenFromMap(m map[string]string) (*oauth2.Token, bool) {
+	if m == nil {
+		return nil, false
+	}
+
+	e, _ := time.Parse(time.RFC3339, m["expiry"])
+	t := &oauth2.Token{
+		AccessToken:  m["access_token"],
+		Expiry:       e,
+		RefreshToken: m["refresh_token"],
+		TokenType:    m["token_type"],
+	}
+
+	return t, t.AccessToken != ""
 }
 
 // TokenFromProto converts a wire-protocol [OAuthToken] message into an

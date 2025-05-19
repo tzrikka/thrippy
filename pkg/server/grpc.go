@@ -72,13 +72,13 @@ func (s *grpcServer) CreateLink(ctx context.Context, in *thrippypb.CreateLinkReq
 		return nil, status.Error(codes.Internal, "secrets manager write error")
 	}
 
-	j, err := o.ToJSON()
-	if err != nil {
-		l.Err(err).Msg("failed to convert proto into JSON")
-		return nil, status.Error(codes.Internal, "secrets manager parse error")
-	}
+	if o.IsUsable() {
+		j, err := o.ToJSON()
+		if err != nil {
+			l.Err(err).Msg("failed to convert proto into JSON")
+			return nil, status.Error(codes.Internal, "secrets manager parse error")
+		}
 
-	if len(j) > 2 { // Save only non-empty OAuth configs.
 		if err := s.sm.Set(ctx, id+"/oauth", j); err != nil {
 			l.Err(err).Msg("secrets manager write error")
 			return nil, status.Error(codes.Internal, "secrets manager write error")

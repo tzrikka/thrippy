@@ -3,6 +3,7 @@ package secrets
 import (
 	"context"
 	"errors"
+	"strings"
 
 	vault "github.com/hashicorp/vault/api"
 	altsrc "github.com/urfave/cli-altsrc/v3"
@@ -83,6 +84,9 @@ func (p *vaultProvider) Set(ctx context.Context, key, value string) error {
 func (p *vaultProvider) Get(ctx context.Context, key string) (string, error) {
 	sec, err := p.client.Get(ctx, key)
 	if err != nil {
+		if strings.HasPrefix(err.Error(), "secret not found: at ") {
+			err = nil
+		}
 		return "", err
 	}
 	data, ok := sec.Data["value"].(string)

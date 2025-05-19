@@ -116,6 +116,44 @@ func TestToString(t *testing.T) {
 	}
 }
 
+func TestConfigIsUsable(t *testing.T) {
+	tests := []struct {
+		name string
+		cfg  *Config
+		want bool
+	}{
+		{
+			name: "nil",
+		},
+		{
+			name: "empty",
+			cfg:  &Config{Config: &oauth2.Config{}},
+		},
+		{
+			name: "auth_url",
+			cfg: &Config{Config: &oauth2.Config{
+				Endpoint: oauth2.Endpoint{AuthURL: "auth_url"},
+			}},
+			want: true,
+		},
+		{
+			name: "client_id",
+			cfg: &Config{Config: &oauth2.Config{
+				ClientID: "client_id",
+			}},
+			want: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.cfg.IsUsable(); got != tt.want {
+				t.Errorf("IsUsable() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestConfigToProto(t *testing.T) {
 	tests := []struct {
 		name string

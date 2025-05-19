@@ -94,6 +94,22 @@ func ToString(c *thrippypb.OAuthConfig) string {
 	return strings.Join(lines, "\n")
 }
 
+// IsUsable checks whether this struct has any usable
+// field values, or whether it's completely empty.
+func (c *Config) IsUsable() bool {
+	if c == nil {
+		return false
+	}
+
+	s := fmt.Sprintf("%s%s%s%s",
+		c.Config.Endpoint.AuthURL,
+		c.Config.Endpoint.TokenURL,
+		c.Config.ClientID,
+		c.Config.ClientSecret)
+
+	return len(s) > 0
+}
+
 // ToProto converts this struct into an [OAuthConfig] protocol-buffer message,
 // for transmission over gRPC. This function returns nil if the receiver is nil.
 //

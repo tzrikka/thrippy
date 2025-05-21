@@ -52,7 +52,23 @@ var OAuthCredFields = []string{"access_token", "expiry", "refresh_token", "token
 
 // Templates is a map of all the link templates that Thrippy recognizes and supports.
 var Templates = map[string]Template{
-	"generic": {
+	"chatgpt": {
+		description: "ChatGPT using a static API key",
+		links: []string{
+			"https://platform.openai.com/docs/api-reference/authentication",
+			"https://platform.openai.com/api-keys",
+		},
+		credFields: []string{"api_key"},
+	},
+	"claude": {
+		description: "Claude using a static API key",
+		links: []string{
+			"https://docs.anthropic.com/en/api/overview",
+			"https://console.anthropic.com/settings/keys",
+		},
+		credFields: []string{"api_key"},
+	},
+	"generic-oauth": {
 		description: "Generic link",
 	},
 	"github-app-jwt": {
@@ -81,6 +97,8 @@ var Templates = map[string]Template{
 		links: []string{
 			"https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api?apiVersion=2022-11-28#authenticating-with-a-personal-access-token",
 			"https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens",
+			"https://github.com/settings/personal-access-tokens",
+			"https://github.com/settings/tokens",
 		},
 		credFields:  []string{"base_url_optional", "pat"},
 		checkerFunc: github.UserChecker,

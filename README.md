@@ -5,4 +5,19 @@
 
 Thrippy is a CLI application and gRPC client/server to manage authentication configurations and secret tokens for third-party (3P) services.
 
-It supports both static and OAuth 2.0 credentials, and it is designed to be both simple and secure.
+It supports both static and OAuth 2.0 credentials, and it is designed to be simple and secure by default.
+
+## Supported Services and Auth Types
+
+- ChatGPT
+  - Static API key
+- Claude
+  - Static API key
+- Generic OAuth 2.0
+- GitHub
+  - App installation using JWTs based on static credentials
+  - App authorization to act on behalf of a user
+  - User's static Personal Access Token (PAT)
+- Slack
+  - App using a static bot token
+  - App using OAuth v2 (regular Slack / GovSlack)

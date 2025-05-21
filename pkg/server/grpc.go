@@ -171,9 +171,11 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCreden
 		return nil, status.Error(codes.Internal, "secrets manager write error")
 	}
 
-	if err := s.sm.Set(ctx, id+"/meta", metadata); err != nil {
-		l.Err(err).Msg("secrets manager write error")
-		return nil, status.Error(codes.Internal, "secrets manager write error")
+	if metadata != "" {
+		if err := s.sm.Set(ctx, id+"/meta", metadata); err != nil {
+			l.Err(err).Msg("secrets manager write error")
+			return nil, status.Error(codes.Internal, "secrets manager write error")
+		}
 	}
 
 	l.Trace().Msg("secrets manager write success")

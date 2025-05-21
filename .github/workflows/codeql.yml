@@ -63,21 +63,10 @@ jobs:
         uses: arduino/setup-protoc@v3
         with:
           version: "31.x"  # https://github.com/protocolbuffers/protobuf/releases
-      - name: Install deps
+      - name: Generate Go from protos
         run: |
           make protoc-plugins third-party-deps
-          echo $PATH
-          echo $GITHUB_PATH
-          echo $GOPATH
-          echo "---"
-          ls /home/runner/go/bin
-          echo "---"
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-          echo "---"
-          echo $PATH
-          echo $GITHUB_PATH
-          echo $GOPATH
-          echo "---"
           go generate
 
       # Add any setup steps before running the `github/codeql-action/init` action.

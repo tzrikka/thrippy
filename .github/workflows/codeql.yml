@@ -64,6 +64,12 @@ jobs:
         run: |
           make protoc-plugins third-party-deps
           go install gotest.tools/gotestsum@latest
+          echo $PATH
+          echo $GITHUB_PATH
+          echo $GOPATH
+          echo "---"
+          ls $GOPATH/bin
+          echo "---"
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
           go generate
 

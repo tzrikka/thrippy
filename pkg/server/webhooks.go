@@ -37,7 +37,7 @@ func newHTTPServer(cmd *cli.Command) *httpServer {
 		httpPort: cmd.Int("webhook-port"),
 
 		grpcAddr:  cmd.String("grpc-addr"),
-		grpcCreds: client.Creds(cmd),
+		grpcCreds: client.GRPCCreds(cmd),
 
 		redirectURL: fmt.Sprintf("https://%s/callback", cmd.String("webhook-addr")),
 		fallbackURL: cmd.String("fallback-url"),

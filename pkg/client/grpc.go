@@ -6,12 +6,10 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
-	"github.com/urfave/cli/v3"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 
@@ -22,25 +20,6 @@ import (
 const (
 	timeout = time.Second * 3
 )
-
-// Creds initializes gRPC client credentials, based on CLI flags.
-func Creds(cmd *cli.Command) credentials.TransportCredentials {
-	if cmd.Bool("dev") {
-		return InsecureCreds()
-	}
-
-	// TODO: With flags defined in main.go:
-	// https://grpc.io/docs/guides/auth/
-	// https://grpc.io/docs/languages/go/alts/
-	// https://github.com/grpc/grpc-go/tree/master/examples/features/authentication
-	// https://github.com/grpc/grpc-go/tree/master/examples/features/encryption
-	panic("non-dev client credentials not implemented yet")
-}
-
-// InsecureCreds should be used only in unit tests.
-func InsecureCreds() credentials.TransportCredentials {
-	return insecure.NewCredentials()
-}
 
 // Connection creates a gRPC client connection to the given address.
 // It supports both secure and insecure connections, based on the given credentials.

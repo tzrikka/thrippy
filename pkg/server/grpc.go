@@ -8,6 +8,7 @@ import (
 	"github.com/lithammer/shortuuid/v4"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v3"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -30,14 +31,14 @@ type grpcServer struct {
 // is non-blocking, in order to let Thrippy run an HTTP server as well.
 //
 // [Thrippy service]: https://github.com/tzrikka/thrippy/blob/main/proto/thrippy/v1/thrippy.proto
-func startGRPCServer(sm secrets.Manager, addr string) (string, error) {
-	lis, err := net.Listen("tcp", addr)
+func startGRPCServer(cmd *cli.Command, sm secrets.Manager) (string, error) {
+	lis, err := net.Listen("tcp", cmd.String("grpc-addr"))
 	if err != nil {
 		log.Err(err).Send()
 		return "", err
 	}
 
-	srv := grpc.NewServer()
+	srv := grpc.NewServer(GRPCCreds(cmd)...)
 	thrippypb.RegisterThrippyServiceServer(srv, &grpcServer{sm: sm})
 	go func() {
 		err = srv.Serve(lis)

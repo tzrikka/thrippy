@@ -89,7 +89,7 @@ func TestLinkOAuthConfig(t *testing.T) {
 				_ = s.Serve(lis)
 			}()
 
-			got, err := LinkOAuthConfig(t.Context(), lis.Addr().String(), InsecureCreds(), "link ID")
+			got, err := LinkOAuthConfig(t.Context(), lis.Addr().String(), insecureCreds(), "link ID")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("LinkOAuthConfig() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/lithammer/shortuuid/v4"
+	"github.com/urfave/cli/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
@@ -14,7 +15,17 @@ import (
 )
 
 func TestCreateLink(t *testing.T) {
-	addr, err := startGRPCServer(secrets.NewTestManager(), "127.0.0.1:0")
+	cmd := &cli.Command{Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:  "grpc-addr",
+			Value: "127.0.0.1:0",
+		},
+		&cli.BoolFlag{
+			Name:  "dev",
+			Value: true,
+		},
+	}}
+	addr, err := startGRPCServer(cmd, secrets.NewTestManager())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,7 +86,17 @@ func TestCreateLink(t *testing.T) {
 }
 
 func TestGetLinkOAuth(t *testing.T) {
-	addr, err := startGRPCServer(secrets.NewTestManager(), "127.0.0.1:0")
+	cmd := &cli.Command{Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:  "grpc-addr",
+			Value: "127.0.0.1:0",
+		},
+		&cli.BoolFlag{
+			Name:  "dev",
+			Value: true,
+		},
+	}}
+	addr, err := startGRPCServer(cmd, secrets.NewTestManager())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -155,7 +176,17 @@ func TestGetLinkOAuth(t *testing.T) {
 }
 
 func TestGetLinkNonOAuth(t *testing.T) {
-	addr, err := startGRPCServer(secrets.NewTestManager(), "127.0.0.1:0")
+	cmd := &cli.Command{Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:  "grpc-addr",
+			Value: "127.0.0.1:0",
+		},
+		&cli.BoolFlag{
+			Name:  "dev",
+			Value: true,
+		},
+	}}
+	addr, err := startGRPCServer(cmd, secrets.NewTestManager())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -193,7 +224,17 @@ func TestGetLinkNonOAuth(t *testing.T) {
 }
 
 func TestSetAndGetCredentials(t *testing.T) {
-	addr, err := startGRPCServer(secrets.NewTestManager(), "127.0.0.1:0")
+	cmd := &cli.Command{Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:  "grpc-addr",
+			Value: "127.0.0.1:0",
+		},
+		&cli.BoolFlag{
+			Name:  "dev",
+			Value: true,
+		},
+	}}
+	addr, err := startGRPCServer(cmd, secrets.NewTestManager())
 	if err != nil {
 		t.Fatal(err)
 	}

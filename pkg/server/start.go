@@ -23,7 +23,7 @@ func Start(_ context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	if _, err := startGRPCServer(sm, cmd.String("grpc-addr")); err != nil {
+	if _, err := startGRPCServer(cmd, sm); err != nil {
 		return err
 	}
 

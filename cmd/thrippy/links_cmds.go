@@ -72,7 +72,7 @@ var createLinkCommand = &cli.Command{
 		},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		conn, err := client.Connection(cmd.String("grpc-addr"), client.Creds(cmd))
+		conn, err := client.Connection(cmd.String("grpc-addr"), client.GRPCCreds(cmd))
 		if err != nil {
 			return err
 		}
@@ -107,7 +107,7 @@ var getLinkCommand = &cli.Command{
 			return err
 		}
 
-		conn, err := client.Connection(cmd.String("grpc-addr"), client.Creds(cmd))
+		conn, err := client.Connection(cmd.String("grpc-addr"), client.GRPCCreds(cmd))
 		if err != nil {
 			return err
 		}

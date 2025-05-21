@@ -17,7 +17,9 @@ import (
 	"github.com/urfave/cli-altsrc/v3/toml"
 	"github.com/urfave/cli/v3"
 
+	"github.com/tzrikka/thrippy/pkg/client"
 	"github.com/tzrikka/thrippy/pkg/secrets"
+	"github.com/tzrikka/thrippy/pkg/server"
 	"github.com/tzrikka/xdg"
 )
 
@@ -52,7 +54,8 @@ func main() {
 			),
 		},
 	}
-	// TODO: Client & server gRPC transport credentials.
+	flags = append(flags, client.GRPCFlags(configFilePath)...)
+	flags = append(flags, server.GRPCFlags(configFilePath)...)
 	flags = append(flags, secrets.ManagerFlags(configFilePath)...)
 	flags = append(flags, secrets.VaultFlags(configFilePath)...)
 

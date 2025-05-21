@@ -64,6 +64,7 @@ jobs:
         run: |
           make protoc-plugins third-party-deps
           go install gotest.tools/gotestsum@latest
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
           go generate
 
       # Add any setup steps before running the `github/codeql-action/init` action.

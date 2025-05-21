@@ -8,4 +8,6 @@ Admins of repositories that are owned by an organization can also install GitHub
 
 Organization owners can prevent outside collaborators who are repository admins from installing GitHub Apps.
 
-Reference: https://docs.github.com/en/apps/using-github-apps/installing-a-github-app-from-a-third-party#requirements-to-install-a-github-app
+References:
+
+- [Requirements to install a GitHub App](https://docs.github.com/en/apps/using-github-apps/installing-a-github-app-from-a-third-party#requirements-to-install-a-github-app)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"maps"
 	"net/url"
+	"os"
 	"slices"
 	"sort"
 
@@ -75,6 +76,11 @@ var setCredsCommand = &cli.Command{
 			return err
 		}
 
+		kv, err := readFiles(cmd.StringMap("kv"))
+		if err != nil {
+			return err
+		}
+
 		conn, err := client.Connection(cmd.String("grpc-addr"), client.GRPCCreds(cmd))
 		if err != nil {
 			return err
@@ -84,7 +90,7 @@ var setCredsCommand = &cli.Command{
 		c := thrippypb.NewThrippyServiceClient(conn)
 		_, err = c.SetCredentials(ctx, thrippypb.SetCredentialsRequest_builder{
 			LinkId:       proto.String(cmd.Args().First()),
-			GenericCreds: cmd.StringMap("kv"),
+			GenericCreds: kv,
 		}.Build())
 		if err != nil {
 			return err
@@ -136,4 +142,23 @@ var getCredsCommand = &cli.Command{
 
 		return nil
 	},
+}
+
+// readFiles converts the values of keys that reference
+// file paths ("@path") into the contents of these files.
+func readFiles(m map[string]string) (map[string]string, error) {
+	for k, v := range m {
+		if len(v) == 0 || v[0] != '@' {
+			continue
+		}
+
+		pem, err := os.ReadFile(v[1:])
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", k, err)
+		}
+
+		m[k] = string(pem)
+	}
+
+	return m, nil
 }

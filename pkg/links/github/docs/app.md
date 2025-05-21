@@ -21,7 +21,7 @@ Thrippy setup:
 2. `set-creds <link ID> --kv "client_id=..." --kv "private_key=..."`
 3. `start-oauth <link ID>`
 
-**TODO:** The private key value can be the contents of the PEM file, or its path (prefixed with `@`), or `-` to read it from stdin.
+The private key value can be the contents of the PEM file, or its path (prefixed with `@`).
 
 ## Apps Acting on Behalf of Users
 

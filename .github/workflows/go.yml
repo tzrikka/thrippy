@@ -26,7 +26,6 @@ jobs:
           version: "31.x"  # https://github.com/protocolbuffers/protobuf/releases
       - name: Install deps
         run: |
-          protoc --version
           make protoc-plugins third-party-deps
           go install gotest.tools/gotestsum@latest
       - name: Build

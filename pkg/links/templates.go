@@ -68,6 +68,15 @@ var Templates = map[string]Template{
 		},
 		credFields: []string{"api_key"},
 	},
+	"gemini": {
+		description: "Gemini with a static API key",
+		links: []string{
+			"https://ai.google.dev/gemini-api/docs/api-key",
+			"https://aistudio.google.com/app/apikey",
+			"https://console.cloud.google.com/apis/credentials",
+		},
+		credFields: []string{"api_key"},
+	},
 	"generic-oauth": {
 		description: "Generic link",
 	},

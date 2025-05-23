@@ -1,4 +1,4 @@
-*.pb.go
+/proto/**/*.pb.go
 /third_party/
 /thrippy
 /x509/*.pem

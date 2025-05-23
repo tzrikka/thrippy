@@ -13,8 +13,8 @@ import (
 	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
-// AppAuthzModifier adjusts the given [oauth.Config] for GitHub
-// app authorizations, in order to act on behalf of a user.
+// AppAuthzModifier adjusts the given [oauth.Config] for
+// GitHub app authorizations, to act on behalf of a user.
 func AppAuthzModifier(o *oauth.Config) {
 	baseURL := AuthBaseURL(o)
 

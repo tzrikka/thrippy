@@ -54,7 +54,7 @@ func TestCreateLink(t *testing.T) {
 		{
 			name: "oauth_without_client_id",
 			req: thrippypb.CreateLinkRequest_builder{
-				Template: proto.String("generic"),
+				Template: proto.String("generic-oauth"),
 				OauthConfig: thrippypb.OAuthConfig_builder{
 					AuthUrl:      proto.String("111"),
 					ClientSecret: proto.String("222"),
@@ -65,7 +65,7 @@ func TestCreateLink(t *testing.T) {
 		{
 			name: "generic_oauth",
 			req: thrippypb.CreateLinkRequest_builder{
-				Template: proto.String("generic"),
+				Template: proto.String("generic-oauth"),
 				OauthConfig: thrippypb.OAuthConfig_builder{
 					AuthUrl:      proto.String("111"),
 					ClientId:     proto.String("222"),
@@ -110,7 +110,7 @@ func TestGetLinkOAuth(t *testing.T) {
 
 	client := thrippypb.NewThrippyServiceClient(conn)
 	resp1, err := client.CreateLink(t.Context(), thrippypb.CreateLinkRequest_builder{
-		Template: proto.String("generic"),
+		Template: proto.String("generic-oauth"),
 		OauthConfig: thrippypb.OAuthConfig_builder{
 			ClientId:     proto.String("111"),
 			ClientSecret: proto.String("222"),
@@ -248,7 +248,7 @@ func TestSetAndGetCredentials(t *testing.T) {
 
 	client := thrippypb.NewThrippyServiceClient(conn)
 	resp1, err := client.CreateLink(t.Context(), thrippypb.CreateLinkRequest_builder{
-		Template: proto.String("generic"),
+		Template: proto.String("generic-oauth"),
 		OauthConfig: thrippypb.OAuthConfig_builder{
 			ClientId:     proto.String("111"),
 			ClientSecret: proto.String("222"),

@@ -11,6 +11,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/tzrikka/thrippy/pkg/links/github"
+	"github.com/tzrikka/thrippy/pkg/links/google"
 	"github.com/tzrikka/thrippy/pkg/links/slack"
 	"github.com/tzrikka/thrippy/pkg/oauth"
 )
@@ -84,6 +85,7 @@ var Templates = map[string]Template{
 		description: "GitHub app installation using JWTs based on static credentials",
 		links: []string{
 			"https://docs.github.com/en/apps/using-github-apps/about-using-github-apps",
+			"https://github.com/settings/apps",
 		},
 		credFields: []string{
 			"client_id", "private_key", // Must be entered manually.
@@ -96,6 +98,7 @@ var Templates = map[string]Template{
 		description: "GitHub app authorization to act on behalf of a user",
 		links: []string{
 			"https://docs.github.com/en/apps/using-github-apps/authorizing-github-apps",
+			"https://github.com/settings/apps",
 		},
 		credFields:  append([]string{"base_url_optional"}, OAuthCredFields...),
 		oauthFunc:   github.AppAuthzModifier,
@@ -112,10 +115,31 @@ var Templates = map[string]Template{
 		credFields:  []string{"base_url_optional", "pat"},
 		checkerFunc: github.UserChecker,
 	},
+	"google-user-oauth": {
+		description: "Google APIs using OAuth 2.0 to act on behalf of a user",
+		links: []string{
+			"https://developers.google.com/workspace/guides/get-started",
+			"https://console.cloud.google.com/auth/overview",
+		},
+		credFields:  OAuthCredFields,
+		oauthFunc:   google.OAuthModifier,
+		checkerFunc: google.UserTokenChecker,
+	},
+	"google-service-account": {
+		description: "Google APIs using a static GCP service account key",
+		links: []string{
+			"https://cloud.google.com/iam/docs/service-account-overview",
+			"https://developers.google.com/identity/protocols/oauth2/service-account",
+			"https://console.cloud.google.com/iam-admin/serviceaccounts",
+		},
+		credFields:  []string{"key"},
+		checkerFunc: google.ServiceKeyChecker,
+	},
 	"slack-bot-token": {
 		description: "Slack app using a static bot token",
 		links: []string{
 			"https://docs.slack.dev/authentication/tokens#bot",
+			"https://api.slack.com/apps",
 		},
 		credFields:  []string{"bot_token", "app_token_optional"},
 		checkerFunc: slack.BotTokenChecker,
@@ -124,6 +148,7 @@ var Templates = map[string]Template{
 		description: "Slack app using OAuth v2",
 		links: []string{
 			"https://docs.slack.dev/authentication/installing-with-oauth",
+			"https://api.slack.com/apps",
 		},
 		credFields:  OAuthCredFields,
 		oauthFunc:   slack.OAuthModifier(slack.DefaultBaseURL),

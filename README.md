@@ -18,6 +18,10 @@ It supports both static and OAuth 2.0 credentials, and it is designed to be simp
   - App installation using JWTs based on static credentials
   - App authorization to act on behalf of a user
   - User's static Personal Access Token (PAT)
+- Google
+  - OAuth 2.0 to act on behalf of a user
+  - Static Google Cloud service account key
+  - Gemini with a static API key
 - Slack
   - App using a static bot token
   - App using OAuth v2 (regular Slack / GovSlack)

@@ -88,7 +88,8 @@ func ToString(c *thrippypb.OAuthConfig) string {
 
 	acs := c.GetAuthCodes()
 	if len(acs) > 0 {
-		lines = append(lines, fmt.Sprintf("Auth Codes: %v", acs))
+		line := fmt.Sprintf("Auth Codes: %v", acs)
+		lines = append(lines, strings.Replace(line, "map", "", 1))
 	}
 
 	return strings.Join(lines, "\n")

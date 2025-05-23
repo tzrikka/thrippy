@@ -218,6 +218,7 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	o.Config.RedirectURL = s.redirectURL
 	token, err := o.Exchange(ctx, code)
 	if err != nil {
 		l.Warn().Err(err).Msg("OAuth code exchange error")

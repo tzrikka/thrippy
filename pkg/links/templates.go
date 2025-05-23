@@ -1,7 +1,6 @@
-// Package links defines the authentication details of well-known
-// third-party services, as templates for link creation, and special
-// logic per service to check the usability of private credentials,
-// and return serialized metadata about them for storage.
+// Package links defines the authentication details of well-known third-party
+// services, as templates for link creation, with special logic to check the
+// usability of user-provided credentials and return metadata about them.
 package links
 
 import (

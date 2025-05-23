@@ -67,7 +67,7 @@ jobs:
         run: |
           make protoc-plugins third-party-deps
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-          go generate
+          go generate ./proto
 
       # Add any setup steps before running the `github/codeql-action/init` action.
       # This includes steps like installing compilers or runtimes (`actions/setup-node`

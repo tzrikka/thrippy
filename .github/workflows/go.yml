@@ -30,8 +30,8 @@ jobs:
           go install gotest.tools/gotestsum@latest
       - name: Build
         run: |
-          go generate
-          go build -v ./...
+          go generate ./proto
+          go build -v ./cmd/thrippy
       - name: Test
         run: gotestsum -f github-actions
       - name: Lint

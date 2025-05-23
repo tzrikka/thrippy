@@ -1,6 +1,6 @@
 .PHONY: go
 go:
-	go generate
+	go generate ./proto
 	go build ./cmd/thrippy
 
 # https://protobuf.dev/installation/

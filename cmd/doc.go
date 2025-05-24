@@ -1,2 +1,2 @@
-// Package command implements the CLI application.
+// Package cmd implements the CLI application.
 package cmd

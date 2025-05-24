@@ -11,7 +11,7 @@ It supports both static and OAuth 2.0 credentials, and it is designed to be simp
 
 Thrippy manages "links", which are collections of configurations, credentials, and metadata.
 
-When you create a link, you specify a "template" for it, which identifies a specific well-known service (e.g. ChatGPT, GitHub, Gmail, Slack) and its authentication type (see the list above). This enables Thrippy to set most configuration details automatically.
+When you create a link, you specify a "template" for it, which identifies a specific well-known service (e.g. ChatGPT, GitHub, Gmail, Slack) and its authentication type (see the list below). This enables Thrippy to set most configuration details automatically.
 
 Static credentials (e.g. API keys) are set manually by the user. Dynamic credentials (e.g. OAuth 2.0 tokens) are refreshed automatically by Thrippy after an initial interactive user authorization.
 
@@ -29,7 +29,7 @@ Static credentials (e.g. API keys) are set manually by the user. Dynamic credent
 - [Google](./docs/google/README.md)
   - OAuth 2.0 to act on behalf of a user
   - Static Google Cloud service account key
-  - Gemini with a static API key
+  - Gemini using a static API key
 - [Slack](./docs/slack/README.md)
   - App using a static bot token
   - App using OAuth v2 (regular Slack / GovSlack)

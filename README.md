@@ -13,7 +13,7 @@ It supports both static and OAuth 2.0 credentials, and it is designed to be simp
   - Static API key
 - [Claude](./docs/claude/README.md)
   - Static API key
-- Generic OAuth 2.0
+- [Generic OAuth 2.0](./docs/generic-oauth/README.md)
 - [GitHub](./docs/github/README.md)
   - App installation using JWTs based on static credentials
   - App authorization to act on behalf of a user

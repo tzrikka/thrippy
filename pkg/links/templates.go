@@ -114,16 +114,6 @@ var Templates = map[string]Template{
 		credFields:  []string{"base_url_optional", "pat"},
 		checkerFunc: github.UserChecker,
 	},
-	"google-user-oauth": {
-		description: "Google APIs using OAuth 2.0 to act on behalf of a user",
-		links: []string{
-			"https://developers.google.com/workspace/guides/get-started",
-			"https://console.cloud.google.com/auth/overview",
-		},
-		credFields:  OAuthCredFields,
-		oauthFunc:   google.OAuthModifier,
-		checkerFunc: google.UserTokenChecker,
-	},
 	"google-service-account": {
 		description: "Google APIs using a static GCP service account key",
 		links: []string{
@@ -133,6 +123,16 @@ var Templates = map[string]Template{
 		},
 		credFields:  []string{"key"},
 		checkerFunc: google.ServiceKeyChecker,
+	},
+	"google-user-oauth": {
+		description: "Google APIs using OAuth 2.0 to act on behalf of a user",
+		links: []string{
+			"https://developers.google.com/workspace/guides/get-started",
+			"https://console.cloud.google.com/auth/overview",
+		},
+		credFields:  OAuthCredFields,
+		oauthFunc:   google.OAuthModifier,
+		checkerFunc: google.UserTokenChecker,
 	},
 	"slack-bot-token": {
 		description: "Slack app using a static bot token",

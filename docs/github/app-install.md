@@ -1,4 +1,4 @@
-# Installing GitHub Apps
+# GitHub Apps: Installation Notes
 
 Anyone can install GitHub Apps on their personal account.
 

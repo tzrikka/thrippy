@@ -9,5 +9,5 @@
 2. Set the link's static credentials
 
    ```shell
-   thrippy set-creds <link ID> --kv "pat=..."
+   thrippy set-creds <link ID> --kv "bot_token=..."
    ```

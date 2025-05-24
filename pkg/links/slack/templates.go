@@ -9,17 +9,53 @@ import (
 
 	"golang.org/x/oauth2"
 
+	"github.com/tzrikka/thrippy/pkg/links/templates"
 	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
 const (
-	DefaultBaseURL = "https://slack.com"
-	GovBaseURL     = "https://slack-gov.com" // https://docs.slack.dev/govslack
+	defaultBaseURL = "https://slack.com"
+	govBaseURL     = "https://slack-gov.com" // https://docs.slack.dev/govslack
 )
 
-// OAuthModifier returns a function that adjusts an [oauth.Config] for Slack
-// apps, based on the given base URL ([DefaultBaseURL] or [GovBaseURL]).
-func OAuthModifier(baseURL string) func(*oauth.Config) {
+var (
+	BotTokenTemplate = templates.New(
+		"Slack app using a static bot token",
+		[]string{
+			"https://docs.slack.dev/authentication/tokens#bot",
+			"https://api.slack.com/apps",
+		},
+		[]string{"bot_token", "app_token_optional"},
+		nil,
+		botTokenChecker,
+	)
+
+	OAuthTemplate = templates.New(
+		"Slack app using OAuth v2",
+		[]string{
+			"https://docs.slack.dev/authentication/installing-with-oauth",
+			"https://api.slack.com/apps",
+		},
+		templates.OAuthCredFields,
+		oauthModifier(defaultBaseURL),
+		oauthChecker,
+	)
+
+	OAuthGovTemplate = templates.New(
+		"GovSlack app using OAuth v2",
+		[]string{
+			"https://docs.slack.dev/authentication/installing-with-oauth",
+			"https://docs.slack.dev/govslack",
+		},
+		templates.OAuthCredFields,
+		oauthModifier(govBaseURL),
+		govOAuthChecker,
+	)
+)
+
+// oauthModifier returns a function that adjusts an [oauth.Config] for Slack
+// apps, based on the given base URL ([defaultBaseURL] or [govBaseURL]).
+func oauthModifier(baseURL string) func(*oauth.Config) {
 	return func(o *oauth.Config) {
 		// https://docs.slack.dev/authentication/installing-with-oauth
 		if o.Config.Endpoint.AuthURL == "" {
@@ -42,22 +78,22 @@ func OAuthModifier(baseURL string) func(*oauth.Config) {
 	}
 }
 
-// BotTokenChecker checks the given static bot token for
+// botTokenChecker checks the given static bot token for
 // Slack, and returns metadata about it in JSON format.
-func BotTokenChecker(ctx context.Context, m map[string]string, _ *oauth.Config, _ *oauth2.Token) (string, error) {
-	return genericChecker(ctx, m["bot_token"], DefaultBaseURL)
+func botTokenChecker(ctx context.Context, m map[string]string, _ *oauth.Config, _ *oauth2.Token) (string, error) {
+	return genericChecker(ctx, m["bot_token"], defaultBaseURL)
 }
 
-// OAuthChecker checks the given static bot token for
+// oauthChecker checks the given static bot token for
 // Slack, and returns metadata about it in JSON format.
-func OAuthChecker(ctx context.Context, _ map[string]string, _ *oauth.Config, t *oauth2.Token) (string, error) {
-	return genericChecker(ctx, t.AccessToken, DefaultBaseURL)
+func oauthChecker(ctx context.Context, _ map[string]string, _ *oauth.Config, t *oauth2.Token) (string, error) {
+	return genericChecker(ctx, t.AccessToken, defaultBaseURL)
 }
 
-// GovOAuthChecker checks the given static bot token for
+// govOAuthChecker checks the given static bot token for
 // GovSlack, and returns metadata about it in JSON format.
-func GovOAuthChecker(ctx context.Context, _ map[string]string, _ *oauth.Config, t *oauth2.Token) (string, error) {
-	return genericChecker(ctx, t.AccessToken, GovBaseURL)
+func govOAuthChecker(ctx context.Context, _ map[string]string, _ *oauth.Config, t *oauth2.Token) (string, error) {
+	return genericChecker(ctx, t.AccessToken, govBaseURL)
 }
 
 func genericChecker(ctx context.Context, botToken, baseURL string) (string, error) {

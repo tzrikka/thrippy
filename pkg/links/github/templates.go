@@ -10,33 +10,53 @@ import (
 
 	"golang.org/x/oauth2"
 
+	"github.com/tzrikka/thrippy/pkg/links/templates"
 	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
-// AppAuthzModifier adjusts the given [oauth.Config] for
-// GitHub app authorizations, to act on behalf of a user.
-func AppAuthzModifier(o *oauth.Config) {
-	baseURL := AuthBaseURL(o)
+var (
+	AppJWTTemplate = templates.New(
+		"GitHub app installation using JWTs based on static credentials",
+		[]string{
+			"https://docs.github.com/en/apps/using-github-apps/about-using-github-apps",
+			"https://github.com/settings/apps",
+		},
+		[]string{
+			"client_id", "private_key", // Must be entered manually.
+			"api_base_url", "install_id", // Added automatically by Thrippy.
+		},
+		appInstallModifier,
+		jwtChecker,
+	)
 
-	// https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app#using-the-web-application-flow-to-generate-a-user-access-token
-	if o.Config.Endpoint.AuthURL == "" {
-		o.Config.Endpoint.AuthURL = baseURL + "/login/oauth/authorize"
-	}
+	AppUserTemplate = templates.New(
+		"GitHub app authorization to act on behalf of a user",
+		[]string{
+			"https://docs.github.com/en/apps/using-github-apps/authorizing-github-apps",
+			"https://github.com/settings/apps",
+		},
+		append([]string{"base_url_optional"}, templates.OAuthCredFields...),
+		appAuthzModifier,
+		userChecker,
+	)
 
-	// https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app#using-the-web-application-flow-to-generate-a-user-access-token
-	if o.Config.Endpoint.TokenURL == "" {
-		o.Config.Endpoint.TokenURL = baseURL + "/login/oauth/access_token"
-	}
+	UserPATTemplate = templates.New(
+		"GitHub with a user's static Personal Access Token (PAT)",
+		[]string{
+			"https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api?apiVersion=2022-11-28#authenticating-with-a-personal-access-token",
+			"https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens",
+			"https://github.com/settings/personal-access-tokens",
+			"https://github.com/settings/tokens",
+		},
+		[]string{"base_url_optional", "pat"},
+		nil,
+		userChecker,
+	)
+)
 
-	// https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#3-use-the-access-token-to-access-the-api
-	if o.Config.Endpoint.AuthStyle == oauth2.AuthStyleAutoDetect {
-		o.Config.Endpoint.AuthStyle = oauth2.AuthStyleInHeader
-	}
-}
-
-// AppInstallModifier adjusts the given [oauth.Config] for GitHub app
+// appInstallModifier adjusts the given [oauth.Config] for GitHub app
 // installations, and using them with JWTs based on static credentials.
-func AppInstallModifier(o *oauth.Config) {
+func appInstallModifier(o *oauth.Config) {
 	baseURL := AuthBaseURL(o)
 
 	appsDir := "apps" // In github.com.
@@ -64,9 +84,30 @@ func AppInstallModifier(o *oauth.Config) {
 	}
 }
 
-// JWTChecker generates and checks a JWT based on the given static credentials
+// appAuthzModifier adjusts the given [oauth.Config] for
+// GitHub app authorizations, to act on behalf of a user.
+func appAuthzModifier(o *oauth.Config) {
+	baseURL := AuthBaseURL(o)
+
+	// https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app#using-the-web-application-flow-to-generate-a-user-access-token
+	if o.Config.Endpoint.AuthURL == "" {
+		o.Config.Endpoint.AuthURL = baseURL + "/login/oauth/authorize"
+	}
+
+	// https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app#using-the-web-application-flow-to-generate-a-user-access-token
+	if o.Config.Endpoint.TokenURL == "" {
+		o.Config.Endpoint.TokenURL = baseURL + "/login/oauth/access_token"
+	}
+
+	// https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#3-use-the-access-token-to-access-the-api
+	if o.Config.Endpoint.AuthStyle == oauth2.AuthStyleAutoDetect {
+		o.Config.Endpoint.AuthStyle = oauth2.AuthStyleInHeader
+	}
+}
+
+// jwtChecker generates and checks a JWT based on the given static credentials
 // for a GitHub app, and returns metadata in JSON format about the GitHub app.
-func JWTChecker(ctx context.Context, m map[string]string, o *oauth.Config, _ *oauth2.Token) (string, error) {
+func jwtChecker(ctx context.Context, m map[string]string, o *oauth.Config, _ *oauth2.Token) (string, error) {
 	jwt, err := generateJWT(m["client_id"], m["private_key"])
 	if err != nil {
 		return "", err
@@ -145,10 +186,10 @@ func normalizeRFC3339(t string) string {
 	return regexp.MustCompile(`\.\d+Z`).ReplaceAllString(t, "Z")
 }
 
-// UserChecker checks the given OAuth token,
+// userChecker checks the given OAuth token,
 // or static Personal Access Token (PAT) for GitHub. Based on:
 // https://docs.github.com/en/rest/users/users#get-the-authenticated-user
-func UserChecker(ctx context.Context, m map[string]string, o *oauth.Config, t *oauth2.Token) (string, error) {
+func userChecker(ctx context.Context, m map[string]string, o *oauth.Config, t *oauth2.Token) (string, error) {
 	if o == nil {
 		o = &oauth.Config{
 			Config: &oauth2.Config{

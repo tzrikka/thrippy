@@ -7,6 +7,14 @@ Thrippy is a CLI application and gRPC client/server to manage authentication con
 
 It supports both static and OAuth 2.0 credentials, and it is designed to be simple and secure by default.
 
+## Overview
+
+Thrippy manages "links", which are collections of configurations, credentials, and metadata.
+
+When you create a link, you specify a "template" for it, which identifies a specific well-known service (e.g. ChatGPT, GitHub, Gmail, Slack) and its authentication type (see the list above). This enables Thrippy to set most configuration details automatically.
+
+Static credentials (e.g. API keys) are set manually by the user. Dynamic credentials (e.g. OAuth 2.0 tokens) are refreshed automatically by Thrippy after an initial interactive user authorization.
+
 ## Supported Services and Auth Types
 
 - [ChatGPT](./docs/chatgpt/README.md)

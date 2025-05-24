@@ -11,12 +11,38 @@ import (
 	"golang.org/x/oauth2/google"
 	googleoauth2 "google.golang.org/api/oauth2/v2"
 
+	"github.com/tzrikka/thrippy/pkg/links/templates"
 	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
-// OAuthModifier adjusts the given [oauth.Config] for Google
+var (
+	ServiceAccountTemplate = templates.New(
+		"Google APIs using a static GCP service account key",
+		[]string{
+			"https://cloud.google.com/iam/docs/service-account-overview",
+			"https://developers.google.com/identity/protocols/oauth2/service-account",
+			"https://console.cloud.google.com/iam-admin/serviceaccounts",
+		},
+		[]string{"key"},
+		nil,
+		serviceKeyChecker,
+	)
+
+	UserOAuthTemplate = templates.New(
+		"Google APIs using OAuth 2.0 to act on behalf of a user",
+		[]string{
+			"https://developers.google.com/workspace/guides/get-started",
+			"https://console.cloud.google.com/auth/overview",
+		},
+		templates.OAuthCredFields,
+		oauthModifier,
+		userTokenChecker,
+	)
+)
+
+// oauthModifier adjusts the given [oauth.Config] for Google
 // OAuth 2.0 authorizations, to act on behalf of a user.
-func OAuthModifier(o *oauth.Config) {
+func oauthModifier(o *oauth.Config) {
 	if o.Config.Endpoint.AuthURL == "" {
 		o.Config.Endpoint.AuthURL = google.Endpoint.AuthURL
 	}
@@ -44,9 +70,9 @@ func OAuthModifier(o *oauth.Config) {
 	}
 }
 
-// UserTokenChecker checks the given OAuth token,
+// userTokenChecker checks the given OAuth token,
 // and returns metadata about its owner in JSON format.
-func UserTokenChecker(ctx context.Context, _ map[string]string, o *oauth.Config, t *oauth2.Token) (string, error) {
+func userTokenChecker(ctx context.Context, _ map[string]string, o *oauth.Config, t *oauth2.Token) (string, error) {
 	user, token, err := oauthUserInfo(ctx, o, t)
 	if err != nil {
 		return "", err
@@ -69,9 +95,9 @@ func UserTokenChecker(ctx context.Context, _ map[string]string, o *oauth.Config,
 	return string(j), nil
 }
 
-// ServiceKeyChecker checks the given Google Cloud service
+// serviceKeyChecker checks the given Google Cloud service
 // account key, and returns metadata about it in JSON format.
-func ServiceKeyChecker(ctx context.Context, m map[string]string, _ *oauth.Config, _ *oauth2.Token) (string, error) {
+func serviceKeyChecker(ctx context.Context, m map[string]string, _ *oauth.Config, _ *oauth2.Token) (string, error) {
 	email, id, err := serviceAccountInfo(ctx, m["key"])
 	if err != nil {
 		return "", err

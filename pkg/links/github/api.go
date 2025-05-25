@@ -113,7 +113,7 @@ const (
 
 // get is a GitHub-specific HTTP GET wrapper for [client.HTTPRequest].
 func get(ctx context.Context, url, token string) (map[string]any, error) {
-	resp, err := client.HTTPRequest(ctx, http.MethodGet, url, mimeType, token, nil)
+	resp, err := client.HTTPRequest(ctx, http.MethodGet, url, mimeType, token)
 	if err != nil {
 		return nil, err
 	}

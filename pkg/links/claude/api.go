@@ -16,15 +16,15 @@ const (
 )
 
 // get is an Anthropic-specific HTTP GET wrapper for [client.HTTPRequest].
+// Based on https://docs.anthropic.com/en/api/overview and
+// https://docs.anthropic.com/en/api/versioning and
+// https://docs.anthropic.com/en/api/models-list.
 func get(ctx context.Context, url, apiKey string) (map[string]any, error) {
-	// https://docs.anthropic.com/en/api/overview
-	// https://docs.anthropic.com/en/api/versioning
-	// https://docs.anthropic.com/en/api/models-list
 	headers := map[string]string{
 		"anthropic-version": "2023-06-01",
 		"x-api-key":         apiKey,
 	}
-	resp, err := client.HTTPRequest(ctx, http.MethodGet, url, mimeType, "", headers)
+	resp, err := client.HTTPRequestWithHeaders(ctx, http.MethodGet, url, mimeType, headers, "")
 	if err != nil {
 		return nil, err
 	}

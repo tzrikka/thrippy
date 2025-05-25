@@ -12,7 +12,11 @@ const (
 	maxSize = 1 << 20 // 2^20 bytes = 1 MiB.
 )
 
-func HTTPRequest(ctx context.Context, httpMethod, url, mimeType, token string, headers map[string]string) ([]byte, error) {
+func HTTPRequest(ctx context.Context, httpMethod, url, mimeType, token string) ([]byte, error) {
+	return HTTPRequestWithHeaders(ctx, httpMethod, url, mimeType, nil, token)
+}
+
+func HTTPRequestWithHeaders(ctx context.Context, httpMethod, url, mimeType string, headers map[string]string, token string) ([]byte, error) {
 	// Construct the request.
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()

@@ -1,7 +1,12 @@
 package chatgpt
 
 import (
+	"context"
+
+	"golang.org/x/oauth2"
+
 	"github.com/tzrikka/thrippy/pkg/links/templates"
+	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
 var Template = templates.New(
@@ -12,5 +17,12 @@ var Template = templates.New(
 	},
 	[]string{"api_key"},
 	nil,
-	nil,
+	apiKeyChecker,
 )
+
+func apiKeyChecker(ctx context.Context, m map[string]string, _ *oauth.Config, _ *oauth2.Token) (string, error) {
+	if _, err := get(ctx, modelsURL, m["api_key"]); err != nil {
+		return "", err
+	}
+	return "", nil
+}

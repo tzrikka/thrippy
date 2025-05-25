@@ -101,7 +101,7 @@ const (
 
 // get is a Slack-specific HTTP GET wrapper for [client.HTTPRequest].
 func get(ctx context.Context, url, botToken string, jsonResp any) error {
-	resp, err := client.HTTPRequest(ctx, http.MethodGet, url, mimeType, botToken)
+	resp, err := client.HTTPRequest(ctx, http.MethodGet, url, mimeType, botToken, nil)
 	if err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func get(ctx context.Context, url, botToken string, jsonResp any) error {
 
 // post is a Slack-specific HTTP POST wrapper for [client.HTTPRequest].
 func post(ctx context.Context, url, botToken string, jsonResp any) error {
-	resp, err := client.HTTPRequest(ctx, http.MethodPost, url, mimeType, botToken)
+	resp, err := client.HTTPRequest(ctx, http.MethodPost, url, mimeType, botToken, nil)
 	if err != nil {
 		return err
 	}

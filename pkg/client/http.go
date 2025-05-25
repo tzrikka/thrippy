@@ -12,7 +12,7 @@ const (
 	maxSize = 1 << 20 // 2^20 bytes = 1 MiB.
 )
 
-func HTTPRequest(ctx context.Context, httpMethod, url, mimeType, token string) ([]byte, error) {
+func HTTPRequest(ctx context.Context, httpMethod, url, mimeType, token string, headers map[string]string) ([]byte, error) {
 	// Construct the request.
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
@@ -23,7 +23,12 @@ func HTTPRequest(ctx context.Context, httpMethod, url, mimeType, token string) (
 	}
 
 	req.Header.Set("Accept", mimeType)
-	req.Header.Set("Authorization", "Bearer "+token)
+	if token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
 
 	// Send the request to the server.
 	resp, err := http.DefaultClient.Do(req)

@@ -40,7 +40,8 @@ func TestHTTPRequest(t *testing.T) {
 			}
 			defer s.Close()
 
-			got, err := HTTPRequest(t.Context(), tt.httpMethod, s.URL, "mime/type", "token")
+			headers := map[string]string{"X-Header": "value"}
+			got, err := HTTPRequest(t.Context(), tt.httpMethod, s.URL, "mime/type", "token", headers)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HTTPRequest() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -64,6 +65,12 @@ func handler(t *testing.T) http.HandlerFunc {
 		want = "Bearer token"
 		if got != want {
 			t.Errorf("authorization header = %q, want %q", got, want)
+		}
+
+		got = r.Header.Get("X-Header")
+		want = "value"
+		if got != want {
+			t.Errorf("custom header = %q, want %q", got, want)
 		}
 
 		body := "body\n"

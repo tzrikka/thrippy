@@ -10,7 +10,6 @@ import (
 
 	"github.com/lithammer/shortuuid/v4"
 	"github.com/urfave/cli/v3"
-	"google.golang.org/protobuf/encoding/prototext"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/tzrikka/thrippy/pkg/client"
@@ -47,7 +46,7 @@ var linkTemplatesCommand = &cli.Command{
 var createLinkCommand = &cli.Command{
 	Name:      "create-link",
 	Usage:     "Creates a new link configuration",
-	UsageText: "thrippy create-link [global options] --template <...> [--oauth <...>]",
+	UsageText: "thrippy create-link [global options] --template <...> [oauth options]",
 	Category:  "link",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
@@ -63,12 +62,28 @@ var createLinkCommand = &cli.Command{
 			},
 		},
 		&cli.StringFlag{
-			Name:    "oauth",
-			Aliases: []string{"o"},
-			Usage:   `"thrippy.v1.OAuthConfig" proto message`,
-			Validator: func(v string) error {
-				return prototext.Unmarshal([]byte(v), &thrippypb.OAuthConfig{})
-			},
+			Name:  "auth-url",
+			Usage: "Optional OAuth 2.0 auth URL",
+		},
+		&cli.StringFlag{
+			Name:  "token-url",
+			Usage: "Optional OAuth 2.0 token URL",
+		},
+		&cli.StringFlag{
+			Name:  "client-id",
+			Usage: "Optional OAuth 2.0 client ID",
+		},
+		&cli.StringFlag{
+			Name:  "client-secret",
+			Usage: "Optional OAuth 2.0 client secret",
+		},
+		&cli.StringSliceFlag{
+			Name:  "scopes",
+			Usage: "Optional OAuth 2.0 scopes (comma delimited / multiple flags)",
+		},
+		&cli.StringMapFlag{
+			Name:  "param",
+			Usage: "Optional OAuth 2.0 URL parameters",
 		},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
@@ -78,10 +93,36 @@ var createLinkCommand = &cli.Command{
 		}
 		defer conn.Close()
 
-		// Syntax already checked by the flag's validator
-		// (semantics will be checked by the server).
+		// Protocol buffers differentiate between empty and unset field values.
+		hasOAuth := false
 		o := &thrippypb.OAuthConfig{}
-		_ = prototext.Unmarshal([]byte(cmd.String("oauth")), o)
+		if v := cmd.String("auth-url"); v != "" {
+			o.SetAuthUrl(v)
+			hasOAuth = true
+		}
+		if v := cmd.String("token-url"); v != "" {
+			o.SetTokenUrl(v)
+			hasOAuth = true
+		}
+		if v := cmd.String("client-id"); v != "" {
+			o.SetClientId(v)
+			hasOAuth = true
+		}
+		if v := cmd.String("client-secret"); v != "" {
+			o.SetClientSecret(v)
+			hasOAuth = true
+		}
+		if s := cmd.StringSlice("scopes"); len(s) > 0 {
+			o.SetScopes(s)
+			hasOAuth = true
+		}
+		if m := cmd.StringMap("param"); len(m) > 0 {
+			o.SetParams(m)
+			hasOAuth = true
+		}
+		if !hasOAuth {
+			o = nil
+		}
 
 		c := thrippypb.NewThrippyServiceClient(conn)
 		resp, err := c.CreateLink(ctx, thrippypb.CreateLinkRequest_builder{

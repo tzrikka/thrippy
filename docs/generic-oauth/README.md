@@ -4,8 +4,9 @@
 
    ```shell
    thrippy create-link --template generic-oauth \
-           --oauth 'auth_url: "..." token_url: "..." \
-           client_id: "..." client_secret: "..." scopes: "..."'
+           --auth-url "..." --token-url "..." \
+           --client-id "..." --client-secret "..." \
+           [ --scopes "xxx,yyy,..." [ --scopes "zzz" ] ]
    ```
 
 2. Authorize the GitHub app (interactively in a browser)

@@ -4,7 +4,7 @@
 
    ```shell
    thrippy create-link --template github-app-jwt \
-           --oauth 'client_id: "..." params: { key: "app_name" value: "..."}'
+           --client-id "..." --param "app_name=..."
    ```
 
 2. Set the link's static credentials
@@ -30,8 +30,8 @@
 
 To use GHES instead of the default base URL (`https://github.com`):
 
-Append the following to the `--oauth` flag in the `create-link` command:
+Add the following flag to the `create-link` command in step 1:
 
-```
-params: { key: "base_url" value: "http://..." }
+```shell
+--param "base_url=http://..."
 ```

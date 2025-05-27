@@ -2,7 +2,6 @@ package slack
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -111,7 +110,7 @@ func genericChecker(ctx context.Context, botToken, baseURL string) (string, erro
 		return "", fmt.Errorf("bot info error: %w", err)
 	}
 
-	j, err := json.Marshal(metadata{
+	return templates.EncodeMetadataAsJSON(metadata{
 		AppID:        bot.AppID,
 		BotID:        bot.ID,
 		BotName:      bot.Name,
@@ -123,10 +122,6 @@ func genericChecker(ctx context.Context, botToken, baseURL string) (string, erro
 		UserID:       auth.UserID,
 		UserName:     auth.User,
 	})
-	if err != nil {
-		return "", err
-	}
-	return string(j), nil
 }
 
 type metadata struct {

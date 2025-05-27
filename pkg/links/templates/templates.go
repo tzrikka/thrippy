@@ -2,7 +2,9 @@ package templates
 
 import (
 	"context"
+	"encoding/json"
 	"slices"
+	"strings"
 
 	"golang.org/x/oauth2"
 
@@ -72,4 +74,13 @@ func ModifyOAuthByTemplate(o *oauth.Config, t Template, found bool) {
 
 	slices.Sort(o.Config.Scopes)
 	o.Config.Scopes = slices.Compact(o.Config.Scopes)
+}
+
+// EncodeMetadataAsJSON converts the given struct into a JSON string.
+func EncodeMetadataAsJSON(v any) (string, error) {
+	sb := strings.Builder{}
+	if err := json.NewEncoder(&sb).Encode(v); err != nil {
+		return "", err
+	}
+	return sb.String(), nil
 }

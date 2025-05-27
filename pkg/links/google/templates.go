@@ -2,7 +2,6 @@ package google
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"regexp"
 	"strconv"
@@ -78,7 +77,7 @@ func userTokenChecker(ctx context.Context, _ map[string]string, o *oauth.Config,
 		return "", err
 	}
 
-	j, err := json.Marshal(oauthMetadata{
+	return templates.EncodeMetadataAsJSON(oauthMetadata{
 		Email:         user.Email,
 		ID:            user.Id,
 		FamilyName:    user.FamilyName,
@@ -88,11 +87,6 @@ func userTokenChecker(ctx context.Context, _ map[string]string, o *oauth.Config,
 		Scopes:        token.Scope,
 		VerifiedEmail: strconv.FormatBool(*user.VerifiedEmail),
 	})
-	if err != nil {
-		return "", err
-	}
-
-	return string(j), nil
 }
 
 // serviceKeyChecker checks the given Google Cloud service
@@ -108,16 +102,11 @@ func serviceKeyChecker(ctx context.Context, m map[string]string, _ *oauth.Config
 		return "", errors.New("project ID not found in service account key")
 	}
 
-	j, err := json.Marshal(oauthMetadata{
+	return templates.EncodeMetadataAsJSON(oauthMetadata{
 		Email:   email,
 		ID:      id,
 		Project: matches[1],
 	})
-	if err != nil {
-		return "", err
-	}
-
-	return string(j), nil
 }
 
 type oauthMetadata struct {

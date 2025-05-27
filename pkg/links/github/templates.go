@@ -2,7 +2,6 @@ package github
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -133,11 +132,7 @@ func jwtChecker(ctx context.Context, m map[string]string, o *oauth.Config, _ *oa
 	// is optional - until Thrippy adds the installation ID automatically.
 	installID := m["install_id"]
 	if installID == "" {
-		j, err := json.Marshal(meta)
-		if err != nil {
-			return "", err
-		}
-		return string(j), nil
+		return templates.EncodeMetadataAsJSON(meta)
 	}
 
 	// https://docs.github.com/en/rest/apps/apps#get-an-installation-for-the-authenticated-app
@@ -157,11 +152,7 @@ func jwtChecker(ctx context.Context, m map[string]string, o *oauth.Config, _ *oa
 	meta.InstallUpdatedAt = normalizeRFC3339(resp["updated_at"].(string))
 	meta.InstallURL = resp["html_url"].(string)
 
-	j, err := json.Marshal(meta)
-	if err != nil {
-		return "", err
-	}
-	return string(j), nil
+	return templates.EncodeMetadataAsJSON(meta)
 }
 
 type appMetadata struct {
@@ -221,7 +212,7 @@ func userChecker(ctx context.Context, m map[string]string, o *oauth.Config, t *o
 		location = ""
 	}
 
-	j, err := json.Marshal(userMetadata{
+	return templates.EncodeMetadataAsJSON(userMetadata{
 		Company:  company,
 		Email:    resp["email"].(string),
 		Location: location,
@@ -230,11 +221,6 @@ func userChecker(ctx context.Context, m map[string]string, o *oauth.Config, t *o
 		URL:      resp["html_url"].(string),
 		UserID:   strconv.FormatInt(int64(resp["id"].(float64)), 10),
 	})
-	if err != nil {
-		return "", err
-	}
-
-	return string(j), nil
 }
 
 type userMetadata struct {

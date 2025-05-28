@@ -47,10 +47,9 @@ func newHTTPServer(cmd *cli.Command) *httpServer {
 // run starts an HTTP server for OAuth webhooks.
 // This is blocking, to keep the Thrippy server running.
 func (s *httpServer) run() error {
+	http.HandleFunc("GET /callback", s.oauthExchangeHandler)
 	http.HandleFunc("GET /start", s.oauthStartHandler)
 	http.HandleFunc("POST /start", s.oauthStartHandler)
-
-	http.HandleFunc("GET /callback", s.oauthExchangeHandler)
 
 	server := &http.Server{
 		Addr:         net.JoinHostPort("", strconv.Itoa(s.httpPort)),
@@ -72,7 +71,9 @@ func (s *httpServer) run() error {
 // to the authorization endpoint of a third-party service. The incoming request's
 // method may be GET or POST, but the resulting redirection should always be GET.
 func (s *httpServer) oauthStartHandler(w http.ResponseWriter, r *http.Request) {
-	l := log.With().Str("url_path", r.URL.EscapedPath()).Logger()
+	defer r.Body.Close()
+
+	l := log.With().Str("http_method", r.Method).Str("url_path", r.URL.EscapedPath()).Logger()
 	l.Info().Msg("received HTTP request")
 
 	// Get the OAuth config corresponding to the link ID in the request's query or body.
@@ -120,7 +121,7 @@ func (s *httpServer) oauthStartHandler(w http.ResponseWriter, r *http.Request) {
 // authorization endpoint (the 2nd lef of the OAuth 2.0 flow), and exchanges
 // the received authorization code for an new access token (the 3rd leg).
 func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request) {
-	l := log.With().Str("url_path", r.URL.EscapedPath()).Logger()
+	l := log.With().Str("http_method", r.Method).Str("url_path", r.URL.EscapedPath()).Logger()
 	l.Info().Msg("received HTTP request")
 
 	if err := r.ParseForm(); err != nil {

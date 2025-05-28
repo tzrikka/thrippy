@@ -32,7 +32,7 @@ func startOAuthCommand(configFilePath altsrc.StringSourcer) *cli.Command {
 				Name:    "base-url",
 				Aliases: []string{"u"},
 				Usage:   "Thrippy HTTP server's base URL",
-				Value:   fmt.Sprintf("http://127.0.0.1:%d", defaultHTTPPort),
+				Value:   fmt.Sprintf("http://localhost:%d", DefaultHTTPPort),
 				Sources: cli.NewValueSourceChain(
 					toml.TOML("client.webhook_base_url", configFilePath),
 				),

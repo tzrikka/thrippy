@@ -1,6 +1,3 @@
-// Thrippy manages authentication configurations and secret tokens for
-// third-party (3P) services. It supports both static and OAuth 2.0
-// credentials, and it is designed to be both simple and secure.
 package main
 
 import (
@@ -8,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"path/filepath"
 	"runtime/debug"
 	"strconv"
 
@@ -24,19 +20,16 @@ import (
 )
 
 const (
-	configDirName  = "thrippy"
-	configFileName = "config.toml"
+	ConfigDirName  = "thrippy"
+	ConfigFileName = "config.toml"
 
-	configDirPerm  = 0o700
-	configFilePerm = 0o600
-
-	defaultGRPCPort = 14460
-	defaultHTTPPort = 14470
+	DefaultGRPCPort = 14460
+	DefaultHTTPPort = 14470
 )
 
 func main() {
 	buildInfo, _ := debug.ReadBuildInfo()
-	configFilePath := configFile(configDir())
+	configFilePath := configFile()
 
 	flags := []cli.Flag{
 		&cli.BoolFlag{
@@ -47,7 +40,7 @@ func main() {
 			Name:    "grpc-addr",
 			Aliases: []string{"a"},
 			Usage:   "gRPC server address and port",
-			Value:   net.JoinHostPort("", strconv.Itoa(defaultGRPCPort)),
+			Value:   net.JoinHostPort("", strconv.Itoa(DefaultGRPCPort)),
 			Sources: cli.NewValueSourceChain(
 				cli.EnvVar("THRIPPY_GRPC_ADDRESS"),
 				toml.TOML("grpc.address", configFilePath),
@@ -84,32 +77,12 @@ func main() {
 	}
 }
 
-// configDir returns the path to the app's configuration directory.
-// It also creates the directory if it doesn't already exist.
-func configDir() string {
-	path, err := xdg.ConfigHome()
-	if err != nil {
-		log.Fatal().Err(err).Caller().Send()
-	}
-
-	path = filepath.Join(path, configDirName)
-	if err := os.MkdirAll(path, configDirPerm); err != nil {
-		log.Fatal().Err(err).Caller().Send()
-	}
-
-	return path
-}
-
 // configFile returns the path to the app's configuration file.
 // It also creates an empty file if it doesn't already exist.
-func configFile(path string) altsrc.StringSourcer {
-	path = filepath.Join(path, configFileName)
-
-	f, err := os.OpenFile(path, os.O_RDONLY|os.O_CREATE, configFilePerm) //gosec:disable G304 -- constructed and cleaned by us
+func configFile() altsrc.StringSourcer {
+	path, err := xdg.CreateFile(xdg.ConfigHome, ConfigDirName, ConfigFileName)
 	if err != nil {
 		log.Fatal().Err(err).Caller().Send()
 	}
-	_ = f.Close()
-
 	return altsrc.StringSourcer(path)
 }

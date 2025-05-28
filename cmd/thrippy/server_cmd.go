@@ -21,7 +21,7 @@ func serverCommand(configFilePath altsrc.StringSourcer) *cli.Command {
 				Name:    "webhook-port",
 				Aliases: []string{"p"},
 				Usage:   "local port number for HTTP webhooks",
-				Value:   defaultHTTPPort,
+				Value:   DefaultHTTPPort,
 				Sources: cli.NewValueSourceChain(
 					cli.EnvVar("THRIPPY_WEBHOOK_PORT"),
 					toml.TOML("server.webhook_port", configFilePath),

@@ -5,5 +5,5 @@
 // It also implements generic and reusable HTTP client requests for
 // link checker functions.
 //
-// [Thrippy gRPC service]: https://github.com/tzrikka/thrippy/blob/main/proto/thrippy/v1/thrippy.proto
+// [Thrippy gRPC service]: https://github.com/tzrikka/thrippy-api/blob/main/proto/thrippy/v1/thrippy.proto
 package client

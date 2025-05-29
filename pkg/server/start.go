@@ -14,7 +14,7 @@ import (
 	"github.com/tzrikka/thrippy/pkg/secrets"
 )
 
-// Start initializes the Thrippy server's network I/O and logging.
+// Start initializes Thrippy's gRPC and HTTP servers, and logging.
 func Start(_ context.Context, cmd *cli.Command) error {
 	initLog(cmd.Bool("dev"))
 

@@ -31,7 +31,7 @@ type grpcServer struct {
 // startGRPCServer starts a gRPC server for the [Thrippy service]. This
 // is non-blocking, in order to let Thrippy run an HTTP server as well.
 //
-// [Thrippy service]: https://github.com/tzrikka/thrippy/blob/main/proto/thrippy/v1/thrippy.proto
+// [Thrippy service]: https://github.com/tzrikka/thrippy-api/blob/main/proto/thrippy/v1/thrippy.proto
 func startGRPCServer(cmd *cli.Command, sm secrets.Manager) (string, error) {
 	lis, err := net.Listen("tcp", cmd.String("grpc-addr"))
 	if err != nil {
@@ -52,7 +52,10 @@ func startGRPCServer(cmd *cli.Command, sm secrets.Manager) (string, error) {
 	return lis.Addr().String(), nil
 }
 
-func (s *grpcServer) CreateLink(ctx context.Context, in *thrippypb.CreateLinkRequest) (*thrippypb.CreateLinkResponse, error) {
+func (s *grpcServer) CreateLink(
+	ctx context.Context,
+	in *thrippypb.CreateLinkRequest,
+) (*thrippypb.CreateLinkResponse, error) {
 	id := shortuuid.New()
 	l := log.With().Str("grpc_method", "CreateLink").Str("id", id).Logger()
 	l.Debug().Msg("received gRPC request")
@@ -125,7 +128,10 @@ func (s *grpcServer) GetLink(ctx context.Context, in *thrippypb.GetLinkRequest) 
 	}.Build(), nil
 }
 
-func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCredentialsRequest) (*thrippypb.SetCredentialsResponse, error) {
+func (s *grpcServer) SetCredentials(
+	ctx context.Context,
+	in *thrippypb.SetCredentialsRequest,
+) (*thrippypb.SetCredentialsResponse, error) {
 	id := in.GetLinkId()
 	l := log.With().Str("grpc_method", "SetCredentials").Str("id", id).Logger()
 	l.Debug().Msg("received gRPC request")
@@ -215,7 +221,10 @@ func (s *grpcServer) templateAndOAuth(ctx context.Context, id string) (string, *
 	return t, m, nil
 }
 
-func (s *grpcServer) GetCredentials(ctx context.Context, in *thrippypb.GetCredentialsRequest) (*thrippypb.GetCredentialsResponse, error) {
+func (s *grpcServer) GetCredentials(
+	ctx context.Context,
+	in *thrippypb.GetCredentialsRequest,
+) (*thrippypb.GetCredentialsResponse, error) {
 	id := in.GetLinkId()
 	l := log.With().Str("grpc_method", "GetCredentials").Str("id", id).Logger()
 
@@ -235,7 +244,10 @@ func (s *grpcServer) GetCredentials(ctx context.Context, in *thrippypb.GetCreden
 	return thrippypb.GetCredentialsResponse_builder{Credentials: m}.Build(), nil
 }
 
-func (s *grpcServer) GetMetadata(ctx context.Context, in *thrippypb.GetMetadataRequest) (*thrippypb.GetMetadataResponse, error) {
+func (s *grpcServer) GetMetadata(
+	ctx context.Context,
+	in *thrippypb.GetMetadataRequest,
+) (*thrippypb.GetMetadataResponse, error) {
 	id := in.GetLinkId()
 	l := log.With().Str("grpc_method", "GetMetadata").Str("id", id).Logger()
 

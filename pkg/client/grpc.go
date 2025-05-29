@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	timeout = time.Second * 3
+	timeout = 3 * time.Second
 )
 
 // Connection creates a gRPC client connection to the given address.

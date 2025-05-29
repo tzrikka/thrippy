@@ -95,7 +95,7 @@ func generateJWT(clientID, privateKey string) (string, error) {
 	now := time.Now()
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
 		"iat": now.Unix(),
-		"exp": now.Add(time.Minute * 10).Unix(),
+		"exp": now.Add(10 * time.Minute).Unix(),
 		"iss": clientID,
 	})
 

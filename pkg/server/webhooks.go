@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	timeout = time.Second * 3
+	timeout = 3 * time.Second
 )
 
 type httpServer struct {
@@ -62,9 +62,10 @@ func (s *httpServer) run() error {
 	err := server.ListenAndServe()
 	if err != nil {
 		log.Err(err).Send()
+		return err
 	}
 
-	return err
+	return nil
 }
 
 // oauthStartHandler starts a 3-legged OAuth 2.0 flow by redirecting the client

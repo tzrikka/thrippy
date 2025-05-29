@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	timeout = time.Second * 3
+	timeout = 3 * time.Second
 )
 
 // Config contains the complete OAuth 2.0 configutation of a link:

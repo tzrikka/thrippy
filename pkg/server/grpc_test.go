@@ -10,8 +10,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
 
+	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 	"github.com/tzrikka/thrippy/pkg/secrets"
-	thrippypb "github.com/tzrikka/thrippy/proto/thrippy/v1"
 )
 
 func TestCreateLink(t *testing.T) {

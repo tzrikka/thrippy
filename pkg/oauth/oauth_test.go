@@ -8,7 +8,7 @@ import (
 	"golang.org/x/oauth2"
 	"google.golang.org/protobuf/proto"
 
-	thrippypb "github.com/tzrikka/thrippy/proto/thrippy/v1"
+	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 )
 
 func TestFromProto(t *testing.T) {

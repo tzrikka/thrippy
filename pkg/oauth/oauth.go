@@ -12,7 +12,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
-	thrippypb "github.com/tzrikka/thrippy/proto/thrippy/v1"
+	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 )
 
 const (

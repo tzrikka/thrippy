@@ -12,10 +12,10 @@ import (
 	"github.com/urfave/cli/v3"
 	"google.golang.org/protobuf/proto"
 
+	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 	"github.com/tzrikka/thrippy/pkg/client"
 	"github.com/tzrikka/thrippy/pkg/links"
 	"github.com/tzrikka/thrippy/pkg/oauth"
-	thrippypb "github.com/tzrikka/thrippy/proto/thrippy/v1"
 )
 
 var linkTemplatesCommand = &cli.Command{

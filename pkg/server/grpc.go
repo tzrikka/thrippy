@@ -16,11 +16,11 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
+	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 	"github.com/tzrikka/thrippy/pkg/links"
 	"github.com/tzrikka/thrippy/pkg/links/templates"
 	"github.com/tzrikka/thrippy/pkg/oauth"
 	"github.com/tzrikka/thrippy/pkg/secrets"
-	thrippypb "github.com/tzrikka/thrippy/proto/thrippy/v1"
 )
 
 type grpcServer struct {

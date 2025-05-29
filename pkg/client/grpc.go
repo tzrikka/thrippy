@@ -13,8 +13,8 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 
+	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 	"github.com/tzrikka/thrippy/pkg/oauth"
-	thrippypb "github.com/tzrikka/thrippy/proto/thrippy/v1"
 )
 
 const (

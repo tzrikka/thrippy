@@ -32,6 +32,7 @@ linters:
     - unconvert
     - usestdlibvars
     - zerologlint
+
   exclusions:
     rules:
       - linters:
@@ -62,7 +63,7 @@ formatters:
     gofumpt:
       extra-rules: true
     golines:
-      max-len: 150
+      max-len: 120
 
 issues:
   max-issues-per-linter: 0

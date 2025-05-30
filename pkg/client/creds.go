@@ -45,7 +45,7 @@ func GRPCFlags(configFilePath altsrc.StringSourcer) []cli.Flag {
 			TakesFile: true,
 		},
 		&cli.StringFlag{
-			Name: "grpc-server-ca-cert", // Either TLS and mTLS.
+			Name: "grpc-server-ca-cert", // Both TLS and mTLS.
 			Sources: cli.NewValueSourceChain(
 				cli.EnvVar("THRIPPY_GRPC_SERVER_CA_CERT"),
 				toml.TOML("grpc.client.server_ca_cert", configFilePath),
@@ -54,7 +54,7 @@ func GRPCFlags(configFilePath altsrc.StringSourcer) []cli.Flag {
 			TakesFile: true,
 		},
 		&cli.StringFlag{
-			Name: "grpc-server-name-override", // Either TLS and mTLS, but only for testing.
+			Name: "grpc-server-name-override", // Both TLS and mTLS, but only for testing.
 			Sources: cli.NewValueSourceChain(
 				cli.EnvVar("THRIPPY_GRPC_SERVER_NAME_OVERRIDE"),
 				toml.TOML("grpc.client.server_name_override", configFilePath),

@@ -50,6 +50,7 @@ func (s *httpServer) run() error {
 	http.HandleFunc("GET /callback", s.oauthExchangeHandler)
 	http.HandleFunc("GET /start", s.oauthStartHandler)
 	http.HandleFunc("POST /start", s.oauthStartHandler)
+	http.HandleFunc("GET /success", successHandler)
 
 	server := &http.Server{
 		Addr:         net.JoinHostPort("", strconv.Itoa(s.httpPort)),
@@ -205,7 +206,7 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 		}
 
 		l.Debug().Msg("checked and saved the GitHub installation")
-		htmlResponse(w, http.StatusOK, "You may now close this browser tab")
+		http.Redirect(w, r, "/success", http.StatusFound)
 		return
 	}
 
@@ -234,6 +235,13 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	l.Debug().Msg("checked and saved OAuth token")
+	http.Redirect(w, r, "/success", http.StatusFound)
+}
+
+// successHandler is a trivial webhook which merely reports the success of
+// a 3-legged OAuth 2.0 flow. The [oauthExchangeHandler] webhook redirects
+// the user to this handler to cosmetically clean up the URL in the browser.
+func successHandler(w http.ResponseWriter, r *http.Request) {
 	htmlResponse(w, http.StatusOK, "You may now close this browser tab")
 }
 

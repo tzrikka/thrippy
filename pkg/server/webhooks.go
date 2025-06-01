@@ -72,8 +72,6 @@ func (s *httpServer) run() error {
 // to the authorization endpoint of a third-party service. The incoming request's
 // method may be GET or POST, but the resulting redirection should always be GET.
 func (s *httpServer) oauthStartHandler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-
 	l := log.With().Str("http_method", r.Method).Str("url_path", r.URL.EscapedPath()).Logger()
 	l.Info().Msg("received HTTP request")
 

@@ -17,39 +17,40 @@ const (
 	govBaseURL     = "https://slack-gov.com" // https://docs.slack.dev/govslack
 )
 
-var (
-	BotTokenTemplate = templates.New(
-		"Slack app using a static bot token",
-		[]string{
-			"https://docs.slack.dev/authentication/tokens#bot",
-			"https://api.slack.com/apps",
-		},
-		[]string{"bot_token", "app_token_optional"},
-		nil,
-		botTokenChecker,
-	)
+var BotTokenTemplate = templates.New(
+	"Slack app using a static bot token",
+	[]string{
+		"https://docs.slack.dev/authentication/tokens#bot",
+		"https://api.slack.com/apps",
+	},
+	[]string{
+		"bot_token_manual",
+		"signing_secret_manual_optional", "app_token_manual_optional",
+	},
+	nil,
+	botTokenChecker,
+)
 
-	OAuthTemplate = templates.New(
-		"Slack app using OAuth v2",
-		[]string{
-			"https://docs.slack.dev/authentication/installing-with-oauth",
-			"https://api.slack.com/apps",
-		},
-		templates.OAuthCredFields,
-		oauthModifier(defaultBaseURL),
-		oauthChecker,
-	)
+var OAuthTemplate = templates.New(
+	"Slack app using OAuth v2",
+	[]string{
+		"https://docs.slack.dev/authentication/installing-with-oauth",
+		"https://api.slack.com/apps",
+	},
+	templates.OAuthCredFields,
+	oauthModifier(defaultBaseURL),
+	oauthChecker,
+)
 
-	OAuthGovTemplate = templates.New(
-		"GovSlack app using OAuth v2",
-		[]string{
-			"https://docs.slack.dev/authentication/installing-with-oauth",
-			"https://docs.slack.dev/govslack",
-		},
-		templates.OAuthCredFields,
-		oauthModifier(govBaseURL),
-		govOAuthChecker,
-	)
+var OAuthGovTemplate = templates.New(
+	"GovSlack app using OAuth v2",
+	[]string{
+		"https://docs.slack.dev/authentication/installing-with-oauth",
+		"https://docs.slack.dev/govslack",
+	},
+	templates.OAuthCredFields,
+	oauthModifier(govBaseURL),
+	govOAuthChecker,
 )
 
 // oauthModifier returns a function that adjusts an [oauth.Config] for Slack

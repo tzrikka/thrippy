@@ -8,7 +8,7 @@ require (
 	github.com/lithammer/shortuuid/v4 v4.2.0
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/rs/zerolog v1.34.0
-	github.com/tzrikka/thrippy-api v1.0.0
+	github.com/tzrikka/thrippy-api v1.1.0
 	github.com/tzrikka/xdg v1.2.3
 	github.com/urfave/cli-altsrc/v3 v3.0.1
 	github.com/urfave/cli/v3 v3.3.3

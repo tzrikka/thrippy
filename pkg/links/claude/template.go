@@ -15,7 +15,7 @@ var Template = templates.New(
 		"https://docs.anthropic.com/en/api/overview",
 		"https://console.anthropic.com/settings/keys",
 	},
-	[]string{"api_key"},
+	[]string{"api_key_manual"},
 	nil,
 	apiKeyChecker,
 )

@@ -162,13 +162,25 @@ var getLinkCommand = &cli.Command{
 			return err
 		}
 
-		fmt.Println("Template: ", resp.GetTemplate())
+		fmt.Println("Template:  ", resp.GetTemplate())
 		o := oauth.ToString(resp.GetOauthConfig())
 		if o != "" {
 			fmt.Println("")
 			fmt.Println(o)
 		}
-		fmt.Println("\nExpected credential fields:", resp.GetCredentialFields())
+
+		fmt.Println("\nExpected credential fields:")
+		for _, cf := range resp.GetCredentialFields() {
+			mod1 := "automatic"
+			if cf.GetManual() {
+				mod1 = "manual"
+			}
+			mod2 := "required"
+			if cf.GetOptional() {
+				mod1 = "optional"
+			}
+			fmt.Printf("- %-*s (%s, %s)\n", 25, cf.GetName(), mod1, mod2)
+		}
 
 		return nil
 	},

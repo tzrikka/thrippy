@@ -21,5 +21,5 @@ To use GHES instead of the default base URL (`https://github.com`):
 Run the following command between steps 1 and 2:
 
 ```
-set-creds <link ID> --kv "base_url_optional=https://..."
+set-creds <link ID> --kv "base_url=https://..."
 ```

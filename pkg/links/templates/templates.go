@@ -7,7 +7,9 @@ import (
 	"strings"
 
 	"golang.org/x/oauth2"
+	"google.golang.org/protobuf/proto"
 
+	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
@@ -41,11 +43,26 @@ func (t Template) Description() string {
 
 // CredsFields returns a copy of all the expected field names
 // in the link's credentials, based on the link's template.
-func (t Template) CredFields() []string {
+func (t Template) CredFields() []*thrippypb.CredentialField {
 	if len(t.credFields) == 0 {
 		return nil
 	}
-	return slices.Clone(t.credFields)
+
+	cfs := make([]*thrippypb.CredentialField, len(t.credFields))
+	for i, name := range t.credFields {
+		cfs[i] = thrippypb.CredentialField_builder{Name: proto.String(name)}.Build()
+		if strings.HasSuffix(name, "_optional") {
+			name = strings.TrimSuffix(name, "_optional")
+			cfs[i].SetName(name)
+			cfs[i].SetOptional(true)
+		}
+		if strings.HasSuffix(name, "_manual") {
+			name = strings.TrimSuffix(name, "_manual")
+			cfs[i].SetName(name)
+			cfs[i].SetManual(true)
+		}
+	}
+	return cfs
 }
 
 // Check checks the usability of the provided credentials (either the map or

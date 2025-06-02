@@ -15,7 +15,7 @@ var Template = templates.New(
 		"https://platform.openai.com/docs/api-reference/authentication",
 		"https://platform.openai.com/api-keys",
 	},
-	[]string{"api_key"},
+	[]string{"api_key_manual"},
 	nil,
 	apiKeyChecker,
 )

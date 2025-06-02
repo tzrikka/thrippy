@@ -11,7 +11,7 @@ var Template = templates.New(
 		"https://aistudio.google.com/app/apikey",
 		"https://console.cloud.google.com/apis/credentials",
 	},
-	[]string{"api_key"},
+	[]string{"api_key_manual"},
 	nil,
 	nil,
 )

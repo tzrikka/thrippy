@@ -14,29 +14,27 @@ import (
 	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
-var (
-	ServiceAccountTemplate = templates.New(
-		"Google APIs using a static GCP service account key",
-		[]string{
-			"https://cloud.google.com/iam/docs/service-account-overview",
-			"https://developers.google.com/identity/protocols/oauth2/service-account",
-			"https://console.cloud.google.com/iam-admin/serviceaccounts",
-		},
-		[]string{"key"},
-		nil,
-		serviceKeyChecker,
-	)
+var ServiceAccountTemplate = templates.New(
+	"Google APIs using a static GCP service account key",
+	[]string{
+		"https://cloud.google.com/iam/docs/service-account-overview",
+		"https://developers.google.com/identity/protocols/oauth2/service-account",
+		"https://console.cloud.google.com/iam-admin/serviceaccounts",
+	},
+	[]string{"key_manual"},
+	nil,
+	serviceKeyChecker,
+)
 
-	UserOAuthTemplate = templates.New(
-		"Google APIs using OAuth 2.0 to act on behalf of a user",
-		[]string{
-			"https://developers.google.com/workspace/guides/get-started",
-			"https://console.cloud.google.com/auth/overview",
-		},
-		templates.OAuthCredFields,
-		oauthModifier,
-		userTokenChecker,
-	)
+var UserOAuthTemplate = templates.New(
+	"Google APIs using OAuth 2.0 to act on behalf of a user",
+	[]string{
+		"https://developers.google.com/workspace/guides/get-started",
+		"https://console.cloud.google.com/auth/overview",
+	},
+	templates.OAuthCredFields,
+	oauthModifier,
+	userTokenChecker,
 )
 
 // oauthModifier adjusts the given [oauth.Config] for Google

@@ -13,44 +13,42 @@ import (
 	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
-var (
-	AppJWTTemplate = templates.New(
-		"GitHub app installation using JWTs based on static credentials",
-		[]string{
-			"https://docs.github.com/en/apps/using-github-apps/about-using-github-apps",
-			"https://github.com/settings/apps",
-		},
-		[]string{
-			"client_id", "private_key", // Must be entered manually.
-			"api_base_url", "install_id", // Added automatically by Thrippy.
-		},
-		appInstallModifier,
-		jwtChecker,
-	)
+var AppJWTTemplate = templates.New(
+	"GitHub app installation using JWTs based on static credentials",
+	[]string{
+		"https://docs.github.com/en/apps/using-github-apps/about-using-github-apps",
+		"https://github.com/settings/apps",
+	},
+	[]string{
+		"client_id_manual", "private_key_manual",
+		"api_base_url", "install_id", // Added automatically by Thrippy.
+	},
+	appInstallModifier,
+	jwtChecker,
+)
 
-	AppUserTemplate = templates.New(
-		"GitHub app authorization to act on behalf of a user",
-		[]string{
-			"https://docs.github.com/en/apps/using-github-apps/authorizing-github-apps",
-			"https://github.com/settings/apps",
-		},
-		append([]string{"base_url_optional"}, templates.OAuthCredFields...),
-		appAuthzModifier,
-		userChecker,
-	)
+var AppUserTemplate = templates.New(
+	"GitHub app authorization to act on behalf of a user",
+	[]string{
+		"https://docs.github.com/en/apps/using-github-apps/authorizing-github-apps",
+		"https://github.com/settings/apps",
+	},
+	append([]string{"base_url_manual_optional"}, templates.OAuthCredFields...),
+	appAuthzModifier,
+	userChecker,
+)
 
-	UserPATTemplate = templates.New(
-		"GitHub with a user's static Personal Access Token (PAT)",
-		[]string{
-			"https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api?apiVersion=2022-11-28#authenticating-with-a-personal-access-token",
-			"https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens",
-			"https://github.com/settings/personal-access-tokens",
-			"https://github.com/settings/tokens",
-		},
-		[]string{"base_url_optional", "pat"},
-		nil,
-		userChecker,
-	)
+var UserPATTemplate = templates.New(
+	"GitHub with a user's static Personal Access Token (PAT)",
+	[]string{
+		"https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api?apiVersion=2022-11-28#authenticating-with-a-personal-access-token",
+		"https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens",
+		"https://github.com/settings/personal-access-tokens",
+		"https://github.com/settings/tokens",
+	},
+	[]string{"base_url_manual_optional", "pat_manual"},
+	nil,
+	userChecker,
 )
 
 // appInstallModifier adjusts the given [oauth.Config] for GitHub app

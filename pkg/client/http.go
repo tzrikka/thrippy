@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	maxSize = 1 << 20 // 2^20 bytes = 1 MiB.
+	maxSize = 10 << 20 // 10 * 2^20 bytes = 1 MiB.
 )
 
 func HTTPRequest(ctx context.Context, httpMethod, url, mimeType, token string) ([]byte, error) {
@@ -44,7 +44,7 @@ func HTTPRequestWithHeaders(ctx context.Context, httpMethod, url, mimeType strin
 	// Read and return the response body.
 	body, err := io.ReadAll(http.MaxBytesReader(nil, resp.Body, maxSize))
 	if err != nil {
-		return nil, fmt.Errorf("failed to read HTTP response's body: %w", err)
+		return nil, fmt.Errorf("failed to read HTTP response body: %w", err)
 	}
 
 	if resp.StatusCode >= http.StatusBadRequest {

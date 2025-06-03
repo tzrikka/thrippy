@@ -24,6 +24,7 @@ var Templates = map[string]templates.Template{
 	"github-app-jwt":         github.AppJWTTemplate,
 	"github-app-user":        github.AppUserTemplate,
 	"github-user-pat":        github.UserPATTemplate,
+	"github-webhook":         github.WebhookTemplate,
 	"google-service-account": google.ServiceAccountTemplate,
 	"google-user-oauth":      google.UserOAuthTemplate,
 	"slack-bot-token":        slack.BotTokenTemplate,

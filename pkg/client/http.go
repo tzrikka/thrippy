@@ -42,7 +42,7 @@ func HTTPRequestWithHeaders(ctx context.Context, httpMethod, url, mimeType strin
 	defer resp.Body.Close()
 
 	// Read and return the response body.
-	body, err := io.ReadAll(http.MaxBytesReader(nil, resp.Body, maxSize))
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxSize))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read HTTP response body: %w", err)
 	}

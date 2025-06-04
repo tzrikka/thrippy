@@ -48,11 +48,11 @@ func HTTPRequestWithHeaders(ctx context.Context, httpMethod, url, mimeType strin
 	}
 
 	if resp.StatusCode >= http.StatusBadRequest {
-		s := fmt.Sprintf("%d %s", resp.StatusCode, http.StatusText(resp.StatusCode))
+		msg := resp.Status
 		if len(body) > 0 {
-			s = fmt.Sprintf("%s: %s", s, string(body))
+			msg = fmt.Sprintf("%s: %s", msg, string(body))
 		}
-		return nil, errors.New(s)
+		return nil, errors.New(msg)
 	}
 
 	return body, nil

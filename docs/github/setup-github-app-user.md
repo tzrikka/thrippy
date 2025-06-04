@@ -14,11 +14,9 @@
    thrippy start-oauth <link ID>
    ```
 
-## GitHub Enterprise Server
+## Optional: GitHub Enterprise Server
 
-To use GHES instead of the default base URL (`https://github.com`):
-
-Run the following command between steps 1 and 2:
+To use GHES instead of the default base URL (`https://github.com`), run the following command between steps 1 and 2:
 
 ```
 set-creds <link ID> --kv "base_url=https://..."

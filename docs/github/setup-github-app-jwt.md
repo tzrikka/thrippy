@@ -26,11 +26,17 @@
    thrippy start-oauth <link ID>
    ```
 
-## GitHub Enterprise Server
+## Optional: Webhook Events
 
-To use GHES instead of the default base URL (`https://github.com`):
+If you configured the app to send asynchronous event notifications to a [webhook](https://docs.github.com/en/webhooks/using-webhooks/creating-webhooks#creating-webhooks-for-a-github-app), add the following flag to the `set-creds` command in step 2:
 
-Add the following flag to the `create-link` command in step 1:
+```shell
+--kv "webhook_secret=..."
+```
+
+## Optional: GitHub Enterprise Server
+
+To use GHES instead of the default base URL (`https://github.com`), add the following flag to the `create-link` command in step 1:
 
 ```shell
 --param "base_url=http://..."

@@ -15,3 +15,7 @@
 3. User's static Personal Access Token (PAT)
 
    - [Thrippy setup](./setup-github-user-pat.md)
+
+4. Webhook only
+
+   - [Thrippy setup](./setup-github-webhook.md)

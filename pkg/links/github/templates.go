@@ -20,7 +20,7 @@ var AppJWTTemplate = templates.New(
 		"https://github.com/settings/apps",
 	},
 	[]string{
-		"client_id_manual", "private_key_manual",
+		"client_id_manual", "private_key_manual", "webhook_secret_manual_optional",
 		"api_base_url", "install_id", // Added automatically by Thrippy.
 	},
 	appInstallModifier,
@@ -46,9 +46,22 @@ var UserPATTemplate = templates.New(
 		"https://github.com/settings/personal-access-tokens",
 		"https://github.com/settings/tokens",
 	},
-	[]string{"base_url_manual_optional", "pat_manual"},
+	[]string{"base_url_manual_optional", "pat_manual", "webhook_secret_manual_optional"},
 	nil,
 	userChecker,
+)
+
+var WebhookTemplate = templates.New(
+	"GitHub webhook for all types of incoming events",
+	[]string{
+		"https://docs.github.com/en/webhooks",
+		"https://docs.github.com/en/webhooks/using-webhooks/creating-webhooks",
+		"https://docs.github.com/en/webhooks/using-webhooks/handling-webhook-deliveries",
+		"https://docs.github.com/en/apps/creating-github-apps/writing-code-for-a-github-app/building-a-github-app-that-responds-to-webhook-events",
+	},
+	[]string{"webhook_secret_manual"},
+	nil,
+	nil,
 )
 
 // appInstallModifier adjusts the given [oauth.Config] for GitHub app
@@ -186,8 +199,8 @@ func userChecker(ctx context.Context, m map[string]string, o *oauth.Config, t *o
 			},
 		}
 	}
-	if o.Config.Endpoint.AuthURL == "" && m["base_url_optional"] != "" {
-		o.Config.Endpoint.AuthURL = m["base_url_optional"]
+	if o.Config.Endpoint.AuthURL == "" && m["base_url"] != "" {
+		o.Config.Endpoint.AuthURL = m["base_url"]
 	}
 
 	u := APIBaseURL(AuthBaseURL(o)) + "/user"

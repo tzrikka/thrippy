@@ -26,6 +26,7 @@ Static credentials (e.g. API keys) are set manually by the user. Dynamic credent
   - App installation using JWTs based on static credentials
   - App authorization to act on behalf of a user
   - User's static Personal Access Token (PAT)
+  - Webhook
 - [Google](./docs/google/README.md)
   - OAuth 2.0 to act on behalf of a user
   - Static Google Cloud service account key

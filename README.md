@@ -34,3 +34,4 @@ Static credentials (e.g. API keys) are set manually by the user. Dynamic credent
 - [Slack](./docs/slack/README.md)
   - App using a static bot token
   - App using OAuth v2 (regular Slack / GovSlack)
+  - Private "Socket Mode" app using a static app-level token

@@ -30,4 +30,5 @@ var Templates = map[string]templates.Template{
 	"slack-bot-token":        slack.BotTokenTemplate,
 	"slack-oauth":            slack.OAuthTemplate,
 	"slack-oauth-gov":        slack.OAuthGovTemplate,
+	"slack-socket-mode":      slack.SocketModeTemplate,
 }

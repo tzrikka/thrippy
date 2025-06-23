@@ -23,10 +23,7 @@ var BotTokenTemplate = templates.New(
 		"https://docs.slack.dev/authentication/tokens#bot",
 		"https://api.slack.com/apps",
 	},
-	[]string{
-		"bot_token_manual",
-		"signing_secret_manual_optional", "app_token_manual_optional",
-	},
+	[]string{"bot_token_manual", "signing_secret_manual"},
 	nil,
 	botTokenChecker,
 )
@@ -51,6 +48,17 @@ var OAuthGovTemplate = templates.New(
 	templates.OAuthCredFields,
 	oauthModifier(govBaseURL),
 	govOAuthChecker,
+)
+
+var SocketModeTemplate = templates.New(
+	`Private Slack "Socket Mode" app using a static app-level token`,
+	[]string{
+		"https://docs.slack.dev/apis/events-api/using-socket-mode",
+		"https://api.slack.com/apps",
+	},
+	[]string{"app_token_manual", "bot_token_manual"},
+	nil,
+	socketModeChecker,
 )
 
 // oauthModifier returns a function that adjusts an [oauth.Config] for Slack
@@ -94,6 +102,21 @@ func oauthChecker(ctx context.Context, _ map[string]string, _ *oauth.Config, t *
 // GovSlack, and returns metadata about it in JSON format.
 func govOAuthChecker(ctx context.Context, _ map[string]string, _ *oauth.Config, t *oauth2.Token) (string, error) {
 	return genericChecker(ctx, t.AccessToken, govBaseURL)
+}
+
+// socketModeChecker checks the given app-level token for Slack Socket Mode, as
+// well as the given static bot token, and returns metadata about it in JSON format.
+func socketModeChecker(ctx context.Context, m map[string]string, _ *oauth.Config, _ *oauth2.Token) (string, error) {
+	appToken := m["app_token"]
+	if appToken == "" {
+		return "", errors.New("missing app-level token")
+	}
+
+	if err := webSocketURL(ctx, defaultBaseURL, appToken); err != nil {
+		return "", fmt.Errorf("socket mode connection error: %w", err)
+	}
+
+	return botTokenChecker(ctx, m, nil, nil)
 }
 
 func genericChecker(ctx context.Context, botToken, baseURL string) (string, error) {

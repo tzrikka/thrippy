@@ -2,17 +2,10 @@
 
 ## Auth Types
 
-1. App using a static bot token
+1. [App using a static bot token](./slack-bot-token.md)
 
-   - [Slack app setup](./app.md)
-   - [Thrippy setup](./setup-slack-bot-token.md)
+2. [App using OAuth v2 (regular Slack)](./slack-oauth.md)
 
-2. App using OAuth v2 (regular Slack)
+3. [App using OAuth v2 (GovSlack)](./slack-oauth-gov.md)
 
-   - [Slack app setup](./app.md)
-   - [Thrippy setup](./setup-slack-oauth.md)
-
-3. App using OAuth v2 ([GovSlack](https://slack.com/solutions/govslack))
-
-   - [Slack app setup](./app.md)
-   - [Thrippy setup](./setup-slack-oauth-gov.md)
+4. [Private "Socket Mode" app using a static app-level token](./slack-socket-mode.md)

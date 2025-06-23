@@ -99,6 +99,23 @@ const (
 	mimeType = "application/json"
 )
 
+// WebSocketURL generates a temporary Socket Mode WebSocket URL that your app
+// can connect to in order to receive events and interactive payloads over.
+// Based on https://docs.slack.dev/reference/methods/apps.connections.open
+// (required scope: https://docs.slack.dev/reference/scopes/connections.write).
+func webSocketURL(ctx context.Context, baseURL, appLevelToken string) error {
+	url := baseURL + "/api/apps.connections.open"
+
+	resp := &slackResponse{}
+	if err := post(ctx, url, appLevelToken, resp); err != nil {
+		return err
+	}
+	if !resp.OK {
+		return errors.New(resp.Error)
+	}
+	return nil
+}
+
 // get is a Slack-specific HTTP GET wrapper for [client.HTTPRequest].
 func get(ctx context.Context, url, botToken string, jsonResp any) error {
 	resp, err := client.HTTPRequest(ctx, http.MethodGet, url, mimeType, botToken)

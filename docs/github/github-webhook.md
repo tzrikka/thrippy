@@ -1,4 +1,4 @@
-# Thrippy Setup: `github-webhook`
+# Thrippy Link Setup: `github-webhook`
 
 All GitHub link templates support webhooks for inbound events, as an optional addition.
 

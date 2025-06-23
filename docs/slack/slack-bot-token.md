@@ -1,4 +1,4 @@
-# Thrippy Setup: `slack-bot-token`
+# Thrippy Link Setup: `slack-bot-token`
 
 ## Slack App Minimum Settings
 

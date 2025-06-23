@@ -1,4 +1,4 @@
-# Thrippy Setup: `chatgpt`
+# Thrippy Link Setup: `chatgpt`
 
 1. Create the link
 

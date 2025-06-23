@@ -1,4 +1,4 @@
-# Thrippy Setup: `slack-oauth`
+# Thrippy Link Setup: `slack-oauth`
 
 ## Slack App Minimum Settings
 

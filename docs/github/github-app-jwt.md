@@ -1,4 +1,10 @@
-# Thrippy Setup: `github-app-jwt`
+# Thrippy Link Setup: `github-app-jwt`
+
+## GitHub App
+
+Minimum settings and details to copy: [see this page](./app-settings.md).
+
+## Thrippy Link Setup
 
 1. Create the link
 

@@ -1,4 +1,4 @@
-# Thrippy Setup: `generic-oauth`
+# Thrippy Link Setup: `generic-oauth`
 
 1. Create the link
 

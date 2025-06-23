@@ -1,4 +1,4 @@
-# GitHub Apps: Configuration Details
+# GitHub Apps: Settings & Details
 
 ## Apps Acting on Their Own Behalf
 

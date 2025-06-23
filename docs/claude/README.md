@@ -1,4 +1,4 @@
-# Thrippy Setup: `claude`
+# Thrippy Link Setup: `claude`
 
 1. Create the link
 

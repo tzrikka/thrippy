@@ -1,4 +1,4 @@
-# Thrippy Setup: `github-user-pat`
+# Thrippy Link Setup: `github-user-pat`
 
 1. Create the link
 

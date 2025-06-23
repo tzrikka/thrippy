@@ -1,4 +1,4 @@
-# Thrippy Setup: `gemini`
+# Thrippy Link Setup: `gemini`
 
 1. Create the link
 

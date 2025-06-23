@@ -1,4 +1,4 @@
-# Thrippy Setup: `slack-socket-mode`
+# Thrippy Link Setup: `slack-socket-mode`
 
 ## Slack App Minimum Settings
 

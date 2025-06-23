@@ -1,4 +1,10 @@
-# Thrippy Setup: `google-service-account`
+# Thrippy Link Setup: `google-service-account`
+
+## Google Cloud OAuth
+
+Minimum settings and details to copy: [see this page](./gcp-oauth.md).
+
+## Thrippy Link Setup
 
 1. Create the link
 

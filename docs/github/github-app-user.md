@@ -1,4 +1,10 @@
-# Thrippy Setup: `github-app-user`
+# Thrippy Link Setup: `github-app-user`
+
+## GitHub App
+
+Minimum settings and details to copy: [see this page](./app-settings.md).
+
+## Thrippy Link Setup
 
 1. Create the link
 
@@ -18,6 +24,6 @@
 
 To use GHES instead of the default base URL (`https://github.com`), run the following command between steps 1 and 2:
 
-```
+```shell
 set-creds <link ID> --kv "base_url=https://..."
 ```

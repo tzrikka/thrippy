@@ -107,13 +107,11 @@ func generateJWT(clientID, privateKey string) (string, error) {
 	return signedToken, nil
 }
 
-const (
-	mimeType = "application/vnd.github+json"
-)
-
 // get is a GitHub-specific HTTP GET wrapper for [client.HTTPRequest].
-func get(ctx context.Context, url, token string) (map[string]any, error) {
-	resp, err := client.HTTPRequest(ctx, http.MethodGet, url, mimeType, token)
+func get(ctx context.Context, url, authToken string) (map[string]any, error) {
+	resp, err := client.HTTPRequestWithHeaders(ctx, http.MethodGet, url, authToken, map[string]string{
+		"Accept": "application/vnd.github+json",
+	})
 	if err != nil {
 		return nil, err
 	}

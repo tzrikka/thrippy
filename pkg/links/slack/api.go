@@ -43,8 +43,8 @@ type bot struct {
 
 type slackResponse struct {
 	OK               bool              `json:"ok"`
-	Warning          string            `json:"warning,omitempty"`
 	Error            string            `json:"error,omitempty"`
+	Warning          string            `json:"warning,omitempty"`
 	ResponseMetadata *responseMetadata `json:"response_metadata,omitempty"`
 }
 
@@ -95,10 +95,6 @@ func botsInfo(ctx context.Context, baseURL, botToken string, authTest *authTestR
 	return &resp.Bot, nil
 }
 
-const (
-	mimeType = "application/json"
-)
-
 // WebSocketURL generates a temporary Socket Mode WebSocket URL that your app
 // can connect to in order to receive events and interactive payloads over.
 // Based on https://docs.slack.dev/reference/methods/apps.connections.open
@@ -118,7 +114,7 @@ func webSocketURL(ctx context.Context, baseURL, appLevelToken string) error {
 
 // get is a Slack-specific HTTP GET wrapper for [client.HTTPRequest].
 func get(ctx context.Context, url, botToken string, jsonResp any) error {
-	resp, err := client.HTTPRequest(ctx, http.MethodGet, url, mimeType, botToken)
+	resp, err := client.HTTPRequest(ctx, http.MethodGet, url, botToken)
 	if err != nil {
 		return err
 	}
@@ -128,7 +124,7 @@ func get(ctx context.Context, url, botToken string, jsonResp any) error {
 
 // post is a Slack-specific HTTP POST wrapper for [client.HTTPRequest].
 func post(ctx context.Context, url, botToken string, jsonResp any) error {
-	resp, err := client.HTTPRequest(ctx, http.MethodPost, url, mimeType, botToken)
+	resp, err := client.HTTPRequest(ctx, http.MethodPost, url, botToken)
 	if err != nil {
 		return err
 	}

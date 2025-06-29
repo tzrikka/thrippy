@@ -40,7 +40,7 @@ func TestHTTPRequest(t *testing.T) {
 			}
 			defer s.Close()
 
-			got, err := HTTPRequest(t.Context(), tt.httpMethod, s.URL, "mime/type", "token")
+			got, err := HTTPRequest(t.Context(), tt.httpMethod, s.URL, "token")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HTTPRequest() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -55,7 +55,7 @@ func TestHTTPRequest(t *testing.T) {
 func handler(t *testing.T) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		got := r.Header.Get("Accept")
-		want := "mime/type"
+		want := "application/json"
 		if got != want {
 			t.Errorf("accept header = %q, want %q", got, want)
 		}

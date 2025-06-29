@@ -10,7 +10,6 @@ import (
 
 const (
 	modelsURL = "https://api.anthropic.com/v1/models"
-	mimeType  = "application/json"
 	version   = "anthropic-version: 2023-06-01"
 	// X-api-key.
 )
@@ -20,11 +19,10 @@ const (
 // https://docs.anthropic.com/en/api/versioning and
 // https://docs.anthropic.com/en/api/models-list.
 func get(ctx context.Context, url, apiKey string) (map[string]any, error) {
-	headers := map[string]string{
+	resp, err := client.HTTPRequestWithHeaders(ctx, http.MethodGet, url, "", map[string]string{
 		"anthropic-version": "2023-06-01",
 		"x-api-key":         apiKey,
-	}
-	resp, err := client.HTTPRequestWithHeaders(ctx, http.MethodGet, url, mimeType, headers, "")
+	})
 	if err != nil {
 		return nil, err
 	}

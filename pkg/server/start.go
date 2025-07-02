@@ -30,8 +30,8 @@ func Start(_ context.Context, cmd *cli.Command) error {
 	return newHTTPServer(cmd).run()
 }
 
-// initLog initializes the logger for the Thrippy server, based
-// on whether the server is running in development mode or not.
+// initLog initializes the logger for the Thrippy server,
+// based on whether it's running in development mode or not.
 func initLog(devMode bool) {
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnixMs

@@ -5,6 +5,15 @@ import (
 	"testing"
 )
 
+func TestFlags(t *testing.T) {
+	d := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", d)
+
+	if len(flags(configFile())) == 0 {
+		t.Errorf("flags() should never be nil or empty")
+	}
+}
+
 func TestConfigDirAndFile(t *testing.T) {
 	d := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", d)

@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	DefaultBaseURL = "https://slack.com"
-	GovBaseURL     = "https://slack-gov.com" // https://docs.slack.dev/govslack
+	defaultBaseURL = "https://slack.com"
+	govBaseURL     = "https://slack-gov.com" // https://docs.slack.dev/govslack
 )
 
 var BotTokenTemplate = templates.New(
@@ -35,7 +35,7 @@ var OAuthTemplate = templates.New(
 		"https://api.slack.com/apps",
 	},
 	templates.OAuthCredFields,
-	oauthModifier(DefaultBaseURL),
+	oauthModifier(defaultBaseURL),
 	oauthChecker,
 )
 
@@ -46,7 +46,7 @@ var OAuthGovTemplate = templates.New(
 		"https://docs.slack.dev/govslack",
 	},
 	templates.OAuthCredFields,
-	oauthModifier(GovBaseURL),
+	oauthModifier(govBaseURL),
 	govOAuthChecker,
 )
 
@@ -89,19 +89,19 @@ func oauthModifier(baseURL string) func(*oauth.Config) {
 // botTokenChecker checks the given static bot token for
 // Slack, and returns metadata about it in JSON format.
 func botTokenChecker(ctx context.Context, m map[string]string, _ *oauth.Config, _ *oauth2.Token) (string, error) {
-	return genericChecker(ctx, m["bot_token"], DefaultBaseURL)
+	return genericChecker(ctx, m["bot_token"], defaultBaseURL)
 }
 
 // oauthChecker checks the given static bot token for
 // Slack, and returns metadata about it in JSON format.
 func oauthChecker(ctx context.Context, _ map[string]string, _ *oauth.Config, t *oauth2.Token) (string, error) {
-	return genericChecker(ctx, t.AccessToken, DefaultBaseURL)
+	return genericChecker(ctx, t.AccessToken, defaultBaseURL)
 }
 
 // govOAuthChecker checks the given static bot token for
 // GovSlack, and returns metadata about it in JSON format.
 func govOAuthChecker(ctx context.Context, _ map[string]string, _ *oauth.Config, t *oauth2.Token) (string, error) {
-	return genericChecker(ctx, t.AccessToken, GovBaseURL)
+	return genericChecker(ctx, t.AccessToken, govBaseURL)
 }
 
 // socketModeChecker checks the given app-level token for Slack Socket Mode, as
@@ -112,7 +112,7 @@ func socketModeChecker(ctx context.Context, m map[string]string, _ *oauth.Config
 		return "", errors.New("missing app-level token")
 	}
 
-	if err := webSocketURL(ctx, DefaultBaseURL, appToken); err != nil {
+	if err := webSocketURL(ctx, defaultBaseURL, appToken); err != nil {
 		return "", fmt.Errorf("socket mode connection error: %w", err)
 	}
 

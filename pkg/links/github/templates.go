@@ -9,11 +9,11 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/tzrikka/thrippy/pkg/links/templates"
+	"github.com/tzrikka/thrippy/internal/links"
 	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
-var AppJWTTemplate = templates.New(
+var AppJWTTemplate = links.NewTemplate(
 	"GitHub app installation using JWTs based on static credentials",
 	[]string{
 		"https://docs.github.com/en/apps/using-github-apps/about-using-github-apps",
@@ -27,18 +27,18 @@ var AppJWTTemplate = templates.New(
 	jwtChecker,
 )
 
-var AppUserTemplate = templates.New(
+var AppUserTemplate = links.NewTemplate(
 	"GitHub app authorization to act on behalf of a user",
 	[]string{
 		"https://docs.github.com/en/apps/using-github-apps/authorizing-github-apps",
 		"https://github.com/settings/apps",
 	},
-	append([]string{"base_url_manual_optional"}, templates.OAuthCredFields...),
+	append([]string{"base_url_manual_optional"}, links.OAuthCredFields...),
 	appAuthzModifier,
 	userChecker,
 )
 
-var UserPATTemplate = templates.New(
+var UserPATTemplate = links.NewTemplate(
 	"GitHub with a user's static Personal Access Token (PAT)",
 	[]string{
 		"https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api?apiVersion=2022-11-28#authenticating-with-a-personal-access-token",
@@ -51,7 +51,7 @@ var UserPATTemplate = templates.New(
 	userChecker,
 )
 
-var WebhookTemplate = templates.New(
+var WebhookTemplate = links.NewTemplate(
 	"GitHub webhook for all types of incoming events",
 	[]string{
 		"https://docs.github.com/en/webhooks",
@@ -143,7 +143,7 @@ func jwtChecker(ctx context.Context, m map[string]string, o *oauth.Config, _ *oa
 	// is optional - until Thrippy adds the installation ID automatically.
 	installID := m["install_id"]
 	if installID == "" {
-		return templates.EncodeMetadataAsJSON(meta)
+		return links.EncodeMetadataAsJSON(meta)
 	}
 
 	// https://docs.github.com/en/rest/apps/apps#get-an-installation-for-the-authenticated-app
@@ -163,7 +163,7 @@ func jwtChecker(ctx context.Context, m map[string]string, o *oauth.Config, _ *oa
 	meta.InstallUpdatedAt = normalizeRFC3339(resp["updated_at"].(string))
 	meta.InstallURL = resp["html_url"].(string)
 
-	return templates.EncodeMetadataAsJSON(meta)
+	return links.EncodeMetadataAsJSON(meta)
 }
 
 type appMetadata struct {
@@ -223,7 +223,7 @@ func userChecker(ctx context.Context, m map[string]string, o *oauth.Config, t *o
 		location = ""
 	}
 
-	return templates.EncodeMetadataAsJSON(userMetadata{
+	return links.EncodeMetadataAsJSON(userMetadata{
 		Company:  company,
 		Email:    resp["email"].(string),
 		Location: location,

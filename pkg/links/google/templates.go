@@ -10,11 +10,11 @@ import (
 	"golang.org/x/oauth2/google"
 	googleoauth2 "google.golang.org/api/oauth2/v2"
 
-	"github.com/tzrikka/thrippy/pkg/links/templates"
+	"github.com/tzrikka/thrippy/internal/links"
 	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
-var ServiceAccountTemplate = templates.New(
+var ServiceAccountTemplate = links.NewTemplate(
 	"Google APIs using a static GCP service account key",
 	[]string{
 		"https://cloud.google.com/iam/docs/service-account-overview",
@@ -26,13 +26,13 @@ var ServiceAccountTemplate = templates.New(
 	serviceKeyChecker,
 )
 
-var UserOAuthTemplate = templates.New(
+var UserOAuthTemplate = links.NewTemplate(
 	"Google APIs using OAuth 2.0 to act on behalf of a user",
 	[]string{
 		"https://developers.google.com/workspace/guides/get-started",
 		"https://console.cloud.google.com/auth/overview",
 	},
-	templates.OAuthCredFields,
+	links.OAuthCredFields,
 	oauthModifier,
 	userTokenChecker,
 )
@@ -75,7 +75,7 @@ func userTokenChecker(ctx context.Context, _ map[string]string, o *oauth.Config,
 		return "", err
 	}
 
-	return templates.EncodeMetadataAsJSON(oauthMetadata{
+	return links.EncodeMetadataAsJSON(oauthMetadata{
 		Email:         user.Email,
 		ID:            user.Id,
 		FamilyName:    user.FamilyName,
@@ -100,7 +100,7 @@ func serviceKeyChecker(ctx context.Context, m map[string]string, _ *oauth.Config
 		return "", errors.New("project ID not found in service account key")
 	}
 
-	return templates.EncodeMetadataAsJSON(oauthMetadata{
+	return links.EncodeMetadataAsJSON(oauthMetadata{
 		Email:   email,
 		ID:      id,
 		Project: matches[1],

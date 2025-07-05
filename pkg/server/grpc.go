@@ -17,8 +17,8 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
+	intlinks "github.com/tzrikka/thrippy/internal/links"
 	"github.com/tzrikka/thrippy/pkg/links"
-	"github.com/tzrikka/thrippy/pkg/links/templates"
 	"github.com/tzrikka/thrippy/pkg/oauth"
 	"github.com/tzrikka/thrippy/pkg/secrets"
 )
@@ -69,7 +69,7 @@ func (s *grpcServer) CreateLink(
 
 	o := oauth.FromProto(in.GetOauthConfig())
 	templ, ok := links.Templates[t]
-	templates.ModifyOAuthByTemplate(o, templ, ok)
+	intlinks.ModifyOAuthByTemplate(o, templ, ok)
 	if o != nil && o.Config.Endpoint.AuthURL != "" && o.Config.ClientID == "" {
 		l.Warn().Msg("missing OAuth client ID")
 		return nil, status.Error(codes.InvalidArgument, "missing OAuth client ID")

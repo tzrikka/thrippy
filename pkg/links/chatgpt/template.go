@@ -5,11 +5,11 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/tzrikka/thrippy/pkg/links/templates"
+	"github.com/tzrikka/thrippy/internal/links"
 	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
-var Template = templates.New(
+var Template = links.NewTemplate(
 	"ChatGPT using a static API key",
 	[]string{
 		"https://platform.openai.com/docs/api-reference/authentication",

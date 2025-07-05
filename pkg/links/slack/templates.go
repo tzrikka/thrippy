@@ -8,7 +8,7 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/tzrikka/thrippy/pkg/links/templates"
+	"github.com/tzrikka/thrippy/internal/links"
 	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
@@ -17,7 +17,7 @@ const (
 	govBaseURL     = "https://slack-gov.com" // https://docs.slack.dev/govslack
 )
 
-var BotTokenTemplate = templates.New(
+var BotTokenTemplate = links.NewTemplate(
 	"Slack app using a static bot token",
 	[]string{
 		"https://docs.slack.dev/authentication/tokens#bot",
@@ -28,29 +28,29 @@ var BotTokenTemplate = templates.New(
 	botTokenChecker,
 )
 
-var OAuthTemplate = templates.New(
+var OAuthTemplate = links.NewTemplate(
 	"Slack app using OAuth v2",
 	[]string{
 		"https://docs.slack.dev/authentication/installing-with-oauth",
 		"https://api.slack.com/apps",
 	},
-	templates.OAuthCredFields,
+	links.OAuthCredFields,
 	oauthModifier(defaultBaseURL),
 	oauthChecker,
 )
 
-var OAuthGovTemplate = templates.New(
+var OAuthGovTemplate = links.NewTemplate(
 	"GovSlack app using OAuth v2",
 	[]string{
 		"https://docs.slack.dev/authentication/installing-with-oauth",
 		"https://docs.slack.dev/govslack",
 	},
-	templates.OAuthCredFields,
+	links.OAuthCredFields,
 	oauthModifier(govBaseURL),
 	govOAuthChecker,
 )
 
-var SocketModeTemplate = templates.New(
+var SocketModeTemplate = links.NewTemplate(
 	`Private Slack "Socket Mode" app using a static app-level token`,
 	[]string{
 		"https://docs.slack.dev/apis/events-api/using-socket-mode",
@@ -134,7 +134,7 @@ func genericChecker(ctx context.Context, botToken, baseURL string) (string, erro
 		return "", fmt.Errorf("bot info error: %w", err)
 	}
 
-	return templates.EncodeMetadataAsJSON(metadata{
+	return links.EncodeMetadataAsJSON(metadata{
 		AppID:        bot.AppID,
 		BotID:        bot.ID,
 		BotName:      bot.Name,

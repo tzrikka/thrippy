@@ -1,4 +1,8 @@
-package templates
+// Package links provides standard types and helper functions
+// for all the templates that are implemented in [pkg/links].
+//
+// [pkg/links]: https://pkg.go.dev/github.com/tzrikka/thrippy/pkg/links
+package links
 
 import (
 	"context"
@@ -13,21 +17,20 @@ import (
 	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
-type (
-	OAuthFunc   func(*oauth.Config)
-	CheckerFunc func(context.Context, map[string]string, *oauth.Config, *oauth2.Token) (string, error)
+type OAuthFunc func(*oauth.Config)
 
-	Template struct {
-		description string
-		links       []string
-		credFields  []string
-		oauthFunc   OAuthFunc
-		checkerFunc CheckerFunc
-	}
-)
+type CheckerFunc func(context.Context, map[string]string, *oauth.Config, *oauth2.Token) (string, error)
 
-// New defines the authentication details of a well-known third-party service.
-func New(description string, links, credFields []string, of OAuthFunc, cf CheckerFunc) Template {
+type Template struct {
+	description string
+	links       []string
+	credFields  []string
+	oauthFunc   OAuthFunc
+	checkerFunc CheckerFunc
+}
+
+// NewTemplate defines the authentication details of a well-known third-party service.
+func NewTemplate(description string, links, credFields []string, of OAuthFunc, cf CheckerFunc) Template {
 	return Template{
 		description: description,
 		links:       links,

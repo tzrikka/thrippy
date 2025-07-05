@@ -4,21 +4,21 @@
 package links
 
 import (
+	"github.com/tzrikka/thrippy/internal/links"
 	"github.com/tzrikka/thrippy/pkg/links/chatgpt"
 	"github.com/tzrikka/thrippy/pkg/links/claude"
 	"github.com/tzrikka/thrippy/pkg/links/gemini"
 	"github.com/tzrikka/thrippy/pkg/links/github"
 	"github.com/tzrikka/thrippy/pkg/links/google"
 	"github.com/tzrikka/thrippy/pkg/links/slack"
-	"github.com/tzrikka/thrippy/pkg/links/templates"
 )
 
 // Templates is a map of all the link templates that Thrippy recognizes and supports.
-var Templates = map[string]templates.Template{
+var Templates = map[string]links.Template{
 	"chatgpt": chatgpt.Template,
 	"claude":  claude.Template,
 	"gemini":  gemini.Template,
-	"generic-oauth": templates.New(
+	"generic-oauth": links.NewTemplate(
 		"Generic link", nil, nil, nil, nil,
 	),
 	"github-app-jwt":         github.AppJWTTemplate,

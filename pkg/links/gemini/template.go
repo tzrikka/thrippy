@@ -1,10 +1,10 @@
 package gemini
 
 import (
-	"github.com/tzrikka/thrippy/pkg/links/templates"
+	"github.com/tzrikka/thrippy/internal/links"
 )
 
-var Template = templates.New(
+var Template = links.NewTemplate(
 	"Gemini using a static API key",
 	[]string{
 		"https://ai.google.dev/gemini-api/docs/api-key",

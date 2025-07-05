@@ -113,7 +113,7 @@ func GRPCCreds(cmd *cli.Command) []grpc.ServerOption {
 	return []grpc.ServerOption{grpc.Creds(credentials.NewTLS(&tls.Config{
 		ClientAuth:   tls.RequireAndVerifyClientCert,
 		Certificates: []tls.Certificate{cert},
-		RootCAs:      ca,
+		ClientCAs:    ca,
 		MinVersion:   tls.VersionTLS13,
 	}))}
 }

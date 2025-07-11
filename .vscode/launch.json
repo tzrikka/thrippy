@@ -12,13 +12,25 @@
             "processId": 0
         },
         {
+            "name": "Launch server",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "cmd/thrippy/main.go",
+            "args": [
+                "--dev",
+                "server"
+            ]
+        },
+        {
             "name": "Launch client",
             "type": "go",
             "request": "launch",
             "mode": "debug",
             "program": "thrippy",
             "args": [
-                "help"
+                "--dev",
+                "link-templates"
             ]
         }
     ]

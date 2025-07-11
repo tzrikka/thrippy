@@ -57,3 +57,9 @@ Static credentials (e.g. API keys) are set manually by the user. Dynamic credent
 > In dev mode, Thrippy uses an in-memory secrets manager by default, which is destroyed when the server goes down.
 
 3. Create any **static** link, based on the [documentation](https://github.com/tzrikka/thrippy/tree/main/docs)
+
+## Production Server Configuration
+
+- Webhooks for OAuth 2.0
+- Secure secrets managers
+- m/TLS for Thrippy client/server communication

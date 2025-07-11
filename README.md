@@ -44,8 +44,8 @@ Static credentials (e.g. API keys) are set manually by the user. Dynamic credent
    go install github.com/tzrikka/thrippy
    ```
 
-   > [!TIP]
-   > The binary will be located here: `$(go env GOPATH)/bin`
+> [!TIP]
+> The binary will be located here: `$(go env GOPATH)/bin`
 
 2. Start the Thrippy server:
 
@@ -53,4 +53,4 @@ Static credentials (e.g. API keys) are set manually by the user. Dynamic credent
    thrippy server --dev
    ```
 
-3. Create any **static** link, based on [the documentation](https://github.com/tzrikka/thrippy/tree/main/docs)
+3. Create any **static** link, based on the [documentation](https://github.com/tzrikka/thrippy/tree/main/docs)

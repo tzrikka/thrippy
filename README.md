@@ -17,6 +17,9 @@ Static credentials (e.g. API keys) are set manually by the user. Dynamic credent
 
 ## Supported Services and Auth Types
 
+- [Atlassian](./docs/atlassian/README.md)
+  - Products: BitBucket, Confluence, Jira
+  - OAuth 2.0 (3LO) app / user API token
 - [ChatGPT](./docs/chatgpt/README.md)
   - Static API key
 - [Claude](./docs/claude/README.md)

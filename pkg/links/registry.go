@@ -5,6 +5,9 @@ package links
 
 import (
 	"github.com/tzrikka/thrippy/internal/links"
+	"github.com/tzrikka/thrippy/pkg/links/atlassian/bitbucket"
+	"github.com/tzrikka/thrippy/pkg/links/atlassian/confluence"
+	"github.com/tzrikka/thrippy/pkg/links/atlassian/jira"
 	"github.com/tzrikka/thrippy/pkg/links/chatgpt"
 	"github.com/tzrikka/thrippy/pkg/links/claude"
 	"github.com/tzrikka/thrippy/pkg/links/gemini"
@@ -15,9 +18,11 @@ import (
 
 // Templates is a map of all the link templates that Thrippy recognizes and supports.
 var Templates = map[string]links.Template{
-	"chatgpt": chatgpt.Template,
-	"claude":  claude.Template,
-	"gemini":  gemini.Template,
+	"bitbucket-user-token":  bitbucket.APITokenTemplate,
+	"chatgpt":               chatgpt.Template,
+	"claude":                claude.Template,
+	"confluence-user-token": confluence.APITokenTemplate,
+	"gemini":                gemini.Template,
 	"generic-oauth": links.NewTemplate(
 		"Generic link", nil, nil, nil, nil,
 	),
@@ -27,6 +32,7 @@ var Templates = map[string]links.Template{
 	"github-webhook":         github.WebhookTemplate,
 	"google-service-account": google.ServiceAccountTemplate,
 	"google-user-oauth":      google.UserOAuthTemplate,
+	"jira-user-token":        jira.APITokenTemplate,
 	"slack-bot-token":        slack.BotTokenTemplate,
 	"slack-oauth":            slack.OAuthTemplate,
 	"slack-oauth-gov":        slack.OAuthGovTemplate,

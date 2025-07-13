@@ -8,12 +8,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 
+	"github.com/tzrikka/thrippy/internal/links"
 	"github.com/tzrikka/thrippy/pkg/client"
 	"github.com/tzrikka/thrippy/pkg/oauth"
 )
@@ -43,18 +43,12 @@ func AuthBaseURL(o *oauth.Config) string {
 		baseURL = "https://" + baseURL
 	}
 
-	u, err := url.Parse(baseURL)
+	u, err := links.NormalizeURL(baseURL)
 	if err != nil {
 		return badBaseURL
 	}
-	if u.Host == "" {
-		return badBaseURL
-	}
-	u.Path = ""
-	u.RawQuery = ""
-	u.Fragment = ""
 
-	return u.String()
+	return u
 }
 
 // APIBaseURL transforms the given GitHub base URL
@@ -109,7 +103,7 @@ func generateJWT(clientID, privateKey string) (string, error) {
 
 // get is a GitHub-specific HTTP GET wrapper for [client.HTTPRequest].
 func get(ctx context.Context, url, authToken string) (map[string]any, error) {
-	resp, err := client.HTTPRequestWithHeaders(ctx, http.MethodGet, url, authToken, map[string]string{
+	resp, err := client.HTTPRequestWithHeaders(ctx, http.MethodGet, url, "Bearer "+authToken, map[string]string{
 		"Accept": "application/vnd.github+json",
 	})
 	if err != nil {

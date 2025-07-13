@@ -7,6 +7,9 @@ package links
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"net/url"
 	"slices"
 	"strings"
 
@@ -103,4 +106,26 @@ func EncodeMetadataAsJSON(v any) (string, error) {
 		return "", err
 	}
 	return sb.String(), nil
+}
+
+// NormalizeURL checks that the given URL is valid,
+// and strips any suffixes after the host address.
+func NormalizeURL(baseURL string) (string, error) {
+	if baseURL == "" {
+		return "", errors.New("missing Atlassian base URL")
+	}
+
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return "", fmt.Errorf("invalid Atlassian base URL: %w", err)
+	}
+
+	if u.Host == "" {
+		return "", errors.New("invalid Atlassian base URL: no host")
+	}
+
+	u.Path = ""
+	u.RawQuery = ""
+	u.Fragment = ""
+	return u.String(), nil
 }

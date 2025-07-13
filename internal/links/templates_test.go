@@ -126,3 +126,54 @@ func TestEncodeMetadataAsJSON(t *testing.T) {
 		})
 	}
 }
+
+func TestNormalizeURL(t *testing.T) {
+	tests := []struct {
+		name    string
+		baseURL string
+		want    string
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			wantErr: true,
+		},
+		{
+			name:    "arbitrary_string",
+			baseURL: "string",
+			wantErr: true,
+		},
+		{
+			name:    "scheme_only",
+			baseURL: "http://",
+			wantErr: true,
+		},
+		{
+			name:    "no_host",
+			baseURL: "https:///foo",
+			wantErr: true,
+		},
+		{
+			name:    "valid_base_url",
+			baseURL: "https://foo/",
+			want:    "https://foo",
+		},
+		{
+			name:    "valid_url_with_suffixes",
+			baseURL: "https://foo.bar.com/dir/subdir?key=value#frag",
+			want:    "https://foo.bar.com",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := NormalizeURL(tt.baseURL)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NormalizeURL() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("NormalizeURL() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

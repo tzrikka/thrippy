@@ -25,10 +25,8 @@ linters:
     - nosprintfhostport
     - perfsprint
     - predeclared
-    # - promlinter
     - recvcheck
     # - revive
-    # - spancheck
     - unconvert
     - usestdlibvars
     - zerologlint

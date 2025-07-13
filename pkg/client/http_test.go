@@ -40,7 +40,7 @@ func TestHTTPRequest(t *testing.T) {
 			}
 			defer s.Close()
 
-			got, err := HTTPRequest(t.Context(), tt.httpMethod, s.URL, "token")
+			got, err := HTTPRequest(t.Context(), tt.httpMethod, s.URL, "Bearer token")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HTTPRequest() error = %v, wantErr %v", err, tt.wantErr)
 				return

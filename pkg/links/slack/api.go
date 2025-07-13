@@ -116,7 +116,7 @@ func webSocketURL(ctx context.Context, baseURL, appLevelToken string) error {
 
 // get is a Slack-specific HTTP GET wrapper for [client.HTTPRequest].
 func get(ctx context.Context, url, botToken string, jsonResp any) error {
-	resp, err := client.HTTPRequest(ctx, http.MethodGet, url, botToken)
+	resp, err := client.HTTPRequest(ctx, http.MethodGet, url, "Bearer "+botToken)
 	if err != nil {
 		return err
 	}
@@ -126,7 +126,7 @@ func get(ctx context.Context, url, botToken string, jsonResp any) error {
 
 // post is a Slack-specific HTTP POST wrapper for [client.HTTPRequest].
 func post(ctx context.Context, url, botToken string, jsonResp any) error {
-	resp, err := client.HTTPRequest(ctx, http.MethodPost, url, botToken)
+	resp, err := client.HTTPRequest(ctx, http.MethodPost, url, "Bearer "+botToken)
 	if err != nil {
 		return err
 	}

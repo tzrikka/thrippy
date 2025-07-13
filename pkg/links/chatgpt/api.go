@@ -15,7 +15,7 @@ const (
 // get is a ChatGPT-specific HTTP GET wrapper for [client.HTTPRequest].
 // Based on https://platform.openai.com/docs/api-reference/authentication.
 func get(ctx context.Context, url, apiKey string) (map[string]any, error) {
-	resp, err := client.HTTPRequest(ctx, http.MethodGet, url, apiKey)
+	resp, err := client.HTTPRequest(ctx, http.MethodGet, url, "Bearer "+apiKey)
 	if err != nil {
 		return nil, err
 	}

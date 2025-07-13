@@ -33,13 +33,18 @@ type httpServer struct {
 }
 
 func newHTTPServer(cmd *cli.Command) *httpServer {
+	redirectURL := ""
+	if webhookAddr := cmd.String("webhook-addr"); webhookAddr != "" {
+		redirectURL = fmt.Sprintf("https://%s/callback", webhookAddr)
+	}
+
 	return &httpServer{
 		httpPort: cmd.Int("webhook-port"),
 
 		grpcAddr:  cmd.String("grpc-addr"),
 		grpcCreds: client.GRPCCreds(cmd),
 
-		redirectURL: fmt.Sprintf("https://%s/callback", cmd.String("webhook-addr")),
+		redirectURL: redirectURL,
 		fallbackURL: cmd.String("fallback-url"),
 	}
 }
@@ -59,7 +64,11 @@ func (s *httpServer) run() error {
 	}
 
 	log.Info().Msgf("HTTP server listening on port %d", s.httpPort)
-	log.Info().Msgf("OAuth callback URL: %s", s.redirectURL)
+	if s.redirectURL != "" {
+		log.Info().Msgf("OAuth callback URL: %s", s.redirectURL)
+	} else {
+		log.Warn().Msg("OAuth callback URL: not set")
+	}
 	err := server.ListenAndServe()
 	if err != nil {
 		log.Err(err).Send()

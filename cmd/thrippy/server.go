@@ -29,10 +29,9 @@ func serverCommand(configFilePath altsrc.StringSourcer) *cli.Command {
 				Validator: validatePort,
 			},
 			&cli.StringFlag{
-				Name:     "webhook-addr",
-				Aliases:  []string{"w"},
-				Usage:    "public address for HTTP webhooks",
-				Required: true,
+				Name:    "webhook-addr",
+				Aliases: []string{"w"},
+				Usage:   "public address for HTTP webhooks",
 				Sources: cli.NewValueSourceChain(
 					cli.EnvVar("THRIPPY_WEBHOOK_ADDRESS"),
 					toml.TOML("server.webhook_address", configFilePath),

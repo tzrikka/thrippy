@@ -1,5 +1,7 @@
-# BitBucket Links in Thrippy
+# Bitbucket Links in Thrippy
 
 ## Auth Types
 
-1. [User's static API token](./bitbucket-user-token.md)
+1. [App using OAuth 2.0 (3LO)](./bitbucket-app-oauth.md)
+
+2. [User's static API token](./bitbucket-user-token.md)

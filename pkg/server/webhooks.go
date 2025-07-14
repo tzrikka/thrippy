@@ -5,6 +5,7 @@ import (
 	"html"
 	"net"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -33,20 +34,32 @@ type httpServer struct {
 }
 
 func newHTTPServer(cmd *cli.Command) *httpServer {
-	redirectURL := ""
-	if webhookAddr := cmd.String("webhook-addr"); webhookAddr != "" {
-		redirectURL = fmt.Sprintf("https://%s/callback", webhookAddr)
-	}
-
 	return &httpServer{
 		httpPort: cmd.Int("webhook-port"),
 
 		grpcAddr:  cmd.String("grpc-addr"),
 		grpcCreds: client.GRPCCreds(cmd),
 
-		redirectURL: redirectURL,
+		redirectURL: redirectURL(cmd.String("webhook-addr")),
 		fallbackURL: cmd.String("fallback-url"),
 	}
+}
+
+// redirectURL normalizes the --webhook-addr flag value and returns the
+// OAuth 2.0 redirect URL that Thrippy will use. This function also handles
+// the case where the flag value is a full URL instead of just the address.
+func redirectURL(webhookAddr string) string {
+	if webhookAddr == "" {
+		return ""
+	}
+
+	if strings.HasPrefix(webhookAddr, "http://") || strings.HasPrefix(webhookAddr, "https://") {
+		if u, err := url.Parse(webhookAddr); err == nil {
+			webhookAddr = u.Host
+		}
+	}
+
+	return fmt.Sprintf("https://%s/callback", webhookAddr)
 }
 
 // run starts an HTTP server for OAuth webhooks.
@@ -208,8 +221,8 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 
 		// Check the app installation, extract metadata with and about it, and save them.
 		ctx := l.WithContext(r.Context())
-		url := github.APIBaseURL(github.AuthBaseURL(o))
-		if err := client.AddGitHubCreds(ctx, s.grpcAddr, s.grpcCreds, id, installID, url); err != nil {
+		u := github.APIBaseURL(github.AuthBaseURL(o))
+		if err := client.AddGitHubCreds(ctx, s.grpcAddr, s.grpcCreds, id, installID, u); err != nil {
 			htmlResponse(w, http.StatusInternalServerError, "&nbsp;")
 			return
 		}

@@ -5,7 +5,7 @@
 App settings:
 
 - Post-installation setup URL: `https://ADDRESS/callback`\
-  (`ADDRESS` is Thrippy's public address for HTTP webhooks - see the `server` command's `-w` flag)
+  (`ADDRESS` is Thrippy's [public address for HTTP webhooks](/docs/http_tunnel.md))
 - Post-installation redirect on update: yes
 - Generate a private key
 

@@ -9,22 +9,22 @@
    - Pick a Slack workspace
    - Click the "Create App" button
 
-2. Left Panel > Features > OAuth & Permissions
+2. Left Sidebar > Features > OAuth & Permissions
 
    - "Scopes" section
      - Bot Token Scopes > click the "Add an OAuth Scope" button
      - Select (at least) [`users:read`](https://docs.slack.dev/reference/scopes/users.read)
 
-3. Left Panel > Settings > Install App
+3. Left Sidebar > Settings > Install App
 
    - Click the "Install to Workspace" button
    - Click the "Allow" button
 
 ## Slack App Details to Copy
 
-- Left Panel > Settings > Basic Information
+- Left Sidebar > Settings > Basic Information
   - Signing secret
-- Left Panel > Settings > Install App
+- Left Sidebar > Settings > Install App
   - Bot User OAuth Token (click the "Copy" button)
 
 ## Thrippy Link Setup

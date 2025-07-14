@@ -164,6 +164,7 @@ func TestNormalizeURL(t *testing.T) {
 			want:    "https://foo.bar.com",
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := NormalizeURL(tt.baseURL)

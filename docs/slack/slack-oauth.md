@@ -9,12 +9,12 @@
    - Pick a Slack workspace
    - Click the "Create App" button
 
-2. Left Panel > Features > OAuth & Permissions
+2. Left Sidebar > Features > OAuth & Permissions
 
    - "Redirect URLs" section
      - Click the "Add New Redirect URL" button
      - Redirect URL: `https://ADDRESS/callback`\
-       (`ADDRESS` is Thrippy's public address for HTTP webhooks - see the `server` command's `-w` flag)
+       (`ADDRESS` is Thrippy's [public address for HTTP webhooks](/docs/http_tunnel.md))
      - Click the "Add" button
      - Click the "Save URLs" button
    - "Scopes" section
@@ -23,11 +23,11 @@
 
 ## Slack App Details to Copy
 
-- Left Panel > Settings > Basic Information
+- Left Sidebar > Settings > Basic Information
   - Client ID
   - Client secret (click the "Show" button)
   - Signing secret (click the "Show" button)
-- Left Panel > Settings > Install App
+- Left Sidebar > Settings > Install App
   - Bot User OAuth Token (click the "Copy" button)
 
 ## Thrippy Link Setup

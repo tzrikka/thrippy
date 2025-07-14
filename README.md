@@ -18,7 +18,7 @@ Static credentials (e.g. API keys) are set manually by the user. Dynamic credent
 ## Supported Services and Auth Types
 
 - [Atlassian](./docs/atlassian/README.md)
-  - Products: BitBucket, Confluence, Jira
+  - Products: Bitbucket, Confluence, Jira
   - OAuth 2.0 (3LO) app / user API token
 - [ChatGPT](./docs/chatgpt/README.md)
   - Static API key
@@ -63,6 +63,6 @@ Static credentials (e.g. API keys) are set manually by the user. Dynamic credent
 
 ## Production Server Configuration
 
-- Webhooks for OAuth 2.0
-- Secure secrets managers
+- Secure secrets manager
+- [HTTP tunnel to enable OAuth 2.0 links](./docs/http_tunnel.md)
 - m/TLS for Thrippy client/server communication

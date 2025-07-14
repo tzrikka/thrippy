@@ -2,7 +2,7 @@
 
 ## Cloud Services
 
-1. [BitBucket](./bitbucket/README.md)
+1. [Bitbucket](./bitbucket/README.md)
 
 2. [Confluence](./confluence/README.md)
 

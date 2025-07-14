@@ -5,7 +5,7 @@
 https://id.atlassian.com/manage-profile/security/api-tokens
 
 > [!IMPORTANT]
-> If you create the API token with specific [scopes](https://developer.atlassian.com/cloud/confluence/scopes-for-oauth-2-3LO-and-forge-apps/), specify **at least** `read:confluence-user` (classic) or `read:content-details:confluence` (granular).
+> If you create the API token with specific [scopes](https://developer.atlassian.com/cloud/confluence/scopes-for-oauth-2-3LO-and-forge-apps/), specify **at least** `read:me` (classic), `read:confluence-user` (classic), or `read:content-details:confluence` (granular).
 
 ## Thrippy Link Setup
 

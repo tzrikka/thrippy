@@ -18,9 +18,11 @@ import (
 
 // Templates is a map of all the link templates that Thrippy recognizes and supports.
 var Templates = map[string]links.Template{
+	"bitbucket-app-oauth":   bitbucket.OAuthTemplate,
 	"bitbucket-user-token":  bitbucket.APITokenTemplate,
 	"chatgpt":               chatgpt.Template,
 	"claude":                claude.Template,
+	"confluence-app-oauth":  confluence.OAuthTemplate,
 	"confluence-user-token": confluence.APITokenTemplate,
 	"gemini":                gemini.Template,
 	"generic-oauth": links.NewTemplate(
@@ -32,6 +34,7 @@ var Templates = map[string]links.Template{
 	"github-webhook":         github.WebhookTemplate,
 	"google-service-account": google.ServiceAccountTemplate,
 	"google-user-oauth":      google.UserOAuthTemplate,
+	"jira-app-oauth":         jira.OAuthTemplate,
 	"jira-user-token":        jira.APITokenTemplate,
 	"slack-bot-token":        slack.BotTokenTemplate,
 	"slack-oauth":            slack.OAuthTemplate,

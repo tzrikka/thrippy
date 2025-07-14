@@ -6,6 +6,46 @@ import (
 	"testing"
 )
 
+func TestRedirectURL(t *testing.T) {
+	tests := []struct {
+		name        string
+		webhookAddr string
+		want        string
+	}{
+		{
+			name: "empty",
+		},
+		{
+			name:        "foo",
+			webhookAddr: "foo",
+			want:        "https://foo/callback",
+		},
+		{
+			name:        "foo.bar",
+			webhookAddr: "foo.bar",
+			want:        "https://foo.bar/callback",
+		},
+		{
+			name:        "full_http_url",
+			webhookAddr: "http://example.com/blah",
+			want:        "https://example.com/callback",
+		},
+		{
+			name:        "full_https_url",
+			webhookAddr: "https://example.com/blah",
+			want:        "https://example.com/callback",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := redirectURL(tt.webhookAddr); got != tt.want {
+				t.Errorf("redirectURL() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestHTMLResponse(t *testing.T) {
 	tests := []struct {
 		name   string

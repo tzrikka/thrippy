@@ -5,7 +5,7 @@
 https://id.atlassian.com/manage-profile/security/api-tokens
 
 > [!IMPORTANT]
-> If you create the API token with specific [scopes](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#forge-app-and-api-token-scopes), specify **at least** `read:user:bitbucket`.
+> If you create the API token with specific [scopes](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#forge-app-and-api-token-scopes), specify **at least** `read:me` (classic) or `read:user:bitbucket`.
 
 ## Thrippy Link Setup
 
@@ -24,6 +24,6 @@ https://id.atlassian.com/manage-profile/security/api-tokens
 ## References
 
 - [Manage API tokens for your Atlassian account](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/)
-- [BitBucket API tokens](https://support.atlassian.com/bitbucket-cloud/docs/api-tokens/)
-- [BitBucket REST API authentication methods](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#api-tokens)
+- [Bitbucket API tokens](https://support.atlassian.com/bitbucket-cloud/docs/api-tokens/)
+- [Bitbucket REST API authentication methods](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#api-tokens)
 

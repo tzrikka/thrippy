@@ -9,7 +9,7 @@
    - Pick a Slack workspace
    - Click the "Create App" button
 
-2. Left Panel > Settings > Socket Mode
+2. Left Sidebar > Settings > Socket Mode
 
    - Enable Socket Mode: on
    - Generate an app-level token to enable Socket Mode
@@ -17,23 +17,23 @@
      - Scope: [`connections:write`](https://docs.slack.dev/reference/scopes/connections.write)
      - Click the "Generate" button
 
-3. Left Panel > Features > OAuth & Permissions
+3. Left Sidebar > Features > OAuth & Permissions
 
    - "Scopes" section
      - Bot Token Scopes > click the "Add an OAuth Scope" button
      - Select (at least) [`users:read`](https://docs.slack.dev/reference/scopes/users.read)
 
-4. Left Panel > Settings > Install App
+4. Left Sidebar > Settings > Install App
 
    - Click the "Install to Workspace" button
    - Click the "Allow" button
 
 ## Slack App Details to Copy
 
-- Left Panel > Settings > Basic Information
+- Left Sidebar > Settings > Basic Information
   - "App-Level Tokens" section
     - Click the token name (click the "Copy" button)
-- Left Panel > Settings > Install App
+- Left Sidebar > Settings > Install App
   - Bot User OAuth Token (click the "Copy" button)
 
 ## Thrippy Link Setup

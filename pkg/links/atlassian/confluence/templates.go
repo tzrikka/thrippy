@@ -22,6 +22,32 @@ var APITokenTemplate = links.NewTemplate(
 	apiTokenChecker,
 )
 
+var OAuthTemplate = links.NewTemplate(
+	"Confluence app using OAuth 2.0 (3LO)",
+	[]string{
+		"https://developer.atlassian.com/cloud/confluence/oauth-2-3lo-apps/",
+		"https://developer.atlassian.com/console/myapps/",
+	},
+	links.OAuthCredFields,
+	oauthModifier,
+	atlassian.OAuthChecker,
+)
+
+// oauthModifier adjusts the given [oauth.Config]
+// for Bitbucket Cloud OAuth 2.0 (3LO) apps, based on
+// https://developer.atlassian.com/cloud/confluence/oauth-2-3lo-apps/.
+func oauthModifier(o *oauth.Config) {
+	if o.Config.Endpoint.AuthURL == "" {
+		o.Config.Endpoint.AuthURL = "https://auth.atlassian.com/authorize"
+	}
+
+	if o.Config.Endpoint.TokenURL == "" {
+		o.Config.Endpoint.TokenURL = "https://auth.atlassian.com/oauth/token"
+	}
+
+	o.Config.Scopes = append(o.Config.Scopes, "read:me")
+}
+
 // apiTokenChecker checks the given static API token for
 // Confluence Cloud, and returns metadata about it in JSON format.
 func apiTokenChecker(ctx context.Context, m map[string]string, _ *oauth.Config, _ *oauth2.Token) (string, error) {
@@ -37,7 +63,7 @@ func apiTokenChecker(ctx context.Context, m map[string]string, _ *oauth.Config, 
 		return "", fmt.Errorf("error in getting current Confluence Cloud user: %w", err)
 	}
 
-	return links.EncodeMetadataAsJSON(atlassian.Metadata{
+	return links.EncodeMetadataAsJSON(atlassian.APITokenMetadata{
 		AccountID:   user.AccountID,
 		AccountType: user.AccountType,
 		Email:       user.Email,

@@ -5,7 +5,7 @@
 https://id.atlassian.com/manage-profile/security/api-tokens
 
 > [!IMPORTANT]
-> If you create the API token with specific [scopes](https://developer.atlassian.com/cloud/jira/platform/scopes-for-oauth-2-3LO-and-forge-apps/), specify **at least** `read:jira-user` (classic) or `read:user:jira` (granular).
+> If you create the API token with specific [scopes](https://developer.atlassian.com/cloud/jira/platform/scopes-for-oauth-2-3LO-and-forge-apps/), specify **at least** `read:me` (classic), `read:jira-user` (classic), or `read:user:jira` (granular).
 
 ## Thrippy Link Setup
 

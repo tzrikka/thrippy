@@ -3,23 +3,23 @@ module github.com/tzrikka/thrippy
 go 1.24.5
 
 require (
-	github.com/golang-jwt/jwt/v5 v5.2.2
+	github.com/golang-jwt/jwt/v5 v5.2.3
 	github.com/hashicorp/vault/api v1.20.0
 	github.com/lithammer/shortuuid/v4 v4.2.0
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/rs/zerolog v1.34.0
-	github.com/tzrikka/thrippy-api v1.1.2
+	github.com/tzrikka/thrippy-api v1.1.3
 	github.com/tzrikka/xdg v1.2.5
 	github.com/urfave/cli-altsrc/v3 v3.0.1
 	github.com/urfave/cli/v3 v3.3.8
 	golang.org/x/oauth2 v0.30.0
-	google.golang.org/api v0.241.0
-	google.golang.org/grpc v1.73.0
+	google.golang.org/api v0.243.0
+	google.golang.org/grpc v1.74.2
 	google.golang.org/protobuf v1.36.6
 )
 
 require (
-	cloud.google.com/go/auth v0.16.2 // indirect
+	cloud.google.com/go/auth v0.16.3 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.7.0 // indirect
 	github.com/BurntSushi/toml v1.5.0 // indirect
@@ -57,6 +57,6 @@ require (
 	golang.org/x/sys v0.34.0 // indirect
 	golang.org/x/text v0.27.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250707201910-8d1bb00bc6a7 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250707201910-8d1bb00bc6a7 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250721164621-a45f3dfb1074 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250721164621-a45f3dfb1074 // indirect
 )

@@ -25,7 +25,7 @@ func TestCreateLink(t *testing.T) {
 			Value: true,
 		},
 	}}
-	addr, err := startGRPCServer(cmd, secrets.NewTestManager())
+	addr, err := startGRPCServer(t.Context(), cmd, secrets.NewTestManager())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +96,7 @@ func TestGetLinkOAuth(t *testing.T) {
 			Value: true,
 		},
 	}}
-	addr, err := startGRPCServer(cmd, secrets.NewTestManager())
+	addr, err := startGRPCServer(t.Context(), cmd, secrets.NewTestManager())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -186,7 +186,7 @@ func TestGetLinkNonOAuth(t *testing.T) {
 			Value: true,
 		},
 	}}
-	addr, err := startGRPCServer(cmd, secrets.NewTestManager())
+	addr, err := startGRPCServer(t.Context(), cmd, secrets.NewTestManager())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -234,7 +234,7 @@ func TestSetAndGetCredentials(t *testing.T) {
 			Value: true,
 		},
 	}}
-	addr, err := startGRPCServer(cmd, secrets.NewTestManager())
+	addr, err := startGRPCServer(t.Context(), cmd, secrets.NewTestManager())
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -15,7 +15,7 @@ import (
 )
 
 // Start initializes Thrippy's gRPC and HTTP servers, and logging.
-func Start(_ context.Context, cmd *cli.Command) error {
+func Start(ctx context.Context, cmd *cli.Command) error {
 	initLog(cmd.Bool("dev"))
 
 	sm, err := secrets.NewManager(cmd)
@@ -23,7 +23,7 @@ func Start(_ context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	if _, err := startGRPCServer(cmd, sm); err != nil {
+	if _, err := startGRPCServer(ctx, cmd, sm); err != nil {
 		return err
 	}
 

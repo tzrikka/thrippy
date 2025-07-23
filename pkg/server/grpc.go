@@ -32,8 +32,9 @@ type grpcServer struct {
 // is non-blocking, in order to let Thrippy run an HTTP server as well.
 //
 // [Thrippy service]: https://github.com/tzrikka/thrippy-api/blob/main/proto/thrippy/v1/thrippy.proto
-func startGRPCServer(cmd *cli.Command, sm secrets.Manager) (string, error) {
-	lis, err := net.Listen("tcp", cmd.String("grpc-addr"))
+func startGRPCServer(ctx context.Context, cmd *cli.Command, sm secrets.Manager) (string, error) {
+	lc := net.ListenConfig{}
+	lis, err := lc.Listen(ctx, "tcp", cmd.String("grpc-addr"))
 	if err != nil {
 		log.Err(err).Send()
 		return "", err

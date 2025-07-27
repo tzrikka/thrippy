@@ -60,7 +60,7 @@ func apiTokenChecker(ctx context.Context, m map[string]string, _ *oauth.Config, 
 	url := baseURL + "/wiki/rest/api/user/current"
 	user := &User{}
 	if err := atlassian.CurrentUser(ctx, url, m["email"], m["api_token"], user); err != nil {
-		return "", fmt.Errorf("error in getting current Confluence Cloud user: %w", err)
+		return "", fmt.Errorf("failed to get current Confluence Cloud user: %w", err)
 	}
 
 	return links.EncodeMetadataAsJSON(atlassian.APITokenMetadata{

@@ -56,9 +56,8 @@ func constructRequest(ctx context.Context, method, url, token string, headers ma
 		return nil, nil, fmt.Errorf("failed to construct HTTP request: %w", err)
 	}
 
-	if strings.HasPrefix(token, "Basic ") {
-		token = strings.TrimPrefix(token, "Basic ")
-		if user, pass, found := strings.Cut(token, ":"); found {
+	if pair, found := strings.CutPrefix(token, "Basic "); found {
+		if user, pass, found := strings.Cut(pair, ":"); found {
 			req.SetBasicAuth(user, pass)
 		}
 	} else if token != "" {

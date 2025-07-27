@@ -31,7 +31,7 @@ type OAuthMetadata struct {
 func OAuthChecker(ctx context.Context, _ map[string]string, _ *oauth.Config, t *oauth2.Token) (string, error) {
 	res, err := AccessibleResources(ctx, t.AccessToken)
 	if err != nil {
-		return "", fmt.Errorf("failed to get Jira Cloud resource: %w", err)
+		return "", fmt.Errorf("failed to get Atlassian Cloud resource: %w", err)
 	}
 
 	return links.EncodeMetadataAsJSON(OAuthMetadata{

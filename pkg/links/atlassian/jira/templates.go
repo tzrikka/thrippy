@@ -60,7 +60,7 @@ func apiTokenChecker(ctx context.Context, m map[string]string, _ *oauth.Config, 
 	url := baseURL + "/rest/api/3/myself"
 	user := &User{}
 	if err := atlassian.CurrentUser(ctx, url, m["email"], m["api_token"], user); err != nil {
-		return "", fmt.Errorf("error in getting current Jira Cloud user: %w", err)
+		return "", fmt.Errorf("failed to get current Jira Cloud user: %w", err)
 	}
 
 	return links.EncodeMetadataAsJSON(atlassian.APITokenMetadata{

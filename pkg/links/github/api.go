@@ -43,7 +43,7 @@ func AuthBaseURL(o *oauth.Config) string {
 		baseURL = "https://" + baseURL
 	}
 
-	u, err := links.NormalizeURL(baseURL)
+	u, err := links.NormalizeBaseURL(baseURL)
 	if err != nil {
 		return badBaseURL
 	}

@@ -51,7 +51,7 @@ func oauthModifier(o *oauth.Config) {
 // apiTokenChecker checks the given static API token for
 // Jira Cloud, and returns metadata about it in JSON format.
 func apiTokenChecker(ctx context.Context, m map[string]string, _ *oauth.Config, _ *oauth2.Token) (string, error) {
-	baseURL, err := links.NormalizeURL(m["base_url"])
+	baseURL, err := links.NormalizeBaseURL(m["base_url"])
 	if err != nil {
 		return "", err
 	}

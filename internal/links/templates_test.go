@@ -127,7 +127,7 @@ func TestEncodeMetadataAsJSON(t *testing.T) {
 	}
 }
 
-func TestNormalizeURL(t *testing.T) {
+func TestNormalizeBaseURL(t *testing.T) {
 	tests := []struct {
 		name    string
 		baseURL string
@@ -167,13 +167,13 @@ func TestNormalizeURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NormalizeURL(tt.baseURL)
+			got, err := NormalizeBaseURL(tt.baseURL)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("NormalizeURL() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("NormalizeBaseURL() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("NormalizeURL() = %v, want %v", got, tt.want)
+				t.Errorf("NormalizeBaseURL() = %v, want %v", got, tt.want)
 			}
 		})
 	}

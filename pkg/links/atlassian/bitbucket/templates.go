@@ -2,7 +2,6 @@ package bitbucket
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -67,26 +66,6 @@ func oauthModifier(o *oauth.Config) {
 	o.Config.Scopes = append(o.Config.Scopes, "account", "webhook")
 }
 
-// oauthChecker checks the given OAuth token's like user credentials,
-// and returns metadata about the Bitbucket Cloud user in JSON format.
-func oauthChecker(ctx context.Context, _ map[string]string, _ *oauth.Config, t *oauth2.Token) (string, error) {
-	// https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-user-get
-	url := "https://api.bitbucket.org/2.0/user"
-	auth := "Bearer " + t.AccessToken
-
-	resp, err := client.HTTPRequest(ctx, http.MethodGet, url, auth)
-	if err != nil {
-		return "", fmt.Errorf("failed to get Bitbucket Cloud admin user: %w", err)
-	}
-
-	user := &User{}
-	if err := json.Unmarshal(resp, user); err != nil {
-		return "", fmt.Errorf("failed to parse Bitbucket Cloud admin user: %w", err)
-	}
-
-	return links.EncodeMetadataAsJSON(user)
-}
-
 // https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-user-get
 type User struct {
 	AccountID   string `json:"account_id"`
@@ -96,4 +75,19 @@ type User struct {
 	Nickname    string `json:"nickname,omitempty"`
 	Username    string `json:"username"`
 	UUID        string `json:"uuid"`
+}
+
+// oauthChecker checks the given OAuth token's webhook API access.
+func oauthChecker(ctx context.Context, _ map[string]string, _ *oauth.Config, t *oauth2.Token) (string, error) {
+	// Based on https://api.bitbucket.org/swagger.json and
+	// https://developer.atlassian.com/cloud/bitbucket/rest/api-group-webhooks/#api-group-webhooks
+	url := "https://api.bitbucket.org/2.0/hook_events"
+	auth := "Bearer " + t.AccessToken
+
+	_, err := client.HTTPRequest(ctx, http.MethodGet, url, auth)
+	if err != nil {
+		return "", fmt.Errorf("failed to get Bitbucket Cloud webhooks: %w", err)
+	}
+
+	return "", nil
 }

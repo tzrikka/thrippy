@@ -20,6 +20,7 @@ import (
 var Templates = map[string]links.Template{
 	"bitbucket-app-oauth":   bitbucket.OAuthTemplate,
 	"bitbucket-user-token":  bitbucket.APITokenTemplate,
+	"bitbucket-webhook":     bitbucket.WebhookTemplate,
 	"chatgpt":               chatgpt.Template,
 	"claude":                claude.Template,
 	"confluence-app-oauth":  confluence.OAuthTemplate,

@@ -38,6 +38,17 @@ var OAuthTemplate = links.NewTemplate(
 	oauthChecker,
 )
 
+var WebhookTemplate = links.NewTemplate(
+	"GitHub webhook for all types of incoming events",
+	[]string{
+		"https://support.atlassian.com/bitbucket-cloud/docs/manage-webhooks/",
+		"https://support.atlassian.com/bitbucket-cloud/docs/event-payloads/",
+	},
+	[]string{"webhook_secret_manual"},
+	nil,
+	nil,
+)
+
 // apiTokenChecker checks the given static API token for
 // Bitbucket Cloud, and returns metadata about it in JSON format.
 func apiTokenChecker(ctx context.Context, m map[string]string, _ *oauth.Config, _ *oauth2.Token) (string, error) {

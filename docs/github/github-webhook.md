@@ -4,7 +4,7 @@ All GitHub link templates support webhooks for inbound events, as an optional ad
 
 This link template defines **only** a webhook, without outbound API access.
 
-This can be any type of GitHub webhook (app, organization, repository, GitHub Marketplace, or GitHub Sponsors), using any type of payload (JSON or web form).
+This can be for any type of GitHub event (app, organization, repository, GitHub Marketplace, or GitHub Sponsors), using any type of payload (JSON or web form).
 
 1. Create the link
 

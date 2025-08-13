@@ -14,7 +14,7 @@ linters:
     - fatcontext
     - gocheckcompilerdirectives
     - gocritic
-    # - godot
+    - godot
     - godox
     - gosec
     - gosmopolitan

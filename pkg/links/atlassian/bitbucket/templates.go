@@ -39,7 +39,7 @@ var OAuthTemplate = links.NewTemplate(
 )
 
 var WebhookTemplate = links.NewTemplate(
-	"GitHub webhook for all types of incoming events",
+	"Bitbucket webhook for all types of incoming events",
 	[]string{
 		"https://support.atlassian.com/bitbucket-cloud/docs/manage-webhooks/",
 		"https://support.atlassian.com/bitbucket-cloud/docs/event-payloads/",

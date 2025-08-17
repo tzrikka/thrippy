@@ -3,7 +3,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/tzrikka/thrippy.svg)](https://pkg.go.dev/github.com/tzrikka/thrippy)
 [![Go Report Card](https://goreportcard.com/badge/github.com/tzrikka/thrippy)](https://goreportcard.com/report/github.com/tzrikka/thrippy)
 
-Thrippy is a CLI application and gRPC client/server to manage authentication configurations and secret tokens for third-party (3P) services.
+Thrippy is a CLI application and gRPC client/server to manage authentication configurations and secret tokens for third-party ("3P") services.
 
 It supports both static and OAuth 2.0 credentials, and it is designed to be simple and secure by default.
 
@@ -65,4 +65,4 @@ Static credentials (e.g. API keys) are set manually by the user. Dynamic credent
 
 - Secure secrets manager
 - [HTTP tunnel to enable OAuth 2.0 links](./docs/http_tunnel.md)
-- m/TLS for Thrippy client/server communication
+- [m/TLS for Thrippy client/server communication](./x509/README.md)

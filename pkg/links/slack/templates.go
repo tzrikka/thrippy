@@ -138,7 +138,7 @@ func genericChecker(ctx context.Context, botToken, baseURL string) (string, erro
 		AppID:        bot.AppID,
 		BotID:        bot.ID,
 		BotName:      bot.Name,
-		BotUpdated:   time.Unix(int64(bot.Updated), 0).UTC().Format(time.RFC3339),
+		BotUpdated:   time.Unix(bot.Updated, 0).UTC().Format(time.RFC3339),
 		EnterpriseID: auth.EnterpriseID,
 		TeamID:       auth.TeamID,
 		TeamName:     auth.Team,

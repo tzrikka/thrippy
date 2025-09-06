@@ -25,6 +25,7 @@ import (
 
 type grpcServer struct {
 	thrippypb.UnimplementedThrippyServiceServer
+
 	sm secrets.Manager
 }
 

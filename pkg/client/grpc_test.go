@@ -19,6 +19,7 @@ import (
 
 type server struct {
 	thrippypb.UnimplementedThrippyServiceServer
+
 	resp *thrippypb.GetLinkResponse
 	err  error
 }

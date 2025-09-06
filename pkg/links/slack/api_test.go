@@ -8,7 +8,8 @@ import (
 )
 
 type httpTestResponse struct {
-	slackResponse
+	response
+
 	Response string `json:"response,omitempty"`
 }
 
@@ -117,6 +118,8 @@ func TestPost(t *testing.T) {
 }
 
 func handler(t *testing.T, resp string) http.HandlerFunc {
+	t.Helper()
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		got := r.Header.Get("Authorization")
 		want := "Bearer token"

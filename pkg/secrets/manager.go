@@ -60,6 +60,7 @@ func ManagerFlags(configFilePath altsrc.StringSourcer) []cli.Flag {
 			Hidden: true,
 			Validator: func(v string) error {
 				options := map[string]bool{
+					fileOption:     true,
 					inMemoryOption: true,
 					vaultOption:    true,
 				}

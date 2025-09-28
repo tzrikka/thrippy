@@ -106,7 +106,9 @@ func NewManager(cmd *cli.Command) (Manager, error) {
 	var err error
 
 	switch provider {
-	case "in-memory":
+	case fileOption:
+		p, err = newFileProvider()
+	case inMemoryOption:
 		p, err = newInMemoryProvider()
 	case vaultOption:
 		p, err = newVaultProvider(cmd)

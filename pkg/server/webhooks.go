@@ -65,6 +65,10 @@ func redirectURL(webhookAddr string) string {
 // run starts an HTTP server for OAuth webhooks.
 // This is blocking, to keep the Thrippy server running.
 func (s *httpServer) run() error {
+	http.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
 	http.HandleFunc("GET /callback", s.oauthExchangeHandler)
 	http.HandleFunc("GET /start", s.oauthStartHandler)
 	http.HandleFunc("POST /start", s.oauthStartHandler)

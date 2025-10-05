@@ -92,7 +92,7 @@ func GRPCCreds(cmd *cli.Command) []grpc.ServerOption {
 	// If all 3 are specified, we use mTLS.
 	msg := "client CA cert file for gRPC server with mTLS"
 	ca := x509.NewCertPool()
-	pem, err := os.ReadFile(caPath) //gosec:disable G304 -- user-specified file by design
+	pem, err := os.ReadFile(caPath) //gosec:disable G304 -- specified by admin by design
 	if err != nil {
 		log.Fatal().Err(err).Str("path", caPath).Msg("failed to read " + msg)
 	}

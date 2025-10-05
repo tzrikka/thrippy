@@ -85,6 +85,98 @@ func TestCreateLink(t *testing.T) {
 	}
 }
 
+func TestDeleteLinkOAuth(t *testing.T) {
+	cmd := &cli.Command{Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:  "grpc-addr",
+			Value: "127.0.0.1:0",
+		},
+		&cli.BoolFlag{
+			Name:  "dev",
+			Value: true,
+		},
+	}}
+	addr, err := startGRPCServer(t.Context(), cmd, secrets.NewTestManager())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	creds := grpc.WithTransportCredentials(insecure.NewCredentials())
+	conn, err := grpc.NewClient(addr, creds)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+
+	client := thrippypb.NewThrippyServiceClient(conn)
+	resp1, err := client.CreateLink(t.Context(), thrippypb.CreateLinkRequest_builder{
+		Template: proto.String("generic-oauth"),
+		OauthConfig: thrippypb.OAuthConfig_builder{
+			ClientId:     proto.String("111"),
+			ClientSecret: proto.String("222"),
+		}.Build(),
+	}.Build())
+	if err != nil {
+		t.Fatalf("CreateLink() error = %v", err)
+	}
+
+	tests := []struct {
+		name    string
+		req     *thrippypb.DeleteLinkRequest
+		wantErr bool
+	}{
+		{
+			name:    "missing_id",
+			req:     thrippypb.DeleteLinkRequest_builder{}.Build(),
+			wantErr: true,
+		},
+		{
+			name: "invalid_id",
+			req: thrippypb.DeleteLinkRequest_builder{
+				LinkId: proto.String("111"),
+			}.Build(),
+			wantErr: true,
+		},
+		{
+			name: "link_not_found_is_error",
+			req: thrippypb.DeleteLinkRequest_builder{
+				LinkId: proto.String(shortuuid.New()),
+			}.Build(),
+			wantErr: true,
+		},
+		{
+			name: "link_not_found_isnt_error",
+			req: thrippypb.DeleteLinkRequest_builder{
+				LinkId:       proto.String(shortuuid.New()),
+				AllowMissing: proto.Bool(true),
+			}.Build(),
+		},
+		{
+			name: "happy_path",
+			req: thrippypb.DeleteLinkRequest_builder{
+				LinkId: proto.String(resp1.GetLinkId()),
+			}.Build(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if _, err := client.DeleteLink(t.Context(), tt.req); (err != nil) != tt.wantErr {
+				t.Fatalf("DeleteLink() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if tt.wantErr || tt.req.GetAllowMissing() {
+				return
+			}
+
+			req3 := thrippypb.GetLinkRequest_builder{LinkId: proto.String(resp1.GetLinkId())}.Build()
+			if _, err = client.GetLink(t.Context(), req3); err == nil {
+				t.Errorf("GetLink() error = %v, wantErr true", err)
+			}
+		})
+	}
+}
+
 func TestGetLinkOAuth(t *testing.T) {
 	cmd := &cli.Command{Flags: []cli.Flag{
 		&cli.StringFlag{

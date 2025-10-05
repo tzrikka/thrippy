@@ -39,6 +39,7 @@ func main() {
 			serverCommand(path),
 			linkTemplatesCommand,
 			createLinkCommand,
+			deleteLinkCommand,
 			getLinkCommand,
 			setCredsCommand,
 			startOAuthCommand(path),

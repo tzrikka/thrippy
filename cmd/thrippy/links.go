@@ -63,27 +63,27 @@ var createLinkCommand = &cli.Command{
 		},
 		&cli.StringFlag{
 			Name:  "auth-url",
-			Usage: "Optional OAuth 2.0 auth URL",
+			Usage: "optional OAuth 2.0 auth URL",
 		},
 		&cli.StringFlag{
 			Name:  "token-url",
-			Usage: "Optional OAuth 2.0 token URL",
+			Usage: "optional OAuth 2.0 token URL",
 		},
 		&cli.StringFlag{
 			Name:  "client-id",
-			Usage: "Optional OAuth 2.0 client ID",
+			Usage: "optional OAuth 2.0 client ID",
 		},
 		&cli.StringFlag{
 			Name:  "client-secret",
-			Usage: "Optional OAuth 2.0 client secret",
+			Usage: "optional OAuth 2.0 client secret",
 		},
 		&cli.StringSliceFlag{
 			Name:  "scopes",
-			Usage: "Optional OAuth 2.0 scopes (comma delimited / multiple flags)",
+			Usage: "optional OAuth 2.0 scopes (comma delimited / multiple flags)",
 		},
 		&cli.StringMapFlag{
 			Name:  "param",
-			Usage: "Optional OAuth 2.0 URL parameters",
+			Usage: "optional OAuth 2.0 URL parameters",
 		},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
@@ -134,6 +134,42 @@ var createLinkCommand = &cli.Command{
 		}
 
 		fmt.Println("New link ID:", resp.GetLinkId())
+		return nil
+	},
+}
+
+var deleteLinkCommand = &cli.Command{
+	Name:      "delete-link",
+	Usage:     "Deletes a specific link's configuration",
+	UsageText: "thrippy delete-link [global options] <link ID> [--allow-missing]",
+	Category:  "link",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "allow-missing",
+			Usage: "do not fail if the link does not exist",
+		},
+	},
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		if err := checkLinkIDArg(cmd); err != nil {
+			return err
+		}
+
+		conn, err := client.Connection(cmd.String("grpc-addr"), client.GRPCCreds(cmd))
+		if err != nil {
+			return err
+		}
+		defer conn.Close()
+
+		c := thrippypb.NewThrippyServiceClient(conn)
+		_, err = c.DeleteLink(ctx, thrippypb.DeleteLinkRequest_builder{
+			LinkId:       proto.String(cmd.Args().First()),
+			AllowMissing: proto.Bool(cmd.Bool("allow-missing")),
+		}.Build())
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("Link deleted successfully:", cmd.Args().First())
 		return nil
 	},
 }

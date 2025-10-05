@@ -101,6 +101,56 @@ func (s *grpcServer) CreateLink(ctx context.Context, in *thrippypb.CreateLinkReq
 	}.Build(), nil
 }
 
+func (s *grpcServer) DeleteLink(ctx context.Context, in *thrippypb.DeleteLinkRequest) (*thrippypb.DeleteLinkResponse, error) {
+	id := in.GetLinkId()
+	l := log.With().Str("grpc_method", "DeleteLink").Str("id", id).Logger()
+	l.Debug().Msg("received gRPC request")
+
+	if id == "" {
+		l.Warn().Msg("missing ID")
+		return nil, status.Error(codes.InvalidArgument, "missing ID")
+	}
+	if _, err := shortuuid.DefaultEncoder.Decode(id); err != nil {
+		l.Warn().Err(err).Msg("ID is an invalid short UUID")
+		return nil, status.Error(codes.InvalidArgument, "invalid ID")
+	}
+
+	t, err := s.sm.Get(ctx, id+"/template")
+	if err != nil {
+		l.Error().Stack().Err(err).Msg("secrets manager read error")
+		return nil, status.Error(codes.Internal, "secrets manager read error")
+	}
+
+	if t == "" {
+		if in.GetAllowMissing() {
+			return &thrippypb.DeleteLinkResponse{}, nil
+		} else {
+			l.Warn().Stack().Msg("link not found")
+			return nil, status.Error(codes.NotFound, "link not found")
+		}
+	}
+
+	if err := s.sm.Delete(ctx, id+"/creds"); err != nil {
+		l.Err(err).Msg("secrets manager delete error: creds")
+		return nil, status.Error(codes.Internal, "secrets manager delete error: creds")
+	}
+	if err := s.sm.Delete(ctx, id+"/meta"); err != nil {
+		l.Err(err).Msg("secrets manager delete error: meta")
+		return nil, status.Error(codes.Internal, "secrets manager delete error: meta")
+	}
+	if err := s.sm.Delete(ctx, id+"/oauth"); err != nil {
+		l.Err(err).Msg("secrets manager delete error: oauth")
+		return nil, status.Error(codes.Internal, "secrets manager delete error: oauth")
+	}
+	if err := s.sm.Delete(ctx, id+"/template"); err != nil {
+		l.Err(err).Msg("secrets manager delete error: template")
+		return nil, status.Error(codes.Internal, "secrets manager delete error: template")
+	}
+
+	l.Trace().Msg("secrets manager delete success")
+	return &thrippypb.DeleteLinkResponse{}, nil
+}
+
 func (s *grpcServer) GetLink(ctx context.Context, in *thrippypb.GetLinkRequest) (*thrippypb.GetLinkResponse, error) {
 	id := in.GetLinkId()
 	l := log.With().Str("grpc_method", "GetLink").Str("id", id).Logger()

@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"html"
+	"html/template"
 	"net"
 	"net/http"
 	"net/url"
@@ -271,6 +272,24 @@ func successHandler(w http.ResponseWriter, r *http.Request) {
 	htmlResponse(w, http.StatusOK, "You may now close this browser tab")
 }
 
+type htmlResponseParams struct {
+	Title  string
+	Header string
+	Msg    string
+}
+
+var htmlResponseTempl = template.Must(template.New("response").Parse(`<!DOCTYPE html>
+<html>
+<head>
+	<title>{{.Title}}</title>
+</head>
+<body>
+	<h1>{{.Header}}</h1>
+	<p>{{.Msg}}</p>
+</body>
+</html>
+`))
+
 func htmlResponse(w http.ResponseWriter, status int, msg string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(status)
@@ -286,17 +305,7 @@ func htmlResponse(w http.ResponseWriter, status int, msg string) {
 		msg += "."
 	}
 
-	_, _ = fmt.Fprintf(w, `<!DOCTYPE html>
-		<html>
-		<head>
-			<title>%s</title>
-		</head>
-		<body>
-			<h1>%s</h1>
-			<p>%s</p>
-		</body>
-		</html>`,
-		title, header, msg)
+	_ = htmlResponseTempl.Execute(w, htmlResponseParams{Title: title, Header: header, Msg: msg})
 }
 
 func constructStateParam(id, memo string) string {

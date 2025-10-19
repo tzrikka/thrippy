@@ -257,11 +257,21 @@ func TokenFromProto(o *thrippypb.OAuthToken) *oauth2.Token {
 		return nil
 	}
 
-	t, _ := time.Parse(time.RFC3339, o.GetExpiry())
-	return &oauth2.Token{
+	e, _ := time.Parse(time.RFC3339, o.GetExpiry())
+	t := &oauth2.Token{
 		AccessToken:  o.GetAccessToken(),
-		Expiry:       t,
+		Expiry:       e,
 		RefreshToken: o.GetRefreshToken(),
 		TokenType:    o.GetTokenType(),
 	}
+
+	if r := o.GetRaw(); len(r) > 0 {
+		m := make(map[string]any, len(r))
+		for k, v := range r {
+			m[k] = v
+		}
+		t = t.WithExtra(m)
+	}
+
+	return t
 }

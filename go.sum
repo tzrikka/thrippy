@@ -88,8 +88,8 @@ github.com/ryanuber/go-glob v1.0.0 h1:iQh3xXAumdQ+4Ufa5b25cRpC5TYKlno6hsv6Cb3pkB
 github.com/ryanuber/go-glob v1.0.0/go.mod h1:807d1WSdnB0XRJzKNil9Om6lcp/3a0v4qIHxIXzX/Yc=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
-github.com/tzrikka/thrippy-api v1.2.1 h1:0AHEwbO3zDTcKmjMvSrWe3GVmXAI9ihS6sX4hy8CiCg=
-github.com/tzrikka/thrippy-api v1.2.1/go.mod h1:yCSc7D0aeF+y8K13mWtIywGCq3C6Qs0W/WixK9GnoB8=
+github.com/tzrikka/thrippy-api v1.3.0 h1:L5ZrnQz9JQSIqWpJ9kDoESZmO8WExD4nuhlN9nicWvo=
+github.com/tzrikka/thrippy-api v1.3.0/go.mod h1:T6dfucCk3ymmzvgsCYOaOzjUaIJS8z80nTu+yQtjiRM=
 github.com/tzrikka/xdg v1.3.1 h1:KUD9Tpgt4QSMIvjEUMqB+JP1Y9OXrNDI63NM5RQR7dA=
 github.com/tzrikka/xdg v1.3.1/go.mod h1:tUEmU2u9hUERexokBBvky85LFtv8H2YvUeJwOgFt9rY=
 github.com/urfave/cli-altsrc/v3 v3.1.0 h1:6E5+kXeAWmRxXlPgdEVf9VqVoTJ2MJci0UMpUi/w/bA=

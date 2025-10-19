@@ -33,7 +33,7 @@ var AppUserTemplate = links.NewTemplate(
 		"https://docs.github.com/en/apps/using-github-apps/authorizing-github-apps",
 		"https://github.com/settings/apps",
 	},
-	append([]string{"base_url_manual_optional"}, links.OAuthCredFields...),
+	append(links.OAuthCredFields, "base_url_manual_optional"),
 	appAuthzModifier,
 	userChecker,
 )

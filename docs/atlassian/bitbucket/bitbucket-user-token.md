@@ -2,7 +2,7 @@
 
 ## Atlassian User Account API Tokens
 
-https://id.atlassian.com/manage-profile/security/api-tokens
+<https://id.atlassian.com/manage-profile/security/api-tokens>
 
 > [!IMPORTANT]
 > The API token must be created with specific [scopes](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#forge-app-and-api-token-scopes): **at least** `read:me` (classic) or `read:user:bitbucket`.

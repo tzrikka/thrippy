@@ -40,7 +40,13 @@
            [ --scopes "xxx,yyy,..." [ --scopes "zzz" ] ]
    ```
 
-2. Install and authorize the Slack app (interactively in a browser)
+2. Optional: webhook secret (persists alongside subsequent OAuth secrets)
+
+   ```shell
+   thrippy set-creds <link ID> --kv "webhook_secret=..."
+   ```
+
+3. Install and authorize the Slack app (interactively in a browser)
 
    ```shell
    thrippy start-oauth <link ID>

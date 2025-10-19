@@ -34,7 +34,7 @@ var OAuthTemplate = links.NewTemplate(
 		"https://docs.slack.dev/authentication/installing-with-oauth",
 		"https://api.slack.com/apps",
 	},
-	links.OAuthCredFields,
+	append(links.OAuthCredFields, "signing_secret_manual"),
 	oauthModifier(defaultBaseURL),
 	oauthChecker,
 )
@@ -45,7 +45,7 @@ var OAuthGovTemplate = links.NewTemplate(
 		"https://docs.slack.dev/authentication/installing-with-oauth",
 		"https://docs.slack.dev/govslack",
 	},
-	links.OAuthCredFields,
+	append(links.OAuthCredFields, "signing_secret_manual_optional"),
 	oauthModifier(govBaseURL),
 	govOAuthChecker,
 )

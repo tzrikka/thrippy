@@ -3,7 +3,9 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net"
+	"strings"
 
 	"github.com/lithammer/shortuuid/v4"
 	"github.com/rs/zerolog"
@@ -196,15 +198,24 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCreden
 		return nil, err
 	}
 
-	// Credentials to store: either an OAuth token or a
-	// generic string map - whichever of them isn't empty.
+	// Credentials to store: either an OAuth token or a generic string map.
+	// For OAuth tokens, persist extra webhook secrets if already set.
 	token := in.GetToken()
 	m := in.GetGenericCreds()
+	if strings.Contains(template, "oauth") {
+		if token == nil {
+			token = thrippypb.OAuthToken_builder{Raw: m}.Build()
+		} else {
+			token.SetRaw(s.getRaw(ctx, id))
+		}
+	}
+
 	j, err := protojson.Marshal(token)
 	if err != nil {
 		l.Err(err).Msg("failed to convert proto into JSON")
 		return nil, status.Error(codes.Internal, "secrets manager parse error")
 	}
+
 	if len(j) <= 2 {
 		j, err = json.Marshal(m)
 		if err != nil {
@@ -265,6 +276,29 @@ func (s *grpcServer) templateAndOAuth(ctx context.Context, id string) (string, *
 	}
 
 	return t, m, nil
+}
+
+func (s *grpcServer) getRaw(ctx context.Context, id string) map[string]string {
+	j, err := s.sm.Get(ctx, id+"/creds")
+	if err != nil {
+		return nil
+	}
+
+	token := map[string]any{}
+	if err := json.Unmarshal([]byte(j), &token); err != nil {
+		return nil
+	}
+
+	raw, ok := token["raw"].(map[string]any)
+	if !ok {
+		return nil
+	}
+
+	m := make(map[string]string, len(raw))
+	for k, v := range raw {
+		m[k] = fmt.Sprintf("%v", v)
+	}
+	return m
 }
 
 func (s *grpcServer) GetCredentials(ctx context.Context, in *thrippypb.GetCredentialsRequest) (*thrippypb.GetCredentialsResponse, error) {

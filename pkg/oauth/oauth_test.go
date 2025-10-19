@@ -369,7 +369,7 @@ func TestTokenToProto(t *testing.T) {
 func TestTokenFromMap(t *testing.T) {
 	tests := []struct {
 		name      string
-		m         map[string]string
+		m         map[string]any
 		wantToken *oauth2.Token
 		wantOK    bool
 	}{
@@ -378,7 +378,7 @@ func TestTokenFromMap(t *testing.T) {
 		},
 		{
 			name: "access_token_without_expiry",
-			m: map[string]string{
+			m: map[string]any{
 				"access_token": "access_token",
 			},
 			wantToken: &oauth2.Token{
@@ -388,7 +388,7 @@ func TestTokenFromMap(t *testing.T) {
 		},
 		{
 			name: "access_token_with_zero_expiry",
-			m: map[string]string{
+			m: map[string]any{
 				"access_token": "access_token",
 				"expiry":       "0001-01-01T00:00:00Z",
 			},
@@ -399,7 +399,7 @@ func TestTokenFromMap(t *testing.T) {
 		},
 		{
 			name: "access_and_refresh_tokens",
-			m: map[string]string{
+			m: map[string]any{
 				"access_token":  "access_token",
 				"expiry":        "2024-12-06T03:02:01Z",
 				"refresh_token": "refresh_token",
@@ -417,7 +417,7 @@ func TestTokenFromMap(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			gotToken, gotOK := TokenFromMap(tt.m)
 			if !reflect.DeepEqual(gotToken, tt.wantToken) {
-				t.Errorf("TokenFromMap() got = %v, want %v", gotToken, tt.wantToken)
+				t.Errorf("TokenFromMap() got = %#v, want %#v", gotToken, tt.wantToken)
 			}
 			if gotOK != tt.wantOK {
 				t.Errorf("TokenFromMap() ok = %v, want %v", gotOK, tt.wantOK)

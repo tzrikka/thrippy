@@ -199,7 +199,7 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCreden
 	}
 
 	// Credentials to store: either an OAuth token or a generic string map.
-	// For OAuth tokens, persist extra webhook secrets if already set.
+	// For OAuth tokens: persist extra secrets if already set.
 	token := in.GetToken()
 	m := in.GetGenericCreds()
 	if strings.Contains(template, "oauth") {
@@ -278,13 +278,16 @@ func (s *grpcServer) templateAndOAuth(ctx context.Context, id string) (string, *
 	return t, m, nil
 }
 
+// getRaw retrieves the "raw" credentials map from an OAuth token stored in the
+// secrets manager. This is used to preserve extra secrets alongside OAuth tokens.
+// If there is any error, or if there are no extra secrets, this function returns nil.
 func (s *grpcServer) getRaw(ctx context.Context, id string) map[string]string {
 	j, err := s.sm.Get(ctx, id+"/creds")
 	if err != nil {
 		return nil
 	}
 
-	token := map[string]any{}
+	var token map[string]any
 	if err := json.Unmarshal([]byte(j), &token); err != nil {
 		return nil
 	}
@@ -306,34 +309,57 @@ func (s *grpcServer) GetCredentials(ctx context.Context, in *thrippypb.GetCreden
 	l := log.With().Str("grpc_method", "GetCredentials").Str("id", id).Logger()
 
 	ctx = l.WithContext(ctx)
-	m, err := s.getSecrets(ctx, id, "/creds")
+	ma, err := s.getSecrets(ctx, id, "/creds")
 	if err != nil {
 		return nil, err
 	}
 
 	// Refresh OAuth token, if needed.
-	if t, ok := oauth.TokenFromMap(m); ok && !t.Valid() {
+	if t, ok := oauth.TokenFromMap(ma); ok && !t.Valid() {
 		if updated, err := s.refreshOAuthToken(ctx, id, t); err == nil {
-			m = updated
+			ma = updated
 		}
 	}
 
-	return thrippypb.GetCredentialsResponse_builder{Credentials: m}.Build(), nil
+	ms := make(map[string]string, len(ma))
+	for k, v := range ma {
+		if k != "raw" {
+			ms[k] = fmt.Sprintf("%v", v)
+			continue
+		}
+
+		// Flatten extra secrets from an OAuth token's "raw" map,
+		// but in a limited way, to prevent overwriting.
+		raw := v.(map[string]any)
+		if ws, ok := raw["signing_secret"].(string); ok { // Slack.
+			ms["signing_secret"] = ws
+		}
+		if ws, ok := raw["webhook_secret"].(string); ok { // Bitbucket, GitHub.
+			ms["webhook_secret"] = ws
+		}
+	}
+
+	return thrippypb.GetCredentialsResponse_builder{Credentials: ms}.Build(), nil
 }
 
 func (s *grpcServer) GetMetadata(ctx context.Context, in *thrippypb.GetMetadataRequest) (*thrippypb.GetMetadataResponse, error) {
 	id := in.GetLinkId()
 	l := log.With().Str("grpc_method", "GetMetadata").Str("id", id).Logger()
 
-	m, err := s.getSecrets(l.WithContext(ctx), id, "/meta")
+	ma, err := s.getSecrets(l.WithContext(ctx), id, "/meta")
 	if err != nil {
 		return nil, err
 	}
 
-	return thrippypb.GetMetadataResponse_builder{Metadata: m}.Build(), nil
+	ms := make(map[string]string, len(ma))
+	for k, v := range ma {
+		ms[k] = fmt.Sprintf("%v", v)
+	}
+
+	return thrippypb.GetMetadataResponse_builder{Metadata: ms}.Build(), nil
 }
 
-func (s *grpcServer) getSecrets(ctx context.Context, linkID, keySuffix string) (map[string]string, error) {
+func (s *grpcServer) getSecrets(ctx context.Context, linkID, keySuffix string) (map[string]any, error) {
 	l := zerolog.Ctx(ctx)
 	l.Debug().Msg("received gRPC request")
 
@@ -352,7 +378,7 @@ func (s *grpcServer) getSecrets(ctx context.Context, linkID, keySuffix string) (
 		return nil, status.Error(codes.Internal, "secrets manager read error")
 	}
 
-	var m map[string]string
+	var m map[string]any
 	if j != "" {
 		if err := json.Unmarshal([]byte(j), &m); err != nil {
 			l.Err(err).Msg("failed to convert JSON into map")
@@ -363,17 +389,17 @@ func (s *grpcServer) getSecrets(ctx context.Context, linkID, keySuffix string) (
 	return m, nil
 }
 
-func (s *grpcServer) refreshOAuthToken(ctx context.Context, id string, t *oauth2.Token) (map[string]string, error) {
+func (s *grpcServer) refreshOAuthToken(ctx context.Context, id string, t *oauth2.Token) (map[string]any, error) {
 	l := zerolog.Ctx(ctx)
 
-	js, err := s.sm.Get(ctx, id+"/oauth")
+	jsonConfig, err := s.sm.Get(ctx, id+"/oauth")
 	if err != nil {
 		l.Err(err).Msg("secrets manager read error")
 		return nil, status.Error(codes.Internal, "secrets manager read error")
 	}
 
 	o := &thrippypb.OAuthConfig{}
-	if err := protojson.Unmarshal([]byte(js), o); err != nil {
+	if err := protojson.Unmarshal([]byte(jsonConfig), o); err != nil {
 		l.Err(err).Msg("failed to convert JSON into proto")
 		return nil, status.Error(codes.Internal, "secrets manager parse error")
 	}
@@ -384,13 +410,17 @@ func (s *grpcServer) refreshOAuthToken(ctx context.Context, id string, t *oauth2
 		return nil, status.Error(codes.Internal, "OAuth token refresh error")
 	}
 
-	jb, err := json.Marshal(m)
+	if raw := s.getRaw(ctx, id); raw != nil {
+		m["raw"] = raw
+	}
+
+	jsonToken, err := json.Marshal(m)
 	if err != nil {
 		l.Err(err).Msg("failed to convert map into JSON")
 		return nil, status.Error(codes.Internal, "secrets manager parse error")
 	}
 
-	if err := s.sm.Set(ctx, id+"/creds", string(jb)); err != nil {
+	if err := s.sm.Set(ctx, id+"/creds", string(jsonToken)); err != nil {
 		l.Err(err).Msg("secrets manager write error")
 		return nil, status.Error(codes.Internal, "secrets manager write error")
 	}

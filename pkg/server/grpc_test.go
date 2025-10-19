@@ -11,6 +11,8 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
+	intlinks "github.com/tzrikka/thrippy/internal/links"
+	"github.com/tzrikka/thrippy/pkg/links"
 	"github.com/tzrikka/thrippy/pkg/secrets"
 )
 
@@ -316,6 +318,8 @@ func TestGetLinkNonOAuth(t *testing.T) {
 }
 
 func TestSetAndGetCredentials(t *testing.T) {
+	links.Templates["test"] = intlinks.NewTemplate("Generic link", nil, nil, nil, nil)
+
 	cmd := &cli.Command{Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "grpc-addr",
@@ -338,27 +342,16 @@ func TestSetAndGetCredentials(t *testing.T) {
 	}
 	defer conn.Close()
 
-	client := thrippypb.NewThrippyServiceClient(conn)
-	resp1, err := client.CreateLink(t.Context(), thrippypb.CreateLinkRequest_builder{
-		Template: proto.String("generic-oauth"),
-		OauthConfig: thrippypb.OAuthConfig_builder{
-			ClientId:     proto.String("111"),
-			ClientSecret: proto.String("222"),
-		}.Build(),
-	}.Build())
-	if err != nil {
-		t.Fatalf("CreateLink() error = %v", err)
-	}
-
 	tests := []struct {
-		name string
-		req  *thrippypb.SetCredentialsRequest
-		want map[string]string
+		name     string
+		template string
+		req      *thrippypb.SetCredentialsRequest
+		want     map[string]string
 	}{
 		{
-			name: "generic_creds",
+			name:     "generic_creds",
+			template: "test",
 			req: thrippypb.SetCredentialsRequest_builder{
-				LinkId: proto.String(resp1.GetLinkId()),
 				GenericCreds: map[string]string{
 					"aaa": "111",
 					"bbb": "222",
@@ -370,9 +363,9 @@ func TestSetAndGetCredentials(t *testing.T) {
 			},
 		},
 		{
-			name: "token",
+			name:     "token",
+			template: "generic-oauth",
 			req: thrippypb.SetCredentialsRequest_builder{
-				LinkId: proto.String(resp1.GetLinkId()),
 				Token: thrippypb.OAuthToken_builder{
 					AccessToken:  proto.String("access_token"),
 					Expiry:       proto.String("2025-05-17T10:11:12Z"),
@@ -389,7 +382,20 @@ func TestSetAndGetCredentials(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := client.SetCredentials(t.Context(), tt.req)
+			client := thrippypb.NewThrippyServiceClient(conn)
+			resp1, err := client.CreateLink(t.Context(), thrippypb.CreateLinkRequest_builder{
+				Template: proto.String(tt.template),
+				OauthConfig: thrippypb.OAuthConfig_builder{
+					ClientId:     proto.String("111"),
+					ClientSecret: proto.String("222"),
+				}.Build(),
+			}.Build())
+			if err != nil {
+				t.Fatalf("CreateLink() error = %v", err)
+			}
+
+			tt.req.SetLinkId(resp1.GetLinkId())
+			_, err = client.SetCredentials(t.Context(), tt.req)
 			if err != nil {
 				t.Errorf("SetCredentials() error = %v", err)
 				return

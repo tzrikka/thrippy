@@ -186,7 +186,7 @@ func (c *Config) authCodes() []oauth2.AuthCodeOption {
 // RefreshToken returns a refreshed version of the given [oauth2.Token],
 // as a map for storage in the secrets manager and transmission to the user,
 // assuming that we already checked that it's no longer [oauth2.Token.Valid].
-func (c *Config) RefreshToken(ctx context.Context, t *oauth2.Token, force bool) (map[string]string, error) {
+func (c *Config) RefreshToken(ctx context.Context, t *oauth2.Token, force bool) (map[string]any, error) {
 	if force {
 		t.AccessToken = ""
 	}
@@ -196,7 +196,7 @@ func (c *Config) RefreshToken(ctx context.Context, t *oauth2.Token, force bool) 
 		return nil, err
 	}
 
-	return map[string]string{
+	return map[string]any{
 		"access_token":  t.AccessToken,
 		"expiry":        t.Expiry.UTC().Format(time.RFC3339),
 		"refresh_token": t.RefreshToken,
@@ -232,17 +232,36 @@ func TokenToProto(t *oauth2.Token) *thrippypb.OAuthToken {
 
 // TokenFromMap converts a map from the secrets manager into an [oauth2.Token]
 // struct. This function returns nil if the input is also nil.
-func TokenFromMap(m map[string]string) (*oauth2.Token, bool) {
+func TokenFromMap(m map[string]any) (*oauth2.Token, bool) {
 	if m == nil {
 		return nil, false
 	}
 
-	e, _ := time.Parse(time.RFC3339, m["expiry"])
-	t := &oauth2.Token{
-		AccessToken:  m["access_token"],
-		Expiry:       e,
-		RefreshToken: m["refresh_token"],
-		TokenType:    m["token_type"],
+	es, ok := m["expiry"].(string)
+	if !ok {
+		es = ""
+	}
+	et, _ := time.Parse(time.RFC3339, es)
+
+	at, ok := m["access_token"].(string)
+	if !ok {
+		at = ""
+	}
+
+	rt, ok := m["refresh_token"].(string)
+	if !ok {
+		rt = ""
+	}
+
+	tt, ok := m["token_type"].(string)
+	if !ok {
+		tt = ""
+	}
+
+	t := &oauth2.Token{AccessToken: at, Expiry: et, RefreshToken: rt, TokenType: tt}
+
+	if r, ok := m["raw"].(map[string]any); ok {
+		t = t.WithExtra(r)
 	}
 
 	return t, t.AccessToken != ""

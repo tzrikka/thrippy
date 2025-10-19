@@ -213,7 +213,7 @@ var getLinkCommand = &cli.Command{
 			}
 			mod2 := "required"
 			if cf.GetOptional() {
-				mod1 = "optional"
+				mod2 = "optional"
 			}
 			fmt.Printf("- %-*s (%s, %s)\n", 25, cf.GetName(), mod1, mod2)
 		}

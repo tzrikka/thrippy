@@ -54,7 +54,7 @@ var WebhookTemplate = links.NewTemplate(
 func apiTokenChecker(ctx context.Context, m map[string]string, _ *oauth.Config, _ *oauth2.Token) (string, error) {
 	// https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-user-get
 	url := "https://api.bitbucket.org/2.0/user"
-	user := &User{}
+	user := new(User)
 	if err := atlassian.CurrentUser(ctx, url, m["email"], m["api_token"], user); err != nil {
 		return "", fmt.Errorf("failed to get current Bitbucket Cloud user: %w", err)
 	}
@@ -88,17 +88,13 @@ type User struct {
 	UUID        string `json:"uuid"`
 }
 
-// oauthChecker checks the given OAuth token's webhook API access.
+// oauthChecker checks the user associated with the given OAuth token.
 func oauthChecker(ctx context.Context, _ map[string]string, _ *oauth.Config, t *oauth2.Token) (string, error) {
-	// Based on https://api.bitbucket.org/swagger.json and
-	// https://developer.atlassian.com/cloud/bitbucket/rest/api-group-webhooks/#api-group-webhooks
-	url := "https://api.bitbucket.org/2.0/hook_events"
-	auth := "Bearer " + t.AccessToken
-
-	_, err := client.HTTPRequest(ctx, http.MethodGet, url, auth)
+	// https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-user-get
+	url := "https://api.bitbucket.org/2.0/user"
+	resp, err := client.HTTPRequest(ctx, http.MethodGet, url, "Bearer "+t.AccessToken)
 	if err != nil {
-		return "", fmt.Errorf("failed to get Bitbucket Cloud webhooks: %w", err)
+		return "", err
 	}
-
-	return "", nil
+	return string(resp), nil
 }

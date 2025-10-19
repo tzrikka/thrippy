@@ -101,8 +101,8 @@ func ModifyOAuthByTemplate(o *oauth.Config, t Template, found bool) {
 
 // EncodeMetadataAsJSON converts the given struct into a JSON string.
 func EncodeMetadataAsJSON(v any) (string, error) {
-	sb := strings.Builder{}
-	if err := json.NewEncoder(&sb).Encode(v); err != nil {
+	sb := new(strings.Builder)
+	if err := json.NewEncoder(sb).Encode(v); err != nil {
 		return "", err
 	}
 	return sb.String(), nil

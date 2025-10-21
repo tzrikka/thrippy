@@ -1,14 +1,14 @@
 // Package secrets provides a generic interface for managing
 // user secrets, using one of these providers:
 //   - In-memory storage ("in-memory") - see note below!
-//   - AWS Secrets Manager ("aws")
-//   - Google Cloud Secret Manager ("gcp")
+//   - AWS Parameter Store ("aws")
+//   - Google Cloud Parameter Store ("gcp")
 //   - HashiCorp Vault ("vault")
-//   - Infisical ("infisical")
 //
 // Configuration in environment variables:
 //   - THRIPPY_SECRETS_PROVIDER
 //   - THRIPPY_SECRETS_NAMESPACE
+//   - AWS_KMS_KEY_ID
 //   - VAULT_ADDR
 //   - VAULT_CACERT
 //   - VAULT_TOKEN
@@ -23,6 +23,10 @@
 //	address = "https://127.0.0.1:8200"
 //	cacert = "/path/to/vault-ca.pem"
 //	token = "..."
+//
+//	[secrets.aws]
+//	region = "us-east1"
+//	kms_key_id = "..."
 //
 // Notes:
 //   - The in-memory provider is used by default when specifying the "--dev" flag,
@@ -60,6 +64,7 @@ func ManagerFlags(configFilePath altsrc.StringSourcer) []cli.Flag {
 			Hidden: true,
 			Validator: func(v string) error {
 				options := map[string]bool{
+					awsOption:      true,
 					fileOption:     true,
 					inMemoryOption: true,
 					vaultOption:    true,
@@ -107,6 +112,8 @@ func NewManager(cmd *cli.Command) (Manager, error) {
 	var err error
 
 	switch provider {
+	case awsOption:
+		p, err = newAWSProvider(cmd)
 	case fileOption:
 		p, err = newFileProvider()
 	case inMemoryOption:

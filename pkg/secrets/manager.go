@@ -8,6 +8,7 @@
 // Configuration in environment variables:
 //   - THRIPPY_SECRETS_PROVIDER
 //   - THRIPPY_SECRETS_NAMESPACE
+//   - AWS_REGION
 //   - AWS_KMS_KEY_ID
 //   - VAULT_ADDR
 //   - VAULT_CACERT
@@ -19,14 +20,14 @@
 //	provider = "in-memory"
 //	namespace = "default"
 //
+//	[secrets.aws]
+//	region = "us-east1"
+//	kms_key_id = "..."
+//
 //	[secrets.vault]
 //	address = "https://127.0.0.1:8200"
 //	cacert = "/path/to/vault-ca.pem"
 //	token = "..."
-//
-//	[secrets.aws]
-//	region = "us-east1"
-//	kms_key_id = "..."
 //
 // Notes:
 //   - The in-memory provider is used by default when specifying the "--dev" flag,

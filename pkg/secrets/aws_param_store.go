@@ -23,6 +23,14 @@ const (
 func AWSFlags(configFilePath altsrc.StringSourcer) []cli.Flag {
 	return []cli.Flag{
 		&cli.StringFlag{
+			Name: "secrets-aws-region",
+			Sources: cli.NewValueSourceChain(
+				cli.EnvVar("AWS_REGION"),
+				toml.TOML("secrets.aws.region", configFilePath),
+			),
+			Hidden: true,
+		},
+		&cli.StringFlag{
 			Name: "secrets-aws-kms-key-id",
 			Sources: cli.NewValueSourceChain(
 				cli.EnvVar("AWS_KMS_KEY_ID"),
@@ -39,7 +47,7 @@ type awsProvider struct {
 }
 
 func newAWSProvider(cmd *cli.Command) (Manager, error) {
-	cfg, err := config.LoadDefaultConfig(context.Background())
+	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion(cmd.String("secrets-aws-region")))
 	if err != nil {
 		return nil, err
 	}

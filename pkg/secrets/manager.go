@@ -100,7 +100,7 @@ type genericWrapper struct {
 	namespace string
 }
 
-func NewManager(cmd *cli.Command) (Manager, error) {
+func NewManager(ctx context.Context, cmd *cli.Command) (Manager, error) {
 	provider := cmd.String("secrets-provider")
 	ns := cmd.String("secrets-namespace")
 
@@ -114,7 +114,7 @@ func NewManager(cmd *cli.Command) (Manager, error) {
 
 	switch provider {
 	case awsOption:
-		p, err = newAWSProvider(cmd)
+		p, err = newAWSProvider(ctx, cmd)
 	case fileOption:
 		p, err = newFileProvider()
 	case inMemoryOption:

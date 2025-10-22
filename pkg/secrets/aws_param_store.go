@@ -46,8 +46,8 @@ type awsProvider struct {
 	client *ssm.Client
 }
 
-func newAWSProvider(cmd *cli.Command) (Manager, error) {
-	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion(cmd.String("secrets-aws-region")))
+func newAWSProvider(ctx context.Context, cmd *cli.Command) (Manager, error) {
+	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(cmd.String("secrets-aws-region")))
 	if err != nil {
 		return nil, err
 	}

@@ -18,7 +18,7 @@ import (
 func Start(ctx context.Context, cmd *cli.Command) error {
 	initLog(cmd.Bool("dev"))
 
-	sm, err := secrets.NewManager(cmd)
+	sm, err := secrets.NewManager(ctx, cmd)
 	if err != nil {
 		return err
 	}

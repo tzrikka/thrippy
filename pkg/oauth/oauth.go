@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/lithammer/shortuuid/v4"
 	"golang.org/x/oauth2"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -35,6 +36,7 @@ type Config struct {
 	Config    *oauth2.Config
 	AuthCodes map[string]string
 	Params    map[string]string
+	Nonce     string
 }
 
 // FromProto converts a wire-protocol [OAuthConfig] protocol-buffer
@@ -61,6 +63,7 @@ func FromProto(c *thrippypb.OAuthConfig) *Config {
 		},
 		AuthCodes: c.GetAuthCodes(),
 		Params:    c.GetParams(),
+		Nonce:     c.GetNonce(),
 	}
 }
 
@@ -91,6 +94,8 @@ func ToString(c *thrippypb.OAuthConfig) string {
 		line := fmt.Sprintf("Auth Codes: %v", acs)
 		lines = append(lines, strings.Replace(line, "map", "", 1))
 	}
+
+	lines = append(lines, "", fmt.Sprintf("Nonce: %s", c.GetNonce()))
 
 	return strings.Join(lines, "\n")
 }
@@ -130,6 +135,10 @@ func (c *Config) ToProto() *thrippypb.OAuthConfig {
 
 		Scopes:    c.Config.Scopes,
 		AuthCodes: c.AuthCodes,
+
+		// Params were already injected into the URLs, so no need to store them as a map.
+
+		Nonce: proto.String(c.Nonce),
 	}.Build()
 }
 
@@ -137,11 +146,16 @@ func (c *Config) ToProto() *thrippypb.OAuthConfig {
 // protocol-buffer message, for storage in the secrets manager.
 // This function returns "{}" if the receiver is nil.
 //
+// This function is not safe for concurrent use: it modifies the receiver's [Nonce] field.
+// However, this is not a problem in practice because it's triggered by a single live user.
+//
 // [OAuthConfig]: https://github.com/tzrikka/thrippy/blob/main/proto/thrippy/v1/oauth.proto
 func (c *Config) ToJSON() (string, error) {
 	if c == nil {
 		return "{}", nil
 	}
+
+	c.Nonce = shortuuid.New()
 
 	j, err := protojson.Marshal(c.ToProto())
 	if err != nil {

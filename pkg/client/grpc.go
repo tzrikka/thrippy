@@ -44,9 +44,7 @@ func LinkOAuthConfig(ctx context.Context, grpcAddr string, creds credentials.Tra
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	resp, err := c.GetLink(ctx, thrippypb.GetLinkRequest_builder{
-		LinkId: proto.String(linkID),
-	}.Build())
+	resp, err := c.GetLink(ctx, thrippypb.GetLinkRequest_builder{LinkId: proto.String(linkID)}.Build())
 	if err != nil {
 		if status.Code(err) != codes.NotFound {
 			l.Error().Stack().Err(err).Send()
@@ -80,9 +78,7 @@ func AddGitHubCreds(ctx context.Context, grpcAddr string, creds credentials.Tran
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	resp, err := c.GetCredentials(ctx, thrippypb.GetCredentialsRequest_builder{
-		LinkId: proto.String(linkID),
-	}.Build())
+	resp, err := c.GetCredentials(ctx, thrippypb.GetCredentialsRequest_builder{LinkId: proto.String(linkID)}.Build())
 	if err != nil {
 		l.Error().Stack().Err(err).Send()
 		return err
@@ -92,11 +88,8 @@ func AddGitHubCreds(ctx context.Context, grpcAddr string, creds credentials.Tran
 	m["install_id"] = installID
 	m["api_base_url"] = url
 
-	_, err = c.SetCredentials(ctx, thrippypb.SetCredentialsRequest_builder{
-		LinkId:       proto.String(linkID),
-		GenericCreds: m,
-	}.Build())
-	if err != nil {
+	req := thrippypb.SetCredentialsRequest_builder{LinkId: proto.String(linkID), GenericCreds: m}.Build()
+	if _, err = c.SetCredentials(ctx, req); err != nil {
 		l.Error().Stack().Err(err).Send()
 		return err
 	}
@@ -120,11 +113,8 @@ func SetOAuthCreds(ctx context.Context, grpcAddr string, creds credentials.Trans
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	_, err = c.SetCredentials(ctx, thrippypb.SetCredentialsRequest_builder{
-		LinkId: proto.String(linkID),
-		Token:  oauth.TokenToProto(t),
-	}.Build())
-	if err != nil {
+	req := thrippypb.SetCredentialsRequest_builder{LinkId: proto.String(linkID), Token: oauth.TokenToProto(t)}.Build()
+	if _, err = c.SetCredentials(ctx, req); err != nil {
 		l.Error().Stack().Err(err).Send()
 		return err
 	}

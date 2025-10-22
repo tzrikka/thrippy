@@ -86,7 +86,7 @@ func (s *grpcServer) CreateLink(ctx context.Context, in *thrippypb.CreateLinkReq
 	if o.IsUsable() {
 		j, err := o.ToJSON()
 		if err != nil {
-			l.Err(err).Msg("failed to convert proto into JSON")
+			l.Err(err).Msg("failed to convert OAuth proto into JSON")
 			return nil, status.Error(codes.Internal, "secrets manager parse error")
 		}
 
@@ -193,9 +193,24 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCreden
 		return nil, status.Error(codes.InvalidArgument, "invalid ID")
 	}
 
-	template, c, err := s.templateAndOAuth(l.WithContext(ctx), id)
+	template, oauthProto, err := s.templateAndOAuth(l.WithContext(ctx), id)
 	if err != nil {
 		return nil, err
+	}
+
+	// OAuth-based links: change the nonce, now that the old one was used successfully.
+	o := oauth.FromProto(oauthProto)
+	if o.IsUsable() {
+		j, err := o.ToJSON()
+		if err != nil {
+			l.Err(err).Msg("failed to convert OAuth proto into JSON")
+			return nil, status.Error(codes.Internal, "secrets manager parse error")
+		}
+
+		if err := s.sm.Set(ctx, id+"/oauth", j); err != nil {
+			l.Err(err).Msg("secrets manager write error")
+			return nil, status.Error(codes.Internal, "secrets manager write error")
+		}
 	}
 
 	// Credentials to store: either an OAuth token or a generic string map.
@@ -225,7 +240,7 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCreden
 	}
 
 	// Check the usability of the provided credentials, retrieve their metadata, and save both.
-	metadata, err := links.Templates[template].Check(ctx, m, oauth.FromProto(c), oauth.TokenFromProto(token))
+	metadata, err := links.Templates[template].Check(ctx, m, o, oauth.TokenFromProto(token))
 	if err != nil {
 		l.Err(err).Msg("failed to check credentials / extract metadata")
 		return nil, status.Error(codes.Internal, "credentials check error: "+err.Error())

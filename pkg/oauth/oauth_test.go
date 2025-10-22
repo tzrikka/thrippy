@@ -179,6 +179,7 @@ func TestConfigToProto(t *testing.T) {
 				AuthStyle:    proto.Int64(0),
 				ClientId:     proto.String(""),
 				ClientSecret: proto.String(""),
+				Nonce:        proto.String(""),
 			}.Build(),
 		},
 		{
@@ -195,6 +196,7 @@ func TestConfigToProto(t *testing.T) {
 				AuthStyle:    proto.Int64(0),
 				ClientId:     proto.String("id"),
 				ClientSecret: proto.String("secret"),
+				Nonce:        proto.String(""),
 			}.Build(),
 		},
 		{
@@ -211,6 +213,7 @@ func TestConfigToProto(t *testing.T) {
 				ClientId:     proto.String(""),
 				ClientSecret: proto.String(""),
 				Scopes:       []string{"111", "222"},
+				Nonce:        proto.String(""),
 			}.Build(),
 		},
 		{
@@ -226,6 +229,22 @@ func TestConfigToProto(t *testing.T) {
 				ClientId:     proto.String(""),
 				ClientSecret: proto.String(""),
 				AuthCodes:    map[string]string{"aaa": "111", "bbb": "222"},
+				Nonce:        proto.String(""),
+			}.Build(),
+		},
+		{
+			name: "nonce",
+			cfg: &Config{
+				Config: &oauth2.Config{},
+				Nonce:  "nonce",
+			},
+			want: thrippypb.OAuthConfig_builder{
+				AuthUrl:      proto.String(""),
+				TokenUrl:     proto.String(""),
+				AuthStyle:    proto.Int64(0),
+				ClientId:     proto.String(""),
+				ClientSecret: proto.String(""),
+				Nonce:        proto.String("nonce"),
 			}.Build(),
 		},
 	}

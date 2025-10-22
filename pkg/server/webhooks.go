@@ -1,6 +1,9 @@
 package server
 
 import (
+	"context"
+	"crypto/subtle"
+	"errors"
 	"fmt"
 	"html"
 	"html/template"
@@ -12,12 +15,14 @@ import (
 	"time"
 
 	"github.com/lithammer/shortuuid/v4"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"google.golang.org/grpc/credentials"
 
 	"github.com/tzrikka/thrippy/pkg/client"
 	"github.com/tzrikka/thrippy/pkg/links/github"
+	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
 const (
@@ -103,7 +108,7 @@ func (s *httpServer) oauthStartHandler(w http.ResponseWriter, r *http.Request) {
 	l := log.With().Str("http_method", r.Method).Str("url_path", r.URL.EscapedPath()).Logger()
 	l.Info().Msg("received HTTP request")
 
-	// Get the OAuth config corresponding to the link ID in the request's query or body.
+	// Extract the link ID and nonce parameters from the request's query or body.
 	if err := r.ParseForm(); err != nil {
 		l.Warn().Err(err).Msg("bad request: form parsing error")
 		htmlResponse(w, http.StatusBadRequest, "Form parsing error")
@@ -119,33 +124,41 @@ func (s *httpServer) oauthStartHandler(w http.ResponseWriter, r *http.Request) {
 
 	l = l.With().Str("id", id).Logger()
 	if _, err := shortuuid.DefaultEncoder.Decode(id); err != nil {
-		l.Warn().Err(err).Msg("bad request: ID is an invalid short UUID")
+		l.Warn().Err(err).Msg("bad request: invalid ID parameter")
 		htmlResponse(w, http.StatusBadRequest, "Invalid ID parameter")
 		return
 	}
 
-	ctx := l.WithContext(r.Context())
-	o, err := client.LinkOAuthConfig(ctx, s.grpcAddr, s.grpcCreds, id)
-	if err != nil {
-		htmlResponse(w, http.StatusInternalServerError, "&nbsp;")
-		return
-	}
-	if o == nil {
-		l.Warn().Err(err).Msg("bad request: link not found")
-		htmlResponse(w, http.StatusBadRequest, "Link not found")
+	nonce := r.FormValue("nonce")
+	if nonce == "" {
+		l.Warn().Msg("bad request: missing nonce parameter")
+		htmlResponse(w, http.StatusBadRequest, "Missing nonce parameter")
 		return
 	}
 
-	// Redirect based on the OAuth config, using its ID as the state parameter,
+	if _, err := shortuuid.DefaultEncoder.Decode(nonce); err != nil {
+		l.Warn().Err(err).Msg("forbidden: invalid nonce parameter")
+		htmlResponse(w, http.StatusForbidden, "Invalid nonce parameter")
+		return
+	}
+
+	// Get the OAuth config corresponding to the link ID, and verify the nonce.
+	ctx := l.WithContext(r.Context())
+	o := s.checkNonceParam(ctx, w, id, nonce)
+	if o == nil {
+		return
+	}
+
+	// Redirect based on the OAuth config, using its nonce as the state parameter,
 	// with an optional (short, opaque, but not secret) memo from the caller.
 	o.Config.RedirectURL = s.redirectURL
-	state := constructStateParam(id, r.FormValue("memo"))
+	state := constructStateParam(id, nonce, r.FormValue("memo"))
 	http.Redirect(w, r, o.AuthCodeURL(state), http.StatusFound)
 	l.Debug().Str("url", o.Config.Endpoint.AuthURL).Msg("redirected HTTP request")
 }
 
 // oauthExchangeHandler receives a redirect back from a third-party service's
-// authorization endpoint (the 2nd lef of the OAuth 2.0 flow), and exchanges
+// authorization endpoint (the 2nd leg of the OAuth 2.0 flow), and exchanges
 // the received authorization code for an new access token (the 3rd leg).
 func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request) {
 	l := log.With().Str("http_method", r.Method).Str("url_path", r.URL.EscapedPath()).Logger()
@@ -185,26 +198,21 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	// Parse the state parameter.
-	id, memo, err := parseStateParam(state)
-	l = l.With().Str("state", id).Str("id", id).Logger()
+	id, nonce, memo, err := parseStateParam(state)
+	l = l.With().Str("id", id).Logger()
 	if memo != "" {
 		l = l.With().Str("memo", memo).Logger()
 	}
 	if err != nil {
-		l.Warn().Err(err).Msg("bad request: state is an invalid short UUID")
+		l.Warn().Err(err).Msg("bad request: invalid state parameter")
 		htmlResponse(w, http.StatusBadRequest, "Invalid state parameter")
 		return
 	}
 
+	// Get the OAuth config corresponding to the link ID, and verify the nonce.
 	ctx := l.WithContext(r.Context())
-	o, err := client.LinkOAuthConfig(ctx, s.grpcAddr, s.grpcCreds, id)
-	if err != nil {
-		htmlResponse(w, http.StatusInternalServerError, "&nbsp;")
-		return
-	}
+	o := s.checkNonceParam(ctx, w, id, nonce)
 	if o == nil {
-		l.Warn().Err(err).Msg("bad request: link not found")
-		htmlResponse(w, http.StatusBadRequest, "Link not found")
 		return
 	}
 
@@ -265,6 +273,30 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	http.Redirect(w, r, "/success", http.StatusFound)
 }
 
+func (s *httpServer) checkNonceParam(ctx context.Context, w http.ResponseWriter, id, nonce string) *oauth.Config {
+	l := zerolog.Ctx(ctx)
+
+	o, err := client.LinkOAuthConfig(ctx, s.grpcAddr, s.grpcCreds, id)
+	if err != nil {
+		htmlResponse(w, http.StatusInternalServerError, "&nbsp;")
+		return nil
+	}
+
+	if o == nil {
+		l.Warn().Msg("forbidden: link not found")
+		htmlResponse(w, http.StatusForbidden, "Invalid state parameter")
+		return nil
+	}
+
+	if subtle.ConstantTimeCompare([]byte(nonce), []byte(o.Nonce)) != 1 {
+		l.Warn().Msg("forbidden: invalid nonce parameter")
+		htmlResponse(w, http.StatusForbidden, "Invalid state parameter")
+		return nil
+	}
+
+	return o
+}
+
 // successHandler is a trivial webhook which merely reports the success of
 // a 3-legged OAuth 2.0 flow. The [oauthExchangeHandler] webhook redirects
 // the user to this handler to cosmetically clean up the URL in the browser.
@@ -308,21 +340,30 @@ func htmlResponse(w http.ResponseWriter, status int, msg string) {
 	_ = htmlResponseTempl.Execute(w, htmlResponseParams{Title: title, Header: header, Msg: msg})
 }
 
-func constructStateParam(id, memo string) string {
-	state := id
+func constructStateParam(id, nonce, memo string) string {
+	state := fmt.Sprintf("%s_%s", id, nonce)
 	if memo != "" {
 		state += "_" + memo
 	}
 	return state
 }
 
-func parseStateParam(state string) (id, memo string, err error) {
-	s := strings.SplitN(state, "_", 2)
-	if len(s) == 1 {
+func parseStateParam(state string) (id, nonce, memo string, err error) {
+	s := strings.SplitN(state, "_", 3)
+	for i := len(s); i < 3; i++ {
 		s = append(s, "")
 	}
 
-	id, memo = s[0], s[1]
-	_, err = shortuuid.DefaultEncoder.Decode(id)
+	id, nonce, memo = s[0], s[1], s[2]
+	if id == "" || nonce == "" {
+		err = errors.New("incomplete state parameter")
+		return
+	}
+	if _, err = shortuuid.DefaultEncoder.Decode(id); err != nil {
+		return
+	}
+	if _, err = shortuuid.DefaultEncoder.Decode(nonce); err != nil {
+		return
+	}
 	return
 }

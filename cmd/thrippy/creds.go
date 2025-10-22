@@ -38,17 +38,37 @@ func startOAuthCommand(configFilePath altsrc.StringSourcer) *cli.Command {
 				),
 			},
 		},
-		Action: func(_ context.Context, cmd *cli.Command) error {
+		Action: func(ctx context.Context, cmd *cli.Command) error {
 			if err := checkLinkIDArg(cmd); err != nil {
 				return err
 			}
 
+			// Get the link's nonce.
+			conn, err := client.Connection(cmd.String("grpc-addr"), client.GRPCCreds(cmd))
+			if err != nil {
+				return err
+			}
+			defer conn.Close()
+
+			id := cmd.Args().First()
+			c := thrippypb.NewThrippyServiceClient(conn)
+			resp, err := c.GetLink(ctx, thrippypb.GetLinkRequest_builder{LinkId: proto.String(id)}.Build())
+			if err != nil {
+				return err
+			}
+
+			nonce := resp.GetOauthConfig().GetNonce()
+			if len(nonce) == 0 {
+				return fmt.Errorf("link %q does not have OAuth configured", id)
+			}
+
+			// Construct the OAuth start URL and open it in a browser.
 			u, err := url.JoinPath(cmd.String("base-url"), "start")
 			if err != nil {
 				return err
 			}
 
-			u = fmt.Sprintf("%s?id=%s", u, cmd.Args().First())
+			u = fmt.Sprintf("%s?id=%s&nonce=%s", u, id, nonce)
 			fmt.Println("Opening a browser with this URL:", u)
 
 			if err := browser.OpenURL(u); err != nil {

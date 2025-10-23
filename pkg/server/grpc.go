@@ -343,8 +343,8 @@ func (s *grpcServer) GetCredentials(ctx context.Context, in *thrippypb.GetCreden
 			continue
 		}
 
-		// Flatten extra secrets from an OAuth token's "raw" map,
-		// but in a limited way, to prevent overwriting.
+		// Flatten extra secrets from an OAuth token's "raw" map, but
+		// in a limited way, to prevent the possibility of overwriting.
 		raw := v.(map[string]any)
 		if ws, ok := raw["signing_secret"].(string); ok { // Slack.
 			ms["signing_secret"] = ws
@@ -426,7 +426,11 @@ func (s *grpcServer) refreshOAuthToken(ctx context.Context, id string, t *oauth2
 	}
 
 	if raw := s.getRaw(ctx, id); raw != nil {
-		m["raw"] = raw
+		rawAny := make(map[string]any, len(raw))
+		for k, v := range raw {
+			rawAny[k] = v
+		}
+		m["raw"] = rawAny
 	}
 
 	jsonToken, err := json.Marshal(m)

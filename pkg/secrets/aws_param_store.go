@@ -62,7 +62,7 @@ func newAWSProvider(ctx context.Context, cmd *cli.Command) (Manager, error) {
 // https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-advanced-parameters.html.
 func (p *awsProvider) Set(ctx context.Context, key, value string) error {
 	_, err := p.client.PutParameter(ctx, &ssm.PutParameterInput{
-		Name:      aws.String(key),
+		Name:      aws.String("/" + key),
 		Value:     aws.String(value),
 		Type:      types.ParameterTypeSecureString,
 		KeyId:     p.keyID,
@@ -73,7 +73,7 @@ func (p *awsProvider) Set(ctx context.Context, key, value string) error {
 
 func (p *awsProvider) Get(ctx context.Context, key string) (string, error) {
 	out, err := p.client.GetParameter(ctx, &ssm.GetParameterInput{
-		Name:           aws.String(key),
+		Name:           aws.String("/" + key),
 		WithDecryption: aws.Bool(true),
 	})
 	if err != nil {
@@ -87,6 +87,6 @@ func (p *awsProvider) Get(ctx context.Context, key string) (string, error) {
 }
 
 func (p *awsProvider) Delete(ctx context.Context, key string) error {
-	_, err := p.client.DeleteParameter(ctx, &ssm.DeleteParameterInput{Name: aws.String(key)})
+	_, err := p.client.DeleteParameter(ctx, &ssm.DeleteParameterInput{Name: aws.String("/" + key)})
 	return err
 }

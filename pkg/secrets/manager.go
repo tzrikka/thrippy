@@ -21,8 +21,8 @@
 //	namespace = "default"
 //
 //	[secrets.aws]
-//	region = "us-east1"
-//	kms_key_id = "..."
+//	region = "us-west-2"
+//	kms_key_id = "arn:aws:kms:us-west-2:123456789012:alias/..."
 //
 //	[secrets.vault]
 //	address = "https://127.0.0.1:8200"

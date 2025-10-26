@@ -78,6 +78,7 @@ func flags(path altsrc.StringSourcer) []cli.Flag {
 	flags = append(flags, client.GRPCFlags(path)...)
 	flags = append(flags, server.GRPCFlags(path)...)
 	flags = append(flags, secrets.ManagerFlags(path)...)
+	flags = append(flags, secrets.AWSFlags(path)...)
 	flags = append(flags, secrets.VaultFlags(path)...)
 	return flags
 }

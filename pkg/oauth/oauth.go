@@ -95,7 +95,7 @@ func ToString(c *thrippypb.OAuthConfig) string {
 		lines = append(lines, strings.Replace(line, "map", "", 1))
 	}
 
-	lines = append(lines, "", fmt.Sprintf("Nonce: %s", c.GetNonce()))
+	lines = append(lines, "", "Nonce: "+c.GetNonce())
 
 	return strings.Join(lines, "\n")
 }

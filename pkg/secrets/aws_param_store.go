@@ -77,7 +77,8 @@ func (p *awsProvider) Get(ctx context.Context, key string) (string, error) {
 		WithDecryption: aws.Bool(true),
 	})
 	if err != nil {
-		if errors.Is(err, &types.ParameterNotFound{}) {
+		var pnf *types.ParameterNotFound
+		if errors.As(err, &pnf) {
 			return "", nil
 		}
 		return "", err

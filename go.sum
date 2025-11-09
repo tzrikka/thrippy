@@ -116,10 +116,10 @@ github.com/ryanuber/go-glob v1.0.0 h1:iQh3xXAumdQ+4Ufa5b25cRpC5TYKlno6hsv6Cb3pkB
 github.com/ryanuber/go-glob v1.0.0/go.mod h1:807d1WSdnB0XRJzKNil9Om6lcp/3a0v4qIHxIXzX/Yc=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
-github.com/tzrikka/thrippy-api v1.4.0 h1:hFAFMSo/hfLA2ydHuMcR5X6ot4dNZ3sQmZ+k81USWQc=
-github.com/tzrikka/thrippy-api v1.4.0/go.mod h1:Jw1Gh9PMkUtVCJHhHzzIla8m+rXvZNufg5q7Wxbh0ZM=
-github.com/tzrikka/xdg v1.3.2 h1:KhTyYLq58F0vs+Vw9uLMKw44qfEZDW5/ZQyCgTE9P2k=
-github.com/tzrikka/xdg v1.3.2/go.mod h1:qZP8butzr5W+sv0kS17GKvBnoUgKVty9fBo+W8LsnTY=
+github.com/tzrikka/thrippy-api v1.4.1 h1:MWWzgp0UwE6RhG0ELVES7OqDpl3+HLVmmZFs8znxLkY=
+github.com/tzrikka/thrippy-api v1.4.1/go.mod h1:MAdXqqg/ucz1WHTc4SJdK9jQOFsHCo1qZUz0qy6h3/w=
+github.com/tzrikka/xdg v1.3.3 h1:IHkv0j11/Nnw6PILS13nA2j2bFncqLmcap0+rqDR8MY=
+github.com/tzrikka/xdg v1.3.3/go.mod h1:SVeuO5DrqSUti7xBpfB6zt1+Nqb9rkcPk3pHQ+esBJE=
 github.com/urfave/cli-altsrc/v3 v3.1.0 h1:6E5+kXeAWmRxXlPgdEVf9VqVoTJ2MJci0UMpUi/w/bA=
 github.com/urfave/cli-altsrc/v3 v3.1.0/go.mod h1:VcWVTGXcL3nrXUDJZagHAeUX702La3PKeWav7KpISqA=
 github.com/urfave/cli/v3 v3.5.0 h1:qCuFMmdayTF3zmjG8TSsoBzrDqszNrklYg2x3g4MSgw=

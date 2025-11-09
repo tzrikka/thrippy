@@ -2,7 +2,9 @@ package secrets
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/BurntSushi/toml"
@@ -87,11 +89,40 @@ func dataFile() string {
 }
 
 func (p *fileProvider) readTOMLFile() (map[string]string, error) {
-	store := map[string]string{}
-	if _, err := toml.DecodeFile(p.path, &store); err != nil {
+	var tomlStore map[string]any
+	if _, err := toml.DecodeFile(p.path, &tomlStore); err != nil {
 		return nil, err
 	}
-	return store, nil
+
+	flatStore := map[string]string{}
+	for prefix, v1 := range tomlStore {
+		m1, ok := v1.(map[string]any)
+		if !ok {
+			continue
+		}
+		for namespace, v2 := range m1 {
+			m2, ok := v2.(map[string]any)
+			if !ok {
+				continue
+			}
+			for id, v3 := range m2 {
+				m3, ok := v3.(map[string]any)
+				if !ok {
+					continue
+				}
+				for field, v4 := range m3 {
+					s, ok := v4.(string)
+					if !ok {
+						continue
+					}
+					k := fmt.Sprintf("%s/%s/%s/%s", prefix, namespace, id, field)
+					flatStore[k] = s
+				}
+			}
+		}
+	}
+
+	return flatStore, nil
 }
 
 func (p *fileProvider) writeTOMLFile(store map[string]string) error {
@@ -106,7 +137,22 @@ func (p *fileProvider) writeTOMLFile(store map[string]string) error {
 		return err
 	}
 
-	if err := toml.NewEncoder(f).Encode(store); err != nil {
+	tomlStore := map[string]any{}
+	for k, v := range store {
+		tomlKeys := strings.Split(k, "/")
+		m := tomlStore
+		for i := range 3 {
+			subMap, ok := m[tomlKeys[i]]
+			if !ok {
+				m[tomlKeys[i]] = map[string]any{}
+				subMap = m[tomlKeys[i]]
+			}
+			m = subMap.(map[string]any)
+		}
+		m[tomlKeys[3]] = v
+	}
+
+	if err := toml.NewEncoder(f).Encode(tomlStore); err != nil {
 		return err
 	}
 	return nil

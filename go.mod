@@ -15,7 +15,7 @@ require (
 	github.com/tzrikka/thrippy-api v1.4.2
 	github.com/tzrikka/xdg v1.3.3
 	github.com/urfave/cli-altsrc/v3 v3.1.0
-	github.com/urfave/cli/v3 v3.6.0
+	github.com/urfave/cli/v3 v3.6.1
 	golang.org/x/oauth2 v0.33.0
 	google.golang.org/api v0.256.0
 	google.golang.org/grpc v1.76.0

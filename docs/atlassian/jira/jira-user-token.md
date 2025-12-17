@@ -2,7 +2,7 @@
 
 ## Atlassian User Account API Tokens
 
-https://id.atlassian.com/manage-profile/security/api-tokens
+<https://id.atlassian.com/manage-profile/security/api-tokens>
 
 > [!IMPORTANT]
 > If you create the API token with specific [scopes](https://developer.atlassian.com/cloud/jira/platform/scopes-for-oauth-2-3LO-and-forge-apps/), specify **at least** `read:me` (classic), `read:jira-user` (classic), or `read:user:jira` (granular).

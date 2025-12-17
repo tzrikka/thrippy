@@ -39,4 +39,3 @@
 ## References
 
 - [Confluence Cloud OAuth 2.0 (3LO) apps](https://developer.atlassian.com/cloud/confluence/oauth-2-3lo-apps/)
-

@@ -6,13 +6,13 @@ This is a simple and free way to set it up.
 
 ## _ngrok_
 
-1. Sign up for an _ngrok_ account: https://dashboard.ngrok.com/signup
+1. Sign up for an _ngrok_ account: <https://dashboard.ngrok.com/signup>
 
-2. Copy your _ngrok_ auth token from: https://dashboard.ngrok.com/get-started/your-authtoken
+2. Copy your _ngrok_ auth token from: <https://dashboard.ngrok.com/get-started/your-authtoken>
 
-3. Install and set up the _ngrok_ CLI agent: https://dashboard.ngrok.com/get-started/setup
+3. Install and set up the _ngrok_ CLI agent: <https://dashboard.ngrok.com/get-started/setup>
 
-4. Create a free static domain in: https://dashboard.ngrok.com/domains
+4. Create a free static domain in: <https://dashboard.ngrok.com/domains>
 
 5. Run this command to start an HTTP tunnel:
 

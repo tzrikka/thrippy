@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net"
 	"os"
 	"runtime/debug"
 	"strconv"
 
-	"github.com/rs/zerolog/log"
 	altsrc "github.com/urfave/cli-altsrc/v3"
 	"github.com/urfave/cli-altsrc/v3/toml"
 	"github.com/urfave/cli/v3"
@@ -88,7 +88,8 @@ func flags(path altsrc.StringSourcer) []cli.Flag {
 func configFile() altsrc.StringSourcer {
 	path, err := xdg.CreateFile(xdg.ConfigHome, ConfigDirName, ConfigFileName)
 	if err != nil {
-		log.Fatal().Err(err).Caller().Send()
+		slog.Error("failed to create config file", "error", err)
+		os.Exit(1)
 	}
 	return altsrc.StringSourcer(path)
 }

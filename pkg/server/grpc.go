@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net"
+	"os"
 	"strings"
 
 	"github.com/lithammer/shortuuid/v4"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
@@ -20,6 +20,7 @@ import (
 
 	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 	intlinks "github.com/tzrikka/thrippy/internal/links"
+	"github.com/tzrikka/thrippy/internal/logger"
 	"github.com/tzrikka/thrippy/pkg/links"
 	"github.com/tzrikka/thrippy/pkg/oauth"
 	"github.com/tzrikka/thrippy/pkg/secrets"
@@ -39,7 +40,7 @@ func startGRPCServer(ctx context.Context, cmd *cli.Command, sm secrets.Manager) 
 	lc := net.ListenConfig{}
 	lis, err := lc.Listen(ctx, "tcp", cmd.String("grpc-addr"))
 	if err != nil {
-		log.Err(err).Send()
+		slog.Error("failed to listen on gRPC address", "error", err, "address", cmd.String("grpc-addr"))
 		return "", err
 	}
 
@@ -48,23 +49,24 @@ func startGRPCServer(ctx context.Context, cmd *cli.Command, sm secrets.Manager) 
 	go func() {
 		err = srv.Serve(lis)
 		if err != nil {
-			log.Fatal().Err(err).Msg("gRPC serving error")
+			slog.Error("gRPC serving error", "error", err)
+			os.Exit(1)
 		}
 	}()
 
-	log.Info().Msgf("gRPC server listening on %s", lis.Addr().String())
+	slog.Info("gRPC server listening on " + lis.Addr().String())
 	return lis.Addr().String(), nil
 }
 
 func (s *grpcServer) CreateLink(ctx context.Context, in *thrippypb.CreateLinkRequest) (*thrippypb.CreateLinkResponse, error) {
 	id := shortuuid.New()
-	l := log.With().Str("grpc_method", "CreateLink").Str("id", id).Logger()
-	l.Debug().Msg("received gRPC request")
+	l := slog.With("grpc_handler", "CreateLink", "id", id)
+	l.Debug("received gRPC request")
 
 	// Parse the input.
 	t := in.GetTemplate()
 	if _, ok := links.Templates[t]; !ok {
-		l.Warn().Str("template", t).Msg("invalid template")
+		l.Warn("invalid template", "template", t)
 		return nil, status.Error(codes.InvalidArgument, "invalid template")
 	}
 
@@ -72,13 +74,13 @@ func (s *grpcServer) CreateLink(ctx context.Context, in *thrippypb.CreateLinkReq
 	templ, ok := links.Templates[t]
 	intlinks.ModifyOAuthByTemplate(o, templ, ok)
 	if o != nil && o.Config.Endpoint.AuthURL != "" && o.Config.ClientID == "" {
-		l.Warn().Msg("missing OAuth client ID")
+		l.Warn("missing OAuth client ID")
 		return nil, status.Error(codes.InvalidArgument, "missing OAuth client ID")
 	}
 
 	// Save the input template.
 	if err := s.sm.Set(ctx, id+"/template", t); err != nil {
-		l.Err(err).Msg("secrets manager write error")
+		l.Error("secrets manager write error", "error", err)
 		return nil, status.Error(codes.Internal, "secrets manager write error")
 	}
 
@@ -86,17 +88,16 @@ func (s *grpcServer) CreateLink(ctx context.Context, in *thrippypb.CreateLinkReq
 	if o.IsUsable() {
 		j, err := o.ToJSON()
 		if err != nil {
-			l.Err(err).Msg("failed to convert OAuth proto into JSON")
+			l.Error("failed to convert OAuth proto into JSON", "error", err)
 			return nil, status.Error(codes.Internal, "secrets manager parse error")
 		}
 
 		if err := s.sm.Set(ctx, id+"/oauth", j); err != nil {
-			l.Err(err).Msg("secrets manager write error")
+			l.Error("secrets manager write error", "error", err)
 			return nil, status.Error(codes.Internal, "secrets manager write error")
 		}
 	}
 
-	l.Trace().Msg("secrets manager write success")
 	return thrippypb.CreateLinkResponse_builder{
 		LinkId:           proto.String(id),
 		CredentialFields: links.Templates[t].CredFields(),
@@ -105,21 +106,21 @@ func (s *grpcServer) CreateLink(ctx context.Context, in *thrippypb.CreateLinkReq
 
 func (s *grpcServer) DeleteLink(ctx context.Context, in *thrippypb.DeleteLinkRequest) (*thrippypb.DeleteLinkResponse, error) {
 	id := in.GetLinkId()
-	l := log.With().Str("grpc_method", "DeleteLink").Str("id", id).Logger()
-	l.Debug().Msg("received gRPC request")
+	l := slog.With("grpc_handler", "DeleteLink", "id", id)
+	l.Debug("received gRPC request")
 
 	if id == "" {
-		l.Warn().Msg("missing ID")
+		l.Warn("missing ID")
 		return nil, status.Error(codes.InvalidArgument, "missing ID")
 	}
 	if _, err := shortuuid.DefaultEncoder.Decode(id); err != nil {
-		l.Warn().Err(err).Msg("ID is an invalid short UUID")
+		l.Warn("ID is an invalid short UUID", "error", err)
 		return nil, status.Error(codes.InvalidArgument, "invalid ID")
 	}
 
 	t, err := s.sm.Get(ctx, id+"/template")
 	if err != nil {
-		l.Error().Stack().Err(err).Msg("secrets manager read error")
+		l.Error("secrets manager read error", "error", err)
 		return nil, status.Error(codes.Internal, "secrets manager read error")
 	}
 
@@ -127,47 +128,47 @@ func (s *grpcServer) DeleteLink(ctx context.Context, in *thrippypb.DeleteLinkReq
 		if in.GetAllowMissing() {
 			return &thrippypb.DeleteLinkResponse{}, nil
 		} else {
-			l.Warn().Stack().Msg("link not found")
+			l.Warn("link not found")
 			return nil, status.Error(codes.NotFound, "link not found")
 		}
 	}
 
 	if err := s.sm.Delete(ctx, id+"/creds"); err != nil {
-		l.Err(err).Msg("secrets manager delete error: creds")
+		l.Error("secrets manager delete error: creds", "error", err)
 		return nil, status.Error(codes.Internal, "secrets manager delete error: creds")
 	}
 	if err := s.sm.Delete(ctx, id+"/meta"); err != nil {
-		l.Err(err).Msg("secrets manager delete error: meta")
+		l.Error("secrets manager delete error: meta", "error", err)
 		return nil, status.Error(codes.Internal, "secrets manager delete error: meta")
 	}
 	if err := s.sm.Delete(ctx, id+"/oauth"); err != nil {
-		l.Err(err).Msg("secrets manager delete error: oauth")
+		l.Error("secrets manager delete error: oauth", "error", err)
 		return nil, status.Error(codes.Internal, "secrets manager delete error: oauth")
 	}
 	if err := s.sm.Delete(ctx, id+"/template"); err != nil {
-		l.Err(err).Msg("secrets manager delete error: template")
+		l.Error("secrets manager delete error: template", "error", err)
 		return nil, status.Error(codes.Internal, "secrets manager delete error: template")
 	}
 
-	l.Trace().Msg("secrets manager delete success")
 	return &thrippypb.DeleteLinkResponse{}, nil
 }
 
 func (s *grpcServer) GetLink(ctx context.Context, in *thrippypb.GetLinkRequest) (*thrippypb.GetLinkResponse, error) {
 	id := in.GetLinkId()
-	l := log.With().Str("grpc_method", "GetLink").Str("id", id).Logger()
-	l.Debug().Msg("received gRPC request")
+	l := slog.With("grpc_handler", "GetLink", "id", id)
+	l.Debug("received gRPC request")
 
 	if id == "" {
-		l.Warn().Msg("missing ID")
+		l.Warn("missing ID")
 		return nil, status.Error(codes.InvalidArgument, "missing ID")
 	}
 	if _, err := shortuuid.DefaultEncoder.Decode(id); err != nil {
-		l.Warn().Err(err).Msg("ID is an invalid short UUID")
+		l.Warn("ID is an invalid short UUID", "error", err)
 		return nil, status.Error(codes.InvalidArgument, "invalid ID")
 	}
 
-	t, o, err := s.templateAndOAuth(l.WithContext(ctx), id)
+	ctx = logger.InContext(ctx, l)
+	t, o, err := s.templateAndOAuth(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -181,19 +182,20 @@ func (s *grpcServer) GetLink(ctx context.Context, in *thrippypb.GetLinkRequest) 
 
 func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCredentialsRequest) (*thrippypb.SetCredentialsResponse, error) {
 	id := in.GetLinkId()
-	l := log.With().Str("grpc_method", "SetCredentials").Str("id", id).Logger()
-	l.Debug().Msg("received gRPC request")
+	l := slog.With("grpc_handler", "SetCredentials", "id", id)
+	l.Debug("received gRPC request")
 
 	if id == "" {
-		l.Warn().Msg("missing ID")
+		l.Warn("missing ID")
 		return nil, status.Error(codes.InvalidArgument, "missing ID")
 	}
 	if _, err := shortuuid.DefaultEncoder.Decode(id); err != nil {
-		l.Warn().Err(err).Msg("ID is an invalid short UUID")
+		l.Warn("ID is an invalid short UUID", "error", err)
 		return nil, status.Error(codes.InvalidArgument, "invalid ID")
 	}
 
-	template, oauthProto, err := s.templateAndOAuth(l.WithContext(ctx), id)
+	ctx = logger.InContext(ctx, l)
+	template, oauthProto, err := s.templateAndOAuth(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -203,12 +205,12 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCreden
 	if o.IsUsable() {
 		j, err := o.ToJSON()
 		if err != nil {
-			l.Err(err).Msg("failed to convert OAuth proto into JSON")
+			l.Error("failed to convert OAuth proto into JSON", "error", err)
 			return nil, status.Error(codes.Internal, "secrets manager parse error")
 		}
 
 		if err := s.sm.Set(ctx, id+"/oauth", j); err != nil {
-			l.Err(err).Msg("secrets manager write error")
+			l.Error("secrets manager write error", "error", err)
 			return nil, status.Error(codes.Internal, "secrets manager write error")
 		}
 	}
@@ -227,14 +229,14 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCreden
 
 	j, err := protojson.Marshal(token)
 	if err != nil {
-		l.Err(err).Msg("failed to convert proto into JSON")
+		l.Error("failed to convert proto into JSON", "error", err)
 		return nil, status.Error(codes.Internal, "secrets manager parse error")
 	}
 
 	if len(j) <= 2 {
 		j, err = json.Marshal(m)
 		if err != nil {
-			l.Err(err).Msg("failed to convert credentials into JSON")
+			l.Error("failed to convert credentials into JSON", "error", err)
 			return nil, status.Error(codes.Internal, "secrets manager parse error")
 		}
 	}
@@ -242,42 +244,41 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCreden
 	// Check the usability of the provided credentials, retrieve their metadata, and save both.
 	metadata, err := links.Templates[template].Check(ctx, m, o, oauth.TokenFromProto(token))
 	if err != nil {
-		l.Err(err).Msg("failed to check credentials / extract metadata")
+		l.Error("failed to check credentials / extract metadata", "error", err)
 		return nil, status.Error(codes.Internal, "credentials check error: "+err.Error())
 	}
 
 	if err := s.sm.Set(ctx, id+"/creds", string(j)); err != nil {
-		l.Err(err).Msg("secrets manager write error")
+		l.Error("secrets manager write error", "error", err)
 		return nil, status.Error(codes.Internal, "secrets manager write error")
 	}
 
 	if metadata != "" {
 		if err := s.sm.Set(ctx, id+"/meta", metadata); err != nil {
-			l.Err(err).Msg("secrets manager write error")
+			l.Error("secrets manager write error", "error", err)
 			return nil, status.Error(codes.Internal, "secrets manager write error")
 		}
 	}
 
-	l.Trace().Msg("secrets manager write success")
 	return &thrippypb.SetCredentialsResponse{}, nil
 }
 
 func (s *grpcServer) templateAndOAuth(ctx context.Context, id string) (string, *thrippypb.OAuthConfig, error) {
-	l := zerolog.Ctx(ctx)
+	l := logger.FromContext(ctx)
 
 	t, err := s.sm.Get(ctx, id+"/template")
 	if err != nil {
-		l.Error().Stack().Err(err).Msg("secrets manager read error")
+		l.Error("secrets manager read error", "error", err)
 		return "", nil, status.Error(codes.Internal, "secrets manager read error")
 	}
 	if t == "" {
-		l.Warn().Stack().Msg("link not found")
+		l.Warn("link not found")
 		return "", nil, status.Error(codes.NotFound, "link not found")
 	}
 
 	o, err := s.sm.Get(ctx, id+"/oauth")
 	if err != nil {
-		l.Error().Stack().Err(err).Msg("secrets manager read error")
+		l.Error("secrets manager read error", "error", err)
 		return "", nil, status.Error(codes.Internal, "secrets manager read error")
 	}
 
@@ -285,7 +286,7 @@ func (s *grpcServer) templateAndOAuth(ctx context.Context, id string) (string, *
 	if o != "" {
 		m = &thrippypb.OAuthConfig{}
 		if err = protojson.Unmarshal([]byte(o), m); err != nil {
-			l.Err(err).Msg("failed to convert JSON into proto")
+			l.Error("failed to convert JSON into proto", "error", err)
 			return "", nil, status.Error(codes.Internal, "secrets manager parse error")
 		}
 	}
@@ -321,9 +322,9 @@ func (s *grpcServer) getRaw(ctx context.Context, id string) map[string]string {
 
 func (s *grpcServer) GetCredentials(ctx context.Context, in *thrippypb.GetCredentialsRequest) (*thrippypb.GetCredentialsResponse, error) {
 	id := in.GetLinkId()
-	l := log.With().Str("grpc_method", "GetCredentials").Str("id", id).Logger()
+	l := slog.With("grpc_handler", "GetCredentials", "id", id)
 
-	ctx = l.WithContext(ctx)
+	ctx = logger.InContext(ctx, l)
 	ma, err := s.getSecrets(ctx, id, "/creds")
 	if err != nil {
 		return nil, err
@@ -359,9 +360,10 @@ func (s *grpcServer) GetCredentials(ctx context.Context, in *thrippypb.GetCreden
 
 func (s *grpcServer) GetMetadata(ctx context.Context, in *thrippypb.GetMetadataRequest) (*thrippypb.GetMetadataResponse, error) {
 	id := in.GetLinkId()
-	l := log.With().Str("grpc_method", "GetMetadata").Str("id", id).Logger()
+	l := slog.With("grpc_handler", "GetMetadata", "id", id)
 
-	ma, err := s.getSecrets(l.WithContext(ctx), id, "/meta")
+	ctx = logger.InContext(ctx, l)
+	ma, err := s.getSecrets(ctx, id, "/meta")
 	if err != nil {
 		return nil, err
 	}
@@ -375,28 +377,28 @@ func (s *grpcServer) GetMetadata(ctx context.Context, in *thrippypb.GetMetadataR
 }
 
 func (s *grpcServer) getSecrets(ctx context.Context, linkID, keySuffix string) (map[string]any, error) {
-	l := zerolog.Ctx(ctx)
-	l.Debug().Msg("received gRPC request")
+	l := logger.FromContext(ctx)
+	l.Debug("received gRPC request")
 
 	if linkID == "" {
-		l.Warn().Msg("missing ID")
+		l.Warn("missing ID")
 		return nil, status.Error(codes.InvalidArgument, "missing ID")
 	}
 	if _, err := shortuuid.DefaultEncoder.Decode(linkID); err != nil {
-		l.Warn().Err(err).Msg("ID is an invalid short UUID")
+		l.Warn("ID is an invalid short UUID", "error", err)
 		return nil, status.Error(codes.InvalidArgument, "invalid ID")
 	}
 
 	j, err := s.sm.Get(ctx, linkID+keySuffix)
 	if err != nil {
-		l.Err(err).Msg("secrets manager read error")
+		l.Error("secrets manager read error", "error", err)
 		return nil, status.Error(codes.Internal, "secrets manager read error")
 	}
 
 	var m map[string]any
 	if j != "" {
 		if err := json.Unmarshal([]byte(j), &m); err != nil {
-			l.Err(err).Msg("failed to convert JSON into map")
+			l.Error("failed to convert JSON into map", "error", err)
 			return nil, status.Error(codes.Internal, "secrets manager parse error")
 		}
 	}
@@ -405,23 +407,23 @@ func (s *grpcServer) getSecrets(ctx context.Context, linkID, keySuffix string) (
 }
 
 func (s *grpcServer) refreshOAuthToken(ctx context.Context, id string, t *oauth2.Token) (map[string]any, error) {
-	l := zerolog.Ctx(ctx)
+	l := logger.FromContext(ctx)
 
 	jsonConfig, err := s.sm.Get(ctx, id+"/oauth")
 	if err != nil {
-		l.Err(err).Msg("secrets manager read error")
+		l.Error("secrets manager read error", "error", err)
 		return nil, status.Error(codes.Internal, "secrets manager read error")
 	}
 
 	o := &thrippypb.OAuthConfig{}
 	if err := protojson.Unmarshal([]byte(jsonConfig), o); err != nil {
-		l.Err(err).Msg("failed to convert JSON into proto")
+		l.Error("failed to convert JSON into proto", "error", err)
 		return nil, status.Error(codes.Internal, "secrets manager parse error")
 	}
 
 	m, err := oauth.FromProto(o).RefreshToken(ctx, t, false)
 	if err != nil {
-		l.Err(err).Msg("failed to refresh OAuth token")
+		l.Error("failed to refresh OAuth token", "error", err)
 		return nil, status.Error(codes.Internal, "OAuth token refresh error")
 	}
 
@@ -435,12 +437,12 @@ func (s *grpcServer) refreshOAuthToken(ctx context.Context, id string, t *oauth2
 
 	jsonToken, err := json.Marshal(m)
 	if err != nil {
-		l.Err(err).Msg("failed to convert map into JSON")
+		l.Error("failed to convert map into JSON", "error", err)
 		return nil, status.Error(codes.Internal, "secrets manager parse error")
 	}
 
 	if err := s.sm.Set(ctx, id+"/creds", string(jsonToken)); err != nil {
-		l.Err(err).Msg("secrets manager write error")
+		l.Error("secrets manager write error", "error", err)
 		return nil, status.Error(codes.Internal, "secrets manager write error")
 	}
 

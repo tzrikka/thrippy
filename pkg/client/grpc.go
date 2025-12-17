@@ -5,7 +5,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/rs/zerolog"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -14,6 +13,7 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
+	"github.com/tzrikka/thrippy/internal/logger"
 	"github.com/tzrikka/thrippy/pkg/oauth"
 )
 
@@ -31,11 +31,11 @@ func Connection(addr string, creds credentials.TransportCredentials) (*grpc.Clie
 // This function reports gRPC errors, and invalid OAuth configurations,
 // but if the link or its OAuth configuration are not found it returns nil.
 func LinkOAuthConfig(ctx context.Context, grpcAddr string, creds credentials.TransportCredentials, linkID string) (*oauth.Config, error) {
-	l := zerolog.Ctx(ctx)
+	l := logger.FromContext(ctx)
 
 	conn, err := Connection(grpcAddr, creds)
 	if err != nil {
-		l.Error().Stack().Err(err).Send()
+		l.Error("gRPC connection error", "error", err)
 		return nil, err
 	}
 	defer conn.Close()
@@ -47,7 +47,7 @@ func LinkOAuthConfig(ctx context.Context, grpcAddr string, creds credentials.Tra
 	resp, err := c.GetLink(ctx, thrippypb.GetLinkRequest_builder{LinkId: proto.String(linkID)}.Build())
 	if err != nil {
 		if status.Code(err) != codes.NotFound {
-			l.Error().Stack().Err(err).Send()
+			l.Error("bad gRPC service response", "error", err, "client_method", "GetLink")
 			return nil, err
 		}
 		return nil, nil
@@ -55,7 +55,7 @@ func LinkOAuthConfig(ctx context.Context, grpcAddr string, creds credentials.Tra
 
 	o := oauth.FromProto(resp.GetOauthConfig())
 	if o != nil && o.Config.ClientID == "" {
-		l.Error().Stack().Msg("empty OAuth client ID")
+		l.Error("empty OAuth client ID")
 		return nil, errors.New("empty OAuth client ID")
 	}
 
@@ -65,11 +65,11 @@ func LinkOAuthConfig(ctx context.Context, grpcAddr string, creds credentials.Tra
 // AddGitHubCreds adds the given GitHub base URL and app installation ID to the given
 // link's existing credentials. This also includes settings new metadata for the link.
 func AddGitHubCreds(ctx context.Context, grpcAddr string, creds credentials.TransportCredentials, linkID, installID, url string) error {
-	l := zerolog.Ctx(ctx)
+	l := logger.FromContext(ctx)
 
 	conn, err := Connection(grpcAddr, creds)
 	if err != nil {
-		l.Error().Stack().Err(err).Send()
+		l.Error("gRPC connection error", "error", err)
 		return err
 	}
 	defer conn.Close()
@@ -80,7 +80,7 @@ func AddGitHubCreds(ctx context.Context, grpcAddr string, creds credentials.Tran
 
 	resp, err := c.GetCredentials(ctx, thrippypb.GetCredentialsRequest_builder{LinkId: proto.String(linkID)}.Build())
 	if err != nil {
-		l.Error().Stack().Err(err).Send()
+		l.Error("bad gRPC service response", "error", err, "client_method", "GetCredentials")
 		return err
 	}
 
@@ -90,7 +90,7 @@ func AddGitHubCreds(ctx context.Context, grpcAddr string, creds credentials.Tran
 
 	req := thrippypb.SetCredentialsRequest_builder{LinkId: proto.String(linkID), GenericCreds: m}.Build()
 	if _, err = c.SetCredentials(ctx, req); err != nil {
-		l.Error().Stack().Err(err).Send()
+		l.Error("bad gRPC service response", "error", err, "client_method", "SetCredentials")
 		return err
 	}
 
@@ -100,11 +100,11 @@ func AddGitHubCreds(ctx context.Context, grpcAddr string, creds credentials.Tran
 // SetOAuthCreds checks and saves the given OAuth token as the credentials
 // of the given link. This also includes settings new metadata for the link.
 func SetOAuthCreds(ctx context.Context, grpcAddr string, creds credentials.TransportCredentials, linkID string, t *oauth2.Token) error {
-	l := zerolog.Ctx(ctx)
+	l := logger.FromContext(ctx)
 
 	conn, err := Connection(grpcAddr, creds)
 	if err != nil {
-		l.Error().Stack().Err(err).Send()
+		l.Error("gRPC connection error", "error", err)
 		return err
 	}
 	defer conn.Close()
@@ -115,7 +115,7 @@ func SetOAuthCreds(ctx context.Context, grpcAddr string, creds credentials.Trans
 
 	req := thrippypb.SetCredentialsRequest_builder{LinkId: proto.String(linkID), Token: oauth.TokenToProto(t)}.Build()
 	if _, err = c.SetCredentials(ctx, req); err != nil {
-		l.Error().Stack().Err(err).Send()
+		l.Error("bad gRPC service response", "error", err, "client_method", "SetCredentials")
 		return err
 	}
 

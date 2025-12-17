@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"html"
 	"html/template"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/url"
@@ -15,11 +16,10 @@ import (
 	"time"
 
 	"github.com/lithammer/shortuuid/v4"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"google.golang.org/grpc/credentials"
 
+	"github.com/tzrikka/thrippy/internal/logger"
 	"github.com/tzrikka/thrippy/pkg/client"
 	"github.com/tzrikka/thrippy/pkg/links/github"
 	"github.com/tzrikka/thrippy/pkg/oauth"
@@ -86,15 +86,15 @@ func (s *httpServer) run() error {
 		WriteTimeout: timeout,
 	}
 
-	log.Info().Msgf("HTTP server listening on port %d", s.httpPort)
+	slog.Info(fmt.Sprintf("HTTP server listening on port %d", s.httpPort))
 	if s.redirectURL != "" {
-		log.Info().Msgf("OAuth callback URL: %s", s.redirectURL)
+		slog.Info("OAuth callback URL: " + s.redirectURL)
 	} else {
-		log.Warn().Msg("OAuth callback URL: not set")
+		slog.Warn("OAuth callback URL: not set")
 	}
 	err := server.ListenAndServe()
 	if err != nil {
-		log.Err(err).Send()
+		slog.Error("HTTP server error", "error", err)
 		return err
 	}
 
@@ -105,45 +105,45 @@ func (s *httpServer) run() error {
 // to the authorization endpoint of a third-party service. The incoming request's
 // method may be GET or POST, but the resulting redirection should always be GET.
 func (s *httpServer) oauthStartHandler(w http.ResponseWriter, r *http.Request) {
-	l := log.With().Str("http_method", r.Method).Str("url_path", r.URL.EscapedPath()).Logger()
-	l.Info().Msg("received HTTP request")
+	l := slog.With("http_method", r.Method, "url_path", r.URL.EscapedPath())
+	l.Info("received HTTP request")
 
 	// Extract the link ID and nonce parameters from the request's query or body.
 	if err := r.ParseForm(); err != nil {
-		l.Warn().Err(err).Msg("bad request: form parsing error")
+		l.Warn("bad request: form parsing error", "error", err)
 		htmlResponse(w, http.StatusBadRequest, "Form parsing error")
 		return
 	}
 
 	id := r.FormValue("id")
 	if id == "" {
-		l.Warn().Msg("bad request: missing ID parameter")
+		l.Warn("bad request: missing ID parameter")
 		htmlResponse(w, http.StatusBadRequest, "Missing ID parameter")
 		return
 	}
 
-	l = l.With().Str("id", id).Logger()
+	l = l.With("id", id)
 	if _, err := shortuuid.DefaultEncoder.Decode(id); err != nil {
-		l.Warn().Err(err).Msg("bad request: invalid ID parameter")
+		l.Warn("bad request: invalid ID parameter", "error", err)
 		htmlResponse(w, http.StatusBadRequest, "Invalid ID parameter")
 		return
 	}
 
 	nonce := r.FormValue("nonce")
 	if nonce == "" {
-		l.Warn().Msg("bad request: missing nonce parameter")
+		l.Warn("bad request: missing nonce parameter")
 		htmlResponse(w, http.StatusBadRequest, "Missing nonce parameter")
 		return
 	}
 
 	if _, err := shortuuid.DefaultEncoder.Decode(nonce); err != nil {
-		l.Warn().Err(err).Msg("forbidden: invalid nonce parameter")
+		l.Warn("forbidden: invalid nonce parameter", "error", err)
 		htmlResponse(w, http.StatusForbidden, "Invalid nonce parameter")
 		return
 	}
 
 	// Get the OAuth config corresponding to the link ID, and verify the nonce.
-	ctx := l.WithContext(r.Context())
+	ctx := logger.InContext(r.Context(), l)
 	o := s.checkNonceParam(ctx, w, id, nonce)
 	if o == nil {
 		return
@@ -154,18 +154,18 @@ func (s *httpServer) oauthStartHandler(w http.ResponseWriter, r *http.Request) {
 	o.Config.RedirectURL = s.redirectURL
 	state := constructStateParam(id, nonce, r.FormValue("memo"))
 	http.Redirect(w, r, o.AuthCodeURL(state), http.StatusFound)
-	l.Debug().Str("url", o.Config.Endpoint.AuthURL).Msg("redirected HTTP request")
+	l.Debug("redirected HTTP request", "url", o.Config.Endpoint.AuthURL)
 }
 
 // oauthExchangeHandler receives a redirect back from a third-party service's
 // authorization endpoint (the 2nd leg of the OAuth 2.0 flow), and exchanges
 // the received authorization code for an new access token (the 3rd leg).
 func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request) {
-	l := log.With().Str("http_method", r.Method).Str("url_path", r.URL.EscapedPath()).Logger()
-	l.Info().Msg("received HTTP request")
+	l := slog.With("http_method", r.Method, "url_path", r.URL.EscapedPath())
+	l.Info("received HTTP request")
 
 	if err := r.ParseForm(); err != nil {
-		l.Warn().Err(err).Msg("bad request: form parsing error")
+		l.Warn("bad request: form parsing error", "error", err)
 		htmlResponse(w, http.StatusBadRequest, "Form parsing error")
 		return
 	}
@@ -178,7 +178,7 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	}
 	if errParam != "" {
 		errParam = html.EscapeString(errParam)
-		l.Warn().Msgf("OAuth error: %s", errParam)
+		l.Warn("OAuth error: " + errParam)
 		htmlResponse(w, http.StatusBadRequest, errParam)
 		return
 	}
@@ -187,9 +187,9 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	// initiated by Thrippy, so we can't do anything with the results.
 	state := r.FormValue("state")
 	if state == "" {
-		l.Warn().Msg("forbidden: missing OAuth state parameter")
+		l.Warn("forbidden: missing OAuth state parameter")
 		if s.fallbackURL != "" {
-			l.Debug().Str("url", s.fallbackURL).Msg("redirected HTTP request")
+			l.Debug("redirected HTTP request", "url", s.fallbackURL)
 			http.Redirect(w, r, s.fallbackURL, http.StatusFound)
 			return
 		}
@@ -199,18 +199,18 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 
 	// Parse the state parameter.
 	id, nonce, memo, err := parseStateParam(state)
-	l = l.With().Str("id", id).Logger()
+	l = l.With("id", id)
 	if memo != "" {
-		l = l.With().Str("memo", memo).Logger()
+		l = l.With("memo", memo)
 	}
 	if err != nil {
-		l.Warn().Err(err).Msg("bad request: invalid state parameter")
+		l.Warn("bad request: invalid state parameter", "error", err)
 		htmlResponse(w, http.StatusBadRequest, "Invalid state parameter")
 		return
 	}
 
 	// Get the OAuth config corresponding to the link ID, and verify the nonce.
-	ctx := l.WithContext(r.Context())
+	ctx := logger.InContext(r.Context(), l)
 	o := s.checkNonceParam(ctx, w, id, nonce)
 	if o == nil {
 		return
@@ -221,7 +221,7 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	// https://docs.github.com/en/apps/using-github-apps/installing-a-github-app-from-a-third-party#requirements-to-install-a-github-app
 	setupAction := r.FormValue("setup_action")
 	if setupAction == "request" {
-		l.Warn().Err(err).Msg("GitHub app installation requested by user who can't approve it")
+		l.Warn("GitHub app installation requested by user who can't approve it")
 		htmlResponse(w, http.StatusForbidden, "Installation must be approved by an organization owner")
 	}
 
@@ -229,18 +229,18 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	// user or app-installation token (the 3rd leg of the OAuth 2.0 flow).
 	installID := r.FormValue("installation_id")
 	if (setupAction == "install" || setupAction == "update") && installID != "" {
-		l = l.With().Str("setup_action", setupAction).Str("install_id", installID).Logger()
-		l.Debug().Msg("successful GitHub app installation")
+		l = l.With("setup_action", setupAction, "install_id", installID)
+		l.Debug("successful GitHub app installation")
 
 		// Check the app installation, extract metadata with and about it, and save them.
-		ctx := l.WithContext(r.Context())
+		ctx := logger.InContext(r.Context(), l)
 		u := github.APIBaseURL(github.AuthBaseURL(o))
 		if err := client.AddGitHubCreds(ctx, s.grpcAddr, s.grpcCreds, id, installID, u); err != nil {
 			htmlResponse(w, http.StatusInternalServerError, "&nbsp;")
 			return
 		}
 
-		l.Debug().Msg("checked and saved the GitHub installation")
+		l.Debug("checked and saved the GitHub installation")
 		http.Redirect(w, r, "/success", http.StatusFound)
 		return
 	}
@@ -249,7 +249,7 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	// including a refresh token (this is the 3rd leg of the OAuth 2.0 flow).
 	code := r.FormValue("code")
 	if code == "" {
-		l.Warn().Any("query", r.URL.Query()).Msg("forbidden: missing OAuth code parameter")
+		l.Warn("forbidden: missing OAuth code parameter", "query", r.URL.Query())
 		htmlResponse(w, http.StatusForbidden, "Missing OAuth code parameter")
 		return
 	}
@@ -257,11 +257,11 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	o.Config.RedirectURL = s.redirectURL
 	token, err := o.Exchange(ctx, code)
 	if err != nil {
-		l.Warn().Err(err).Msg("OAuth code exchange error")
+		l.Warn("OAuth code exchange error", "error", err)
 		htmlResponse(w, http.StatusForbidden, "OAuth code exchange error")
 		return
 	}
-	l.Debug().Msg("successful OAuth token exchange")
+	l.Debug("successful OAuth token exchange")
 
 	// Check the token, extract metadata with and about it, and save them.
 	if err := client.SetOAuthCreds(ctx, s.grpcAddr, s.grpcCreds, id, token); err != nil {
@@ -269,12 +269,12 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	l.Debug().Msg("checked and saved OAuth token")
+	l.Debug("checked and saved OAuth token")
 	http.Redirect(w, r, "/success", http.StatusFound)
 }
 
 func (s *httpServer) checkNonceParam(ctx context.Context, w http.ResponseWriter, id, nonce string) *oauth.Config {
-	l := zerolog.Ctx(ctx)
+	l := logger.FromContext(ctx)
 
 	o, err := client.LinkOAuthConfig(ctx, s.grpcAddr, s.grpcCreds, id)
 	if err != nil {
@@ -283,13 +283,13 @@ func (s *httpServer) checkNonceParam(ctx context.Context, w http.ResponseWriter,
 	}
 
 	if o == nil {
-		l.Warn().Msg("forbidden: link not found")
+		l.Warn("forbidden: link not found")
 		htmlResponse(w, http.StatusForbidden, "Invalid state parameter")
 		return nil
 	}
 
 	if subtle.ConstantTimeCompare([]byte(nonce), []byte(o.Nonce)) != 1 {
-		l.Warn().Msg("forbidden: invalid nonce parameter")
+		l.Warn("forbidden: invalid nonce parameter")
 		htmlResponse(w, http.StatusForbidden, "Invalid state parameter")
 		return nil
 	}

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"net"
 	"os"
 	"runtime/debug"
@@ -13,6 +12,7 @@ import (
 	"github.com/urfave/cli-altsrc/v3/toml"
 	"github.com/urfave/cli/v3"
 
+	"github.com/tzrikka/thrippy/internal/logger"
 	"github.com/tzrikka/thrippy/pkg/client"
 	"github.com/tzrikka/thrippy/pkg/secrets"
 	"github.com/tzrikka/thrippy/pkg/server"
@@ -88,8 +88,7 @@ func flags(path altsrc.StringSourcer) []cli.Flag {
 func configFile() altsrc.StringSourcer {
 	path, err := xdg.CreateFile(xdg.ConfigHome, ConfigDirName, ConfigFileName)
 	if err != nil {
-		slog.Error("failed to create config file", "error", err)
-		os.Exit(1)
+		logger.FatalError(context.Background(), "failed to create config file", err)
 	}
 	return altsrc.StringSourcer(path)
 }

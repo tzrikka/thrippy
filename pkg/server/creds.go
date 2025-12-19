@@ -1,16 +1,19 @@
 package server
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"log/slog"
 	"os"
 
-	"github.com/rs/zerolog/log"
 	altsrc "github.com/urfave/cli-altsrc/v3"
 	"github.com/urfave/cli-altsrc/v3/toml"
 	"github.com/urfave/cli/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+
+	"github.com/tzrikka/thrippy/internal/logger"
 )
 
 // GRPCFlags defines global (but hidden) CLI flags. The purpose of
@@ -56,7 +59,7 @@ func GRPCFlags(configFilePath altsrc.StringSourcer) []cli.Flag {
 // See also [client.GRPCCreds].
 //
 // [client.GRPCCreds]: https://pkg.go.dev/github.com/tzrikka/thrippy/pkg/client#GRPCCreds
-func GRPCCreds(cmd *cli.Command) []grpc.ServerOption {
+func GRPCCreds(ctx context.Context, cmd *cli.Command) []grpc.ServerOption {
 	if cmd.Bool("dev") {
 		return nil
 	}
@@ -70,10 +73,10 @@ func GRPCCreds(cmd *cli.Command) []grpc.ServerOption {
 	// The server's X.509 PEM-encoded public cert and private key are required
 	// for both TLS and mTLS. If either of them is missing it's an error.
 	if certPath == "" {
-		log.Fatal().Msg("missing server public cert file for gRPC client with m/TLS")
+		logger.Fatal(ctx, "missing server public cert file for gRPC client with m/TLS")
 	}
 	if keyPath == "" {
-		log.Fatal().Msg("missing server private key file for gRPC client with m/TLS")
+		logger.Fatal(ctx, "missing server private key file for gRPC client with m/TLS")
 	}
 
 	// Using mTLS requires the client's CA cert (on many Linux systems,
@@ -83,9 +86,9 @@ func GRPCCreds(cmd *cli.Command) []grpc.ServerOption {
 		msg := "gRPC server with TLS"
 		creds, err := credentials.NewServerTLSFromFile(certPath, keyPath)
 		if err != nil {
-			log.Fatal().Err(err).Msg("failed to create credentials for " + msg)
+			logger.FatalError(ctx, "failed to create credentials for "+msg, err)
 		}
-		log.Info().Str("cert", certPath).Str("key", keyPath).Msg("using " + msg)
+		slog.Info("using "+msg, slog.String("cert", certPath), slog.String("key", keyPath))
 		return []grpc.ServerOption{grpc.Creds(creds)}
 	}
 
@@ -94,21 +97,21 @@ func GRPCCreds(cmd *cli.Command) []grpc.ServerOption {
 	ca := x509.NewCertPool()
 	pem, err := os.ReadFile(caPath) //gosec:disable G304 -- specified by admin by design
 	if err != nil {
-		log.Fatal().Err(err).Str("path", caPath).Msg("failed to read " + msg)
+		logger.FatalError(ctx, "failed to read "+msg, err, slog.String("path", caPath))
 	}
 	if ok := ca.AppendCertsFromPEM(pem); !ok {
-		log.Fatal().Err(err).Str("path", caPath).Msg("failed to parse " + msg)
+		logger.Fatal(ctx, "failed to parse "+msg, slog.String("path", caPath))
 	}
 
 	msg = "gRPC server with mTLS"
 	cert, err := tls.LoadX509KeyPair(certPath, keyPath)
 	if err != nil {
-		log.Fatal().Err(err).Str("cert", certPath).Str("key", keyPath).
-			Msg("failed to load server PEM key pair for " + msg)
+		logger.FatalError(ctx, "failed to load server PEM key pair for "+msg,
+			err, slog.String("cert", certPath), slog.String("key", keyPath))
 	}
 
-	log.Info().Str("server_cert", certPath).Str("server_key", keyPath).
-		Str("client_ca_cert", caPath).Msg("using " + msg)
+	slog.Info("using "+msg, slog.String("server_cert", certPath), slog.String("server_key", keyPath),
+		slog.String("client_ca_cert", caPath))
 
 	return []grpc.ServerOption{grpc.Creds(credentials.NewTLS(&tls.Config{
 		ClientAuth:   tls.RequireAndVerifyClientCert,

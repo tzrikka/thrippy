@@ -8,7 +8,7 @@ func TestFileProvider(t *testing.T) {
 	d := t.TempDir()
 	t.Setenv("XDG_DATA_HOME", d)
 
-	p, err := newFileProvider()
+	p, err := newFileProvider(t.Context())
 	if err != nil {
 		t.Fatalf("newFileProvider() error = %v", err)
 	}

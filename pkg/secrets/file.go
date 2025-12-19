@@ -8,8 +8,8 @@ import (
 	"sync"
 
 	"github.com/BurntSushi/toml"
-	"github.com/rs/zerolog/log"
 
+	"github.com/tzrikka/thrippy/internal/logger"
 	"github.com/tzrikka/xdg"
 )
 
@@ -26,8 +26,8 @@ type fileProvider struct {
 	mu   sync.RWMutex
 }
 
-func newFileProvider() (Manager, error) {
-	return &fileProvider{path: dataFile()}, nil
+func newFileProvider(ctx context.Context) (Manager, error) {
+	return &fileProvider{path: dataFile(ctx)}, nil
 }
 
 func (p *fileProvider) Set(_ context.Context, key, value string) error {
@@ -80,10 +80,10 @@ func (p *fileProvider) Delete(_ context.Context, key string) error {
 
 // dataFile returns the path to the app's data file.
 // It also creates an empty file if it doesn't already exist.
-func dataFile() string {
+func dataFile(ctx context.Context) string {
 	path, err := xdg.CreateFile(xdg.DataHome, DataDirName, DataFileName)
 	if err != nil {
-		log.Fatal().Err(err).Caller().Msg("failed to create data file")
+		logger.FatalError(ctx, "failed to create data file", err)
 	}
 	return path
 }

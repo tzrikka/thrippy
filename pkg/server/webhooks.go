@@ -39,12 +39,12 @@ type httpServer struct {
 	fallbackURL string // Optional destination for OAuth callbacks without a state.
 }
 
-func newHTTPServer(cmd *cli.Command) *httpServer {
+func newHTTPServer(ctx context.Context, cmd *cli.Command) *httpServer {
 	return &httpServer{
 		httpPort: cmd.Int("webhook-port"),
 
 		grpcAddr:  cmd.String("grpc-addr"),
-		grpcCreds: client.GRPCCreds(cmd),
+		grpcCreds: client.GRPCCreds(ctx, cmd),
 
 		redirectURL: redirectURL(cmd.String("webhook-addr")),
 		fallbackURL: cmd.String("fallback-url"),
@@ -94,7 +94,7 @@ func (s *httpServer) run() error {
 	}
 	err := server.ListenAndServe()
 	if err != nil {
-		slog.Error("HTTP server error", "error", err)
+		slog.Error("HTTP server error", slog.Any("error", err))
 		return err
 	}
 
@@ -105,12 +105,12 @@ func (s *httpServer) run() error {
 // to the authorization endpoint of a third-party service. The incoming request's
 // method may be GET or POST, but the resulting redirection should always be GET.
 func (s *httpServer) oauthStartHandler(w http.ResponseWriter, r *http.Request) {
-	l := slog.With("http_method", r.Method, "url_path", r.URL.EscapedPath())
+	l := slog.With(slog.String("http_method", r.Method), slog.String("url_path", r.URL.EscapedPath()))
 	l.Info("received HTTP request")
 
 	// Extract the link ID and nonce parameters from the request's query or body.
 	if err := r.ParseForm(); err != nil {
-		l.Warn("bad request: form parsing error", "error", err)
+		l.Warn("bad request: form parsing error", slog.Any("error", err))
 		htmlResponse(w, http.StatusBadRequest, "Form parsing error")
 		return
 	}
@@ -122,9 +122,9 @@ func (s *httpServer) oauthStartHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	l = l.With("id", id)
+	l = l.With(slog.String("link_id", id))
 	if _, err := shortuuid.DefaultEncoder.Decode(id); err != nil {
-		l.Warn("bad request: invalid ID parameter", "error", err)
+		l.Warn("bad request: invalid ID parameter", slog.Any("error", err))
 		htmlResponse(w, http.StatusBadRequest, "Invalid ID parameter")
 		return
 	}
@@ -137,7 +137,7 @@ func (s *httpServer) oauthStartHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := shortuuid.DefaultEncoder.Decode(nonce); err != nil {
-		l.Warn("forbidden: invalid nonce parameter", "error", err)
+		l.Warn("forbidden: invalid nonce parameter", slog.Any("error", err))
 		htmlResponse(w, http.StatusForbidden, "Invalid nonce parameter")
 		return
 	}
@@ -154,18 +154,18 @@ func (s *httpServer) oauthStartHandler(w http.ResponseWriter, r *http.Request) {
 	o.Config.RedirectURL = s.redirectURL
 	state := constructStateParam(id, nonce, r.FormValue("memo"))
 	http.Redirect(w, r, o.AuthCodeURL(state), http.StatusFound)
-	l.Debug("redirected HTTP request", "url", o.Config.Endpoint.AuthURL)
+	l.Debug("redirected HTTP request", slog.String("url", o.Config.Endpoint.AuthURL))
 }
 
 // oauthExchangeHandler receives a redirect back from a third-party service's
 // authorization endpoint (the 2nd leg of the OAuth 2.0 flow), and exchanges
 // the received authorization code for an new access token (the 3rd leg).
 func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request) {
-	l := slog.With("http_method", r.Method, "url_path", r.URL.EscapedPath())
+	l := slog.With(slog.String("http_method", r.Method), slog.String("url_path", r.URL.EscapedPath()))
 	l.Info("received HTTP request")
 
 	if err := r.ParseForm(); err != nil {
-		l.Warn("bad request: form parsing error", "error", err)
+		l.Warn("bad request: form parsing error", slog.Any("error", err))
 		htmlResponse(w, http.StatusBadRequest, "Form parsing error")
 		return
 	}
@@ -189,7 +189,7 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	if state == "" {
 		l.Warn("forbidden: missing OAuth state parameter")
 		if s.fallbackURL != "" {
-			l.Debug("redirected HTTP request", "url", s.fallbackURL)
+			l.Debug("redirected HTTP request", slog.String("url", s.fallbackURL))
 			http.Redirect(w, r, s.fallbackURL, http.StatusFound)
 			return
 		}
@@ -199,12 +199,12 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 
 	// Parse the state parameter.
 	id, nonce, memo, err := parseStateParam(state)
-	l = l.With("id", id)
+	l = l.With(slog.String("link_id", id))
 	if memo != "" {
-		l = l.With("memo", memo)
+		l = l.With(slog.String("memo", memo))
 	}
 	if err != nil {
-		l.Warn("bad request: invalid state parameter", "error", err)
+		l.Warn("bad request: invalid state parameter", slog.Any("error", err))
 		htmlResponse(w, http.StatusBadRequest, "Invalid state parameter")
 		return
 	}
@@ -229,7 +229,7 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	// user or app-installation token (the 3rd leg of the OAuth 2.0 flow).
 	installID := r.FormValue("installation_id")
 	if (setupAction == "install" || setupAction == "update") && installID != "" {
-		l = l.With("setup_action", setupAction, "install_id", installID)
+		l = l.With(slog.String("setup_action", setupAction), slog.String("install_id", installID))
 		l.Debug("successful GitHub app installation")
 
 		// Check the app installation, extract metadata with and about it, and save them.
@@ -249,7 +249,7 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	// including a refresh token (this is the 3rd leg of the OAuth 2.0 flow).
 	code := r.FormValue("code")
 	if code == "" {
-		l.Warn("forbidden: missing OAuth code parameter", "query", r.URL.Query())
+		l.Warn("forbidden: missing OAuth code parameter", slog.Any("query", r.URL.Query()))
 		htmlResponse(w, http.StatusForbidden, "Missing OAuth code parameter")
 		return
 	}
@@ -257,7 +257,7 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	o.Config.RedirectURL = s.redirectURL
 	token, err := o.Exchange(ctx, code)
 	if err != nil {
-		l.Warn("OAuth code exchange error", "error", err)
+		l.Warn("OAuth code exchange error", slog.Any("error", err))
 		htmlResponse(w, http.StatusForbidden, "OAuth code exchange error")
 		return
 	}

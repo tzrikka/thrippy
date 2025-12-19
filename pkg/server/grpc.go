@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
-	"os"
 	"strings"
 
 	"github.com/lithammer/shortuuid/v4"
@@ -32,25 +31,25 @@ type grpcServer struct {
 	sm secrets.Manager
 }
 
-// startGRPCServer starts a gRPC server for the [Thrippy service]. This
-// is non-blocking, in order to let Thrippy run an HTTP server as well.
+// startGRPCServer starts a gRPC server for the [Thrippy service].
+// This is non-blocking, in order to let Thrippy run an HTTP server as well.
 //
 // [Thrippy service]: https://github.com/tzrikka/thrippy-api/blob/main/proto/thrippy/v1/thrippy.proto
 func startGRPCServer(ctx context.Context, cmd *cli.Command, sm secrets.Manager) (string, error) {
 	lc := net.ListenConfig{}
-	lis, err := lc.Listen(ctx, "tcp", cmd.String("grpc-addr"))
+	addr := cmd.String("grpc-addr")
+	lis, err := lc.Listen(ctx, "tcp", addr)
 	if err != nil {
-		slog.Error("failed to listen on gRPC address", "error", err, "address", cmd.String("grpc-addr"))
+		slog.Error("failed to listen on gRPC address", slog.Any("error", err), slog.String("address", addr))
 		return "", err
 	}
 
-	srv := grpc.NewServer(GRPCCreds(cmd)...)
+	srv := grpc.NewServer(GRPCCreds(ctx, cmd)...)
 	thrippypb.RegisterThrippyServiceServer(srv, &grpcServer{sm: sm})
 	go func() {
 		err = srv.Serve(lis)
 		if err != nil {
-			slog.Error("gRPC serving error", "error", err)
-			os.Exit(1)
+			logger.FatalError(ctx, "gRPC serving error", err)
 		}
 	}()
 
@@ -60,13 +59,13 @@ func startGRPCServer(ctx context.Context, cmd *cli.Command, sm secrets.Manager) 
 
 func (s *grpcServer) CreateLink(ctx context.Context, in *thrippypb.CreateLinkRequest) (*thrippypb.CreateLinkResponse, error) {
 	id := shortuuid.New()
-	l := slog.With("grpc_handler", "CreateLink", "id", id)
+	l := logger.FromContext(ctx).With(slog.String("grpc_handler", "CreateLink"), slog.String("link_id", id))
 	l.Debug("received gRPC request")
 
 	// Parse the input.
 	t := in.GetTemplate()
 	if _, ok := links.Templates[t]; !ok {
-		l.Warn("invalid template", "template", t)
+		l.Warn("invalid template", slog.String("template", t))
 		return nil, status.Error(codes.InvalidArgument, "invalid template")
 	}
 
@@ -80,7 +79,7 @@ func (s *grpcServer) CreateLink(ctx context.Context, in *thrippypb.CreateLinkReq
 
 	// Save the input template.
 	if err := s.sm.Set(ctx, id+"/template", t); err != nil {
-		l.Error("secrets manager write error", "error", err)
+		l.Error("secrets manager write error", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "secrets manager write error")
 	}
 
@@ -88,12 +87,12 @@ func (s *grpcServer) CreateLink(ctx context.Context, in *thrippypb.CreateLinkReq
 	if o.IsUsable() {
 		j, err := o.ToJSON()
 		if err != nil {
-			l.Error("failed to convert OAuth proto into JSON", "error", err)
+			l.Error("failed to convert OAuth proto into JSON", slog.Any("error", err))
 			return nil, status.Error(codes.Internal, "secrets manager parse error")
 		}
 
 		if err := s.sm.Set(ctx, id+"/oauth", j); err != nil {
-			l.Error("secrets manager write error", "error", err)
+			l.Error("secrets manager write error", slog.Any("error", err))
 			return nil, status.Error(codes.Internal, "secrets manager write error")
 		}
 	}
@@ -106,7 +105,7 @@ func (s *grpcServer) CreateLink(ctx context.Context, in *thrippypb.CreateLinkReq
 
 func (s *grpcServer) DeleteLink(ctx context.Context, in *thrippypb.DeleteLinkRequest) (*thrippypb.DeleteLinkResponse, error) {
 	id := in.GetLinkId()
-	l := slog.With("grpc_handler", "DeleteLink", "id", id)
+	l := logger.FromContext(ctx).With(slog.String("grpc_handler", "DeleteLink"), slog.String("link_id", id))
 	l.Debug("received gRPC request")
 
 	if id == "" {
@@ -114,13 +113,13 @@ func (s *grpcServer) DeleteLink(ctx context.Context, in *thrippypb.DeleteLinkReq
 		return nil, status.Error(codes.InvalidArgument, "missing ID")
 	}
 	if _, err := shortuuid.DefaultEncoder.Decode(id); err != nil {
-		l.Warn("ID is an invalid short UUID", "error", err)
+		l.Warn("ID is an invalid short UUID", slog.Any("error", err))
 		return nil, status.Error(codes.InvalidArgument, "invalid ID")
 	}
 
 	t, err := s.sm.Get(ctx, id+"/template")
 	if err != nil {
-		l.Error("secrets manager read error", "error", err)
+		l.Error("secrets manager read error", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "secrets manager read error")
 	}
 
@@ -134,19 +133,19 @@ func (s *grpcServer) DeleteLink(ctx context.Context, in *thrippypb.DeleteLinkReq
 	}
 
 	if err := s.sm.Delete(ctx, id+"/creds"); err != nil {
-		l.Error("secrets manager delete error: creds", "error", err)
+		l.Error("secrets manager delete error: creds", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "secrets manager delete error: creds")
 	}
 	if err := s.sm.Delete(ctx, id+"/meta"); err != nil {
-		l.Error("secrets manager delete error: meta", "error", err)
+		l.Error("secrets manager delete error: meta", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "secrets manager delete error: meta")
 	}
 	if err := s.sm.Delete(ctx, id+"/oauth"); err != nil {
-		l.Error("secrets manager delete error: oauth", "error", err)
+		l.Error("secrets manager delete error: oauth", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "secrets manager delete error: oauth")
 	}
 	if err := s.sm.Delete(ctx, id+"/template"); err != nil {
-		l.Error("secrets manager delete error: template", "error", err)
+		l.Error("secrets manager delete error: template", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "secrets manager delete error: template")
 	}
 
@@ -155,7 +154,7 @@ func (s *grpcServer) DeleteLink(ctx context.Context, in *thrippypb.DeleteLinkReq
 
 func (s *grpcServer) GetLink(ctx context.Context, in *thrippypb.GetLinkRequest) (*thrippypb.GetLinkResponse, error) {
 	id := in.GetLinkId()
-	l := slog.With("grpc_handler", "GetLink", "id", id)
+	l := logger.FromContext(ctx).With(slog.String("grpc_handler", "GetLink"), slog.String("link_id", id))
 	l.Debug("received gRPC request")
 
 	if id == "" {
@@ -163,7 +162,7 @@ func (s *grpcServer) GetLink(ctx context.Context, in *thrippypb.GetLinkRequest) 
 		return nil, status.Error(codes.InvalidArgument, "missing ID")
 	}
 	if _, err := shortuuid.DefaultEncoder.Decode(id); err != nil {
-		l.Warn("ID is an invalid short UUID", "error", err)
+		l.Warn("ID is an invalid short UUID", slog.Any("error", err))
 		return nil, status.Error(codes.InvalidArgument, "invalid ID")
 	}
 
@@ -182,7 +181,7 @@ func (s *grpcServer) GetLink(ctx context.Context, in *thrippypb.GetLinkRequest) 
 
 func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCredentialsRequest) (*thrippypb.SetCredentialsResponse, error) {
 	id := in.GetLinkId()
-	l := slog.With("grpc_handler", "SetCredentials", "id", id)
+	l := logger.FromContext(ctx).With(slog.String("grpc_handler", "SetCredentials"), slog.String("link_id", id))
 	l.Debug("received gRPC request")
 
 	if id == "" {
@@ -190,7 +189,7 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCreden
 		return nil, status.Error(codes.InvalidArgument, "missing ID")
 	}
 	if _, err := shortuuid.DefaultEncoder.Decode(id); err != nil {
-		l.Warn("ID is an invalid short UUID", "error", err)
+		l.Warn("ID is an invalid short UUID", slog.Any("error", err))
 		return nil, status.Error(codes.InvalidArgument, "invalid ID")
 	}
 
@@ -205,12 +204,12 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCreden
 	if o.IsUsable() {
 		j, err := o.ToJSON()
 		if err != nil {
-			l.Error("failed to convert OAuth proto into JSON", "error", err)
+			l.Error("failed to convert OAuth proto into JSON", slog.Any("error", err))
 			return nil, status.Error(codes.Internal, "secrets manager parse error")
 		}
 
 		if err := s.sm.Set(ctx, id+"/oauth", j); err != nil {
-			l.Error("secrets manager write error", "error", err)
+			l.Error("secrets manager write error", slog.Any("error", err))
 			return nil, status.Error(codes.Internal, "secrets manager write error")
 		}
 	}
@@ -229,14 +228,14 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCreden
 
 	j, err := protojson.Marshal(token)
 	if err != nil {
-		l.Error("failed to convert proto into JSON", "error", err)
+		l.Error("failed to convert proto into JSON", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "secrets manager parse error")
 	}
 
 	if len(j) <= 2 {
 		j, err = json.Marshal(m)
 		if err != nil {
-			l.Error("failed to convert credentials into JSON", "error", err)
+			l.Error("failed to convert credentials into JSON", slog.Any("error", err))
 			return nil, status.Error(codes.Internal, "secrets manager parse error")
 		}
 	}
@@ -244,18 +243,18 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCreden
 	// Check the usability of the provided credentials, retrieve their metadata, and save both.
 	metadata, err := links.Templates[template].Check(ctx, m, o, oauth.TokenFromProto(token))
 	if err != nil {
-		l.Error("failed to check credentials / extract metadata", "error", err)
+		l.Error("failed to check credentials / extract metadata", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "credentials check error: "+err.Error())
 	}
 
 	if err := s.sm.Set(ctx, id+"/creds", string(j)); err != nil {
-		l.Error("secrets manager write error", "error", err)
+		l.Error("secrets manager write error", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "secrets manager write error")
 	}
 
 	if metadata != "" {
 		if err := s.sm.Set(ctx, id+"/meta", metadata); err != nil {
-			l.Error("secrets manager write error", "error", err)
+			l.Error("secrets manager write error", slog.Any("error", err))
 			return nil, status.Error(codes.Internal, "secrets manager write error")
 		}
 	}
@@ -268,7 +267,7 @@ func (s *grpcServer) templateAndOAuth(ctx context.Context, id string) (string, *
 
 	t, err := s.sm.Get(ctx, id+"/template")
 	if err != nil {
-		l.Error("secrets manager read error", "error", err)
+		l.Error("secrets manager read error", slog.Any("error", err))
 		return "", nil, status.Error(codes.Internal, "secrets manager read error")
 	}
 	if t == "" {
@@ -278,7 +277,7 @@ func (s *grpcServer) templateAndOAuth(ctx context.Context, id string) (string, *
 
 	o, err := s.sm.Get(ctx, id+"/oauth")
 	if err != nil {
-		l.Error("secrets manager read error", "error", err)
+		l.Error("secrets manager read error", slog.Any("error", err))
 		return "", nil, status.Error(codes.Internal, "secrets manager read error")
 	}
 
@@ -286,7 +285,7 @@ func (s *grpcServer) templateAndOAuth(ctx context.Context, id string) (string, *
 	if o != "" {
 		m = &thrippypb.OAuthConfig{}
 		if err = protojson.Unmarshal([]byte(o), m); err != nil {
-			l.Error("failed to convert JSON into proto", "error", err)
+			l.Error("failed to convert JSON into proto", slog.Any("error", err))
 			return "", nil, status.Error(codes.Internal, "secrets manager parse error")
 		}
 	}
@@ -322,7 +321,7 @@ func (s *grpcServer) getRaw(ctx context.Context, id string) map[string]string {
 
 func (s *grpcServer) GetCredentials(ctx context.Context, in *thrippypb.GetCredentialsRequest) (*thrippypb.GetCredentialsResponse, error) {
 	id := in.GetLinkId()
-	l := slog.With("grpc_handler", "GetCredentials", "id", id)
+	l := logger.FromContext(ctx).With(slog.String("grpc_handler", "GetCredentials"), slog.String("link_id", id))
 
 	ctx = logger.InContext(ctx, l)
 	ma, err := s.getSecrets(ctx, id, "/creds")
@@ -360,7 +359,7 @@ func (s *grpcServer) GetCredentials(ctx context.Context, in *thrippypb.GetCreden
 
 func (s *grpcServer) GetMetadata(ctx context.Context, in *thrippypb.GetMetadataRequest) (*thrippypb.GetMetadataResponse, error) {
 	id := in.GetLinkId()
-	l := slog.With("grpc_handler", "GetMetadata", "id", id)
+	l := logger.FromContext(ctx).With(slog.String("grpc_handler", "GetMetadata"), slog.String("link_id", id))
 
 	ctx = logger.InContext(ctx, l)
 	ma, err := s.getSecrets(ctx, id, "/meta")
@@ -385,20 +384,20 @@ func (s *grpcServer) getSecrets(ctx context.Context, linkID, keySuffix string) (
 		return nil, status.Error(codes.InvalidArgument, "missing ID")
 	}
 	if _, err := shortuuid.DefaultEncoder.Decode(linkID); err != nil {
-		l.Warn("ID is an invalid short UUID", "error", err)
+		l.Warn("ID is an invalid short UUID", slog.Any("error", err))
 		return nil, status.Error(codes.InvalidArgument, "invalid ID")
 	}
 
 	j, err := s.sm.Get(ctx, linkID+keySuffix)
 	if err != nil {
-		l.Error("secrets manager read error", "error", err)
+		l.Error("secrets manager read error", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "secrets manager read error")
 	}
 
 	var m map[string]any
 	if j != "" {
 		if err := json.Unmarshal([]byte(j), &m); err != nil {
-			l.Error("failed to convert JSON into map", "error", err)
+			l.Error("failed to convert JSON into map", slog.Any("error", err))
 			return nil, status.Error(codes.Internal, "secrets manager parse error")
 		}
 	}
@@ -411,19 +410,19 @@ func (s *grpcServer) refreshOAuthToken(ctx context.Context, id string, t *oauth2
 
 	jsonConfig, err := s.sm.Get(ctx, id+"/oauth")
 	if err != nil {
-		l.Error("secrets manager read error", "error", err)
+		l.Error("secrets manager read error", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "secrets manager read error")
 	}
 
 	o := &thrippypb.OAuthConfig{}
 	if err := protojson.Unmarshal([]byte(jsonConfig), o); err != nil {
-		l.Error("failed to convert JSON into proto", "error", err)
+		l.Error("failed to convert JSON into proto", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "secrets manager parse error")
 	}
 
 	m, err := oauth.FromProto(o).RefreshToken(ctx, t, false)
 	if err != nil {
-		l.Error("failed to refresh OAuth token", "error", err)
+		l.Error("failed to refresh OAuth token", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "OAuth token refresh error")
 	}
 
@@ -437,12 +436,12 @@ func (s *grpcServer) refreshOAuthToken(ctx context.Context, id string, t *oauth2
 
 	jsonToken, err := json.Marshal(m)
 	if err != nil {
-		l.Error("failed to convert map into JSON", "error", err)
+		l.Error("failed to convert map into JSON", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "secrets manager parse error")
 	}
 
 	if err := s.sm.Set(ctx, id+"/creds", string(jsonToken)); err != nil {
-		l.Error("secrets manager write error", "error", err)
+		l.Error("secrets manager write error", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "secrets manager write error")
 	}
 

@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"time"
 
 	"golang.org/x/oauth2"
@@ -35,7 +36,7 @@ func LinkOAuthConfig(ctx context.Context, grpcAddr string, creds credentials.Tra
 
 	conn, err := Connection(grpcAddr, creds)
 	if err != nil {
-		l.Error("gRPC connection error", "error", err)
+		l.Error("gRPC connection error", slog.Any("error", err))
 		return nil, err
 	}
 	defer conn.Close()
@@ -47,7 +48,7 @@ func LinkOAuthConfig(ctx context.Context, grpcAddr string, creds credentials.Tra
 	resp, err := c.GetLink(ctx, thrippypb.GetLinkRequest_builder{LinkId: proto.String(linkID)}.Build())
 	if err != nil {
 		if status.Code(err) != codes.NotFound {
-			l.Error("bad gRPC service response", "error", err, "client_method", "GetLink")
+			l.Error("bad response from gRPC service", slog.Any("error", err), slog.String("client_method", "GetLink"))
 			return nil, err
 		}
 		return nil, nil
@@ -69,7 +70,7 @@ func AddGitHubCreds(ctx context.Context, grpcAddr string, creds credentials.Tran
 
 	conn, err := Connection(grpcAddr, creds)
 	if err != nil {
-		l.Error("gRPC connection error", "error", err)
+		l.Error("gRPC connection error", slog.Any("error", err))
 		return err
 	}
 	defer conn.Close()
@@ -80,7 +81,7 @@ func AddGitHubCreds(ctx context.Context, grpcAddr string, creds credentials.Tran
 
 	resp, err := c.GetCredentials(ctx, thrippypb.GetCredentialsRequest_builder{LinkId: proto.String(linkID)}.Build())
 	if err != nil {
-		l.Error("bad gRPC service response", "error", err, "client_method", "GetCredentials")
+		l.Error("bad response from gRPC service", slog.Any("error", err), slog.String("client_method", "GetCredentials"))
 		return err
 	}
 
@@ -90,7 +91,7 @@ func AddGitHubCreds(ctx context.Context, grpcAddr string, creds credentials.Tran
 
 	req := thrippypb.SetCredentialsRequest_builder{LinkId: proto.String(linkID), GenericCreds: m}.Build()
 	if _, err = c.SetCredentials(ctx, req); err != nil {
-		l.Error("bad gRPC service response", "error", err, "client_method", "SetCredentials")
+		l.Error("bad response from gRPC service", slog.Any("error", err), slog.String("client_method", "SetCredentials"))
 		return err
 	}
 
@@ -104,7 +105,7 @@ func SetOAuthCreds(ctx context.Context, grpcAddr string, creds credentials.Trans
 
 	conn, err := Connection(grpcAddr, creds)
 	if err != nil {
-		l.Error("gRPC connection error", "error", err)
+		l.Error("gRPC connection error", slog.Any("error", err))
 		return err
 	}
 	defer conn.Close()
@@ -115,7 +116,7 @@ func SetOAuthCreds(ctx context.Context, grpcAddr string, creds credentials.Trans
 
 	req := thrippypb.SetCredentialsRequest_builder{LinkId: proto.String(linkID), Token: oauth.TokenToProto(t)}.Build()
 	if _, err = c.SetCredentials(ctx, req); err != nil {
-		l.Error("bad gRPC service response", "error", err, "client_method", "SetCredentials")
+		l.Error("bad response from gRPC service", slog.Any("error", err), slog.String("client_method", "SetCredentials"))
 		return err
 	}
 

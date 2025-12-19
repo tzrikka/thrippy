@@ -24,7 +24,7 @@ var getMetaCommand = &cli.Command{
 			return err
 		}
 
-		conn, err := client.Connection(cmd.String("grpc-addr"), client.GRPCCreds(cmd))
+		conn, err := client.Connection(cmd.String("grpc-addr"), client.GRPCCreds(ctx, cmd))
 		if err != nil {
 			return err
 		}

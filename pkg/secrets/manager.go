@@ -38,8 +38,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
-	"github.com/rs/zerolog/log"
 	altsrc "github.com/urfave/cli-altsrc/v3"
 	"github.com/urfave/cli-altsrc/v3/toml"
 	"github.com/urfave/cli/v3"
@@ -108,7 +108,7 @@ func NewManager(ctx context.Context, cmd *cli.Command) (Manager, error) {
 		return nil, errors.New("in-memory secrets provider allowed only with --dev flag")
 	}
 
-	log.Info().Msgf("secrets provider: %s", provider)
+	slog.Info("secrets provider: " + provider)
 	var p Manager
 	var err error
 
@@ -116,7 +116,7 @@ func NewManager(ctx context.Context, cmd *cli.Command) (Manager, error) {
 	case awsOption:
 		p, err = newAWSProvider(ctx, cmd)
 	case fileOption:
-		p, err = newFileProvider()
+		p, err = newFileProvider(ctx)
 	case inMemoryOption:
 		p, err = newInMemoryProvider()
 	case vaultOption:

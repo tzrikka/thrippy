@@ -87,7 +87,7 @@ var createLinkCommand = &cli.Command{
 		},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		conn, err := client.Connection(cmd.String("grpc-addr"), client.GRPCCreds(cmd))
+		conn, err := client.Connection(cmd.String("grpc-addr"), client.GRPCCreds(ctx, cmd))
 		if err != nil {
 			return err
 		}
@@ -154,7 +154,7 @@ var deleteLinkCommand = &cli.Command{
 			return err
 		}
 
-		conn, err := client.Connection(cmd.String("grpc-addr"), client.GRPCCreds(cmd))
+		conn, err := client.Connection(cmd.String("grpc-addr"), client.GRPCCreds(ctx, cmd))
 		if err != nil {
 			return err
 		}
@@ -184,7 +184,7 @@ var getLinkCommand = &cli.Command{
 			return err
 		}
 
-		conn, err := client.Connection(cmd.String("grpc-addr"), client.GRPCCreds(cmd))
+		conn, err := client.Connection(cmd.String("grpc-addr"), client.GRPCCreds(ctx, cmd))
 		if err != nil {
 			return err
 		}

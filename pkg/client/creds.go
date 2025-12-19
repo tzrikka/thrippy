@@ -1,16 +1,19 @@
 package client
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"log/slog"
 	"os"
 
-	"github.com/rs/zerolog/log"
 	altsrc "github.com/urfave/cli-altsrc/v3"
 	"github.com/urfave/cli-altsrc/v3/toml"
 	"github.com/urfave/cli/v3"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/tzrikka/thrippy/internal/logger"
 )
 
 // insecureCreds should be used only in dev mode and unit tests.
@@ -69,7 +72,7 @@ func GRPCFlags(configFilePath altsrc.StringSourcer) []cli.Flag {
 // See also [server.GRPCCreds].
 //
 // [server.GRPCCreds]: https://pkg.go.dev/github.com/tzrikka/thrippy/pkg/server#GRPCCreds
-func GRPCCreds(cmd *cli.Command) credentials.TransportCredentials {
+func GRPCCreds(ctx context.Context, cmd *cli.Command) credentials.TransportCredentials {
 	if cmd.Bool("dev") {
 		return insecureCreds()
 	}
@@ -84,31 +87,31 @@ func GRPCCreds(cmd *cli.Command) credentials.TransportCredentials {
 	// The server's CA cert is required either way (on many Linux systems,
 	// "/etc/ssl/cert.pem" contains the system-wide set of root CAs).
 	if caPath == "" {
-		log.Fatal().Msg("missing server CA cert file for gRPC client with m/TLS")
+		logger.Fatal(ctx, "missing server CA cert file for gRPC client with m/TLS")
 	}
 
 	// Using mTLS requires the client's X.509 PEM-encoded public cert
 	// and private key. If one of them is missing it's an error.
 	if certPath == "" && keyPath != "" {
-		log.Fatal().Msg("missing client public cert file for gRPC client with mTLS")
+		logger.Fatal(ctx, "missing client public cert file for gRPC client with mTLS")
 	}
 	if certPath != "" && keyPath == "" {
-		log.Fatal().Msg("missing client private key file for gRPC client with mTLS")
+		logger.Fatal(ctx, "missing client private key file for gRPC client with mTLS")
 	}
 
 	// If both of them are missing, we use TLS.
 	if certPath == "" && keyPath == "" {
-		return newClientTLSFromFile(caPath, nameOverride, nil)
+		return newClientTLSFromFile(ctx, caPath, nameOverride, nil)
 	}
 
 	// If all 3 are specified, we use mTLS.
 	cert, err := tls.LoadX509KeyPair(certPath, keyPath)
 	if err != nil {
-		log.Fatal().Err(err).Str("cert", certPath).Str("key", keyPath).
-			Msg("failed to load client PEM key pair for gRPC client with mTLS")
+		logger.FatalError(ctx, "failed to load client PEM key pair for gRPC client with mTLS", err,
+			slog.String("cert", certPath), slog.String("key", keyPath))
 	}
 
-	return newClientTLSFromFile(caPath, nameOverride, []tls.Certificate{cert})
+	return newClientTLSFromFile(ctx, caPath, nameOverride, []tls.Certificate{cert})
 }
 
 // newClientTLSFromFile constructs TLS credentials from the provided root
@@ -116,15 +119,15 @@ func GRPCCreds(cmd *cli.Command) credentials.TransportCredentials {
 //
 // This function is based on [credentials.NewClientTLSFromFile], but uses
 // TLS 1.3 as the minimum version (instead of 1.2), and support mTLS too.
-func newClientTLSFromFile(caPath, serverNameOverride string, certs []tls.Certificate) credentials.TransportCredentials {
+func newClientTLSFromFile(ctx context.Context, caPath, serverNameOverride string, certs []tls.Certificate) credentials.TransportCredentials {
 	b, err := os.ReadFile(caPath) //gosec:disable G304 -- specified by admin by design
 	if err != nil {
-		log.Fatal().Err(err).Str("path", caPath).Msg("failed to read server CA cert file for gRPC client")
+		logger.FatalError(ctx, "failed to read server CA cert file for gRPC client", err, slog.String("path", caPath))
 	}
 
 	cp := x509.NewCertPool()
 	if !cp.AppendCertsFromPEM(b) {
-		log.Fatal().Str("path", caPath).Msg("failed to parse server CA cert file for gRPC client")
+		logger.Fatal(ctx, "failed to parse server CA cert file for gRPC client", slog.String("path", caPath))
 	}
 
 	cfg := &tls.Config{

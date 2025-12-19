@@ -41,5 +41,5 @@ func Start(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return newHTTPServer(cmd).run()
+	return newHTTPServer(ctx, cmd).run()
 }

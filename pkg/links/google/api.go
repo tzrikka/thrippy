@@ -34,7 +34,7 @@ func oauthUserInfo(ctx context.Context, o *oauth.Config, t *oauth2.Token) (*goog
 
 func serviceAccountInfo(ctx context.Context, jsonKey string) (string, string, error) {
 	// https://cloud.google.com/docs/authentication/client-libraries#external-credentials
-	opt := option.WithCredentialsJSON([]byte(jsonKey))
+	opt := option.WithAuthCredentialsJSON(option.ServiceAccount, []byte(jsonKey))
 	svc, err := googleoauth2.NewService(ctx, opt)
 	if err != nil {
 		return "", "", err

@@ -58,7 +58,7 @@ func newAWSProvider(ctx context.Context, cmd *cli.Command) (Manager, error) {
 	}, nil
 }
 
-// The data size limit is 4 KiB, according to this link:
+// Set value size limit is 4 KiB, according to this link:
 // https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-advanced-parameters.html.
 func (p *awsProvider) Set(ctx context.Context, key, value string) error {
 	_, err := p.client.PutParameter(ctx, &ssm.PutParameterInput{

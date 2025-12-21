@@ -72,6 +72,7 @@ func apiTokenChecker(ctx context.Context, m map[string]string, _ *oauth.Config, 
 	})
 }
 
+// User is based on:
 // https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-users/#api-wiki-rest-api-user-current-get
 type User struct {
 	AccountID   string `json:"accountId"`

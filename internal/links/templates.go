@@ -47,28 +47,28 @@ func (t Template) Description() string {
 	return t.description
 }
 
-// CredsFields returns a copy of all the expected field names
+// CredFields returns a copy of all the expected field names
 // in the link's credentials, based on the link's template.
 func (t Template) CredFields() []*thrippypb.CredentialField {
 	if len(t.credFields) == 0 {
 		return nil
 	}
 
-	cfs := make([]*thrippypb.CredentialField, len(t.credFields))
+	fields := make([]*thrippypb.CredentialField, len(t.credFields))
 	for i, name := range t.credFields {
-		cfs[i] = thrippypb.CredentialField_builder{Name: proto.String(name)}.Build()
-		if strings.HasSuffix(name, "_optional") {
-			name = strings.TrimSuffix(name, "_optional")
-			cfs[i].SetName(name)
-			cfs[i].SetOptional(true)
+		fields[i] = thrippypb.CredentialField_builder{Name: proto.String(name)}.Build()
+		if prefix, ok := strings.CutSuffix(name, "_optional"); ok {
+			name = prefix
+			fields[i].SetName(name)
+			fields[i].SetOptional(true)
 		}
-		if strings.HasSuffix(name, "_manual") {
-			name = strings.TrimSuffix(name, "_manual")
-			cfs[i].SetName(name)
-			cfs[i].SetManual(true)
+		if prefix, ok := strings.CutSuffix(name, "_manual"); ok {
+			name = prefix
+			fields[i].SetName(name)
+			fields[i].SetManual(true)
 		}
 	}
-	return cfs
+	return fields
 }
 
 // Check checks the usability of the provided credentials (either the map or

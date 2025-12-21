@@ -74,7 +74,7 @@ func newVaultProvider(cmd *cli.Command) (Manager, error) {
 	return &vaultProvider{client: client.KVv2("secret")}, nil
 }
 
-// The data size limit is 0.5 or 1 MiB, according to this link:
+// Set value size limit is 0.5 or 1 MiB, according to this link:
 // https://developer.hashicorp.com/vault/docs/internals/limits.
 func (p *vaultProvider) Set(ctx context.Context, key, value string) error {
 	_, err := p.client.Put(ctx, key, map[string]any{"value": value})

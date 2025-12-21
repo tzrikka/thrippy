@@ -71,7 +71,7 @@ func redirectURL(webhookAddr string) string {
 // run starts an HTTP server for OAuth webhooks.
 // This is blocking, to keep the Thrippy server running.
 func (s *httpServer) run() error {
-	http.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
@@ -300,7 +300,7 @@ func (s *httpServer) checkNonceParam(ctx context.Context, w http.ResponseWriter,
 // successHandler is a trivial webhook which merely reports the success of
 // a 3-legged OAuth 2.0 flow. The [oauthExchangeHandler] webhook redirects
 // the user to this handler to cosmetically clean up the URL in the browser.
-func successHandler(w http.ResponseWriter, r *http.Request) {
+func successHandler(w http.ResponseWriter, _ *http.Request) {
 	htmlResponse(w, http.StatusOK, "You may now close this browser tab")
 }
 
@@ -357,13 +357,14 @@ func parseStateParam(state string) (id, nonce, memo string, err error) {
 	id, nonce, memo = s[0], s[1], s[2]
 	if id == "" || nonce == "" {
 		err = errors.New("incomplete state parameter")
-		return
+		return id, nonce, memo, err
 	}
 	if _, err = shortuuid.DefaultEncoder.Decode(id); err != nil {
-		return
+		return id, nonce, memo, err
 	}
 	if _, err = shortuuid.DefaultEncoder.Decode(nonce); err != nil {
-		return
+		return id, nonce, memo, err
 	}
-	return
+
+	return id, nonce, memo, nil
 }

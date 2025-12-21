@@ -2,6 +2,7 @@ package secrets
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -137,6 +138,7 @@ func (p *fileProvider) writeTOMLFile(store map[string]string) error {
 		return err
 	}
 
+	// Convert flat "map[string]string" to nested "map[string]any" for TOML encoding.
 	tomlStore := map[string]any{}
 	for k, v := range store {
 		tomlKeys := strings.Split(k, "/")
@@ -147,7 +149,10 @@ func (p *fileProvider) writeTOMLFile(store map[string]string) error {
 				m[tomlKeys[i]] = map[string]any{}
 				subMap = m[tomlKeys[i]]
 			}
-			m = subMap.(map[string]any)
+			m, ok = subMap.(map[string]any)
+			if !ok {
+				return errors.New("unexpected type for key " + strings.Join(tomlKeys[:i+1], "/"))
+			}
 		}
 		m[tomlKeys[3]] = v
 	}

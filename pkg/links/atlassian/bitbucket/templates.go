@@ -78,7 +78,7 @@ func oauthModifier(o *oauth.Config) {
 	o.Config.Scopes = append(o.Config.Scopes, "account")
 }
 
-// https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-user-get
+// User is based on: https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-user-get
 type User struct {
 	AccountID   string `json:"account_id"`
 	Type        string `json:"type"`

@@ -126,10 +126,9 @@ func (s *grpcServer) DeleteLink(ctx context.Context, in *thrippypb.DeleteLinkReq
 	if t == "" {
 		if in.GetAllowMissing() {
 			return &thrippypb.DeleteLinkResponse{}, nil
-		} else {
-			l.Warn("link not found")
-			return nil, status.Error(codes.NotFound, "link not found")
 		}
+		l.Warn("link not found")
+		return nil, status.Error(codes.NotFound, "link not found")
 	}
 
 	if err := s.sm.Delete(ctx, id+"/creds"); err != nil {
@@ -345,7 +344,10 @@ func (s *grpcServer) GetCredentials(ctx context.Context, in *thrippypb.GetCreden
 
 		// Flatten extra secrets from an OAuth token's "raw" map, but
 		// in a limited way, to prevent the possibility of overwriting.
-		raw := v.(map[string]any)
+		raw, ok := v.(map[string]any)
+		if !ok {
+			continue
+		}
 		if ws, ok := raw["signing_secret"].(string); ok { // Slack.
 			ms["signing_secret"] = ws
 		}

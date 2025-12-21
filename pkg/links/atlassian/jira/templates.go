@@ -72,6 +72,7 @@ func apiTokenChecker(ctx context.Context, m map[string]string, _ *oauth.Config, 
 	})
 }
 
+// User is based on:
 // https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-myself/#api-rest-api-3-myself-get
 type User struct {
 	AccountID    string `json:"accountId"`

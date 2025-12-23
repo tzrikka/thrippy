@@ -165,7 +165,7 @@ func (s *grpcServer) GetLink(ctx context.Context, in *thrippypb.GetLinkRequest) 
 		return nil, status.Error(codes.InvalidArgument, "invalid ID")
 	}
 
-	ctx = logger.InContext(ctx, l)
+	ctx = logger.WithContext(ctx, l)
 	t, o, err := s.templateAndOAuth(ctx, id)
 	if err != nil {
 		return nil, err
@@ -192,7 +192,7 @@ func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCreden
 		return nil, status.Error(codes.InvalidArgument, "invalid ID")
 	}
 
-	ctx = logger.InContext(ctx, l)
+	ctx = logger.WithContext(ctx, l)
 	template, oauthProto, err := s.templateAndOAuth(ctx, id)
 	if err != nil {
 		return nil, err
@@ -322,7 +322,7 @@ func (s *grpcServer) GetCredentials(ctx context.Context, in *thrippypb.GetCreden
 	id := in.GetLinkId()
 	l := logger.FromContext(ctx).With(slog.String("grpc_handler", "GetCredentials"), slog.String("link_id", id))
 
-	ctx = logger.InContext(ctx, l)
+	ctx = logger.WithContext(ctx, l)
 	ma, err := s.getSecrets(ctx, id, "/creds")
 	if err != nil {
 		return nil, err
@@ -363,7 +363,7 @@ func (s *grpcServer) GetMetadata(ctx context.Context, in *thrippypb.GetMetadataR
 	id := in.GetLinkId()
 	l := logger.FromContext(ctx).With(slog.String("grpc_handler", "GetMetadata"), slog.String("link_id", id))
 
-	ctx = logger.InContext(ctx, l)
+	ctx = logger.WithContext(ctx, l)
 	ma, err := s.getSecrets(ctx, id, "/meta")
 	if err != nil {
 		return nil, err

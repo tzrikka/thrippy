@@ -143,7 +143,7 @@ func (s *httpServer) oauthStartHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the OAuth config corresponding to the link ID, and verify the nonce.
-	ctx := logger.InContext(r.Context(), l)
+	ctx := logger.WithContext(r.Context(), l)
 	o := s.checkNonceParam(ctx, w, id, nonce)
 	if o == nil {
 		return
@@ -210,7 +210,7 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	// Get the OAuth config corresponding to the link ID, and verify the nonce.
-	ctx := logger.InContext(r.Context(), l)
+	ctx := logger.WithContext(r.Context(), l)
 	o := s.checkNonceParam(ctx, w, id, nonce)
 	if o == nil {
 		return
@@ -233,7 +233,7 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 		l.Debug("successful GitHub app installation")
 
 		// Check the app installation, extract metadata with and about it, and save them.
-		ctx := logger.InContext(r.Context(), l)
+		ctx := logger.WithContext(r.Context(), l)
 		u := github.APIBaseURL(github.AuthBaseURL(o))
 		if err := client.AddGitHubCreds(ctx, s.grpcAddr, s.grpcCreds, id, installID, u); err != nil {
 			htmlResponse(w, http.StatusInternalServerError, "&nbsp;")

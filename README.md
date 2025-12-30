@@ -1,6 +1,7 @@
 # Thrippy
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/tzrikka/thrippy.svg)](https://pkg.go.dev/github.com/tzrikka/thrippy)
+[![Code Wiki](https://img.shields.io/badge/Code_Wiki-gold?logo=googlegemini)](https://codewiki.google/github.com/tzrikka/thrippy)
 [![Go Report Card](https://goreportcard.com/badge/github.com/tzrikka/thrippy)](https://goreportcard.com/report/github.com/tzrikka/thrippy)
 
 Thrippy is a CLI application and gRPC client/server to manage authentication configurations and secret tokens for a variety of third-party ("3P") services.
@@ -50,7 +51,7 @@ Static credentials (e.g. API keys) are set manually by the user. Dynamic credent
 > [!TIP]
 > The binary will be located here: `$(go env GOPATH)/bin`
 
-2. Start the Thrippy server:
+1. Start the Thrippy server:
 
    ```shell
    thrippy server --dev
@@ -59,10 +60,28 @@ Static credentials (e.g. API keys) are set manually by the user. Dynamic credent
 > [!IMPORTANT]
 > In dev mode, Thrippy uses an in-memory secrets manager by default, which is destroyed when the server goes down.
 
-3. Create any **static** link, based on the [documentation](https://github.com/tzrikka/thrippy/tree/main/docs)
+1. Create any **static** link, based on the [documentation](https://github.com/tzrikka/thrippy/tree/main/docs)
 
 ## Production Server Configuration
 
 - Secure secrets manager
 - [HTTP tunnel to enable OAuth 2.0 links](./docs/http_tunnel.md)
 - [m/TLS for Thrippy client/server communication](./x509/README.md)
+
+## Production Security
+
+The `--dev` flag allows users start Thrippy quickly, without configuring important security settings.
+
+In this section we will demonstrate
+
+1. Install and start HashiCorp Vault
+
+   Simple but insecure example:
+
+   ```shell
+   brew install hashicorp/tap/vault
+   vault server -dev -dev-root-token-id VAULT_PASSWORD
+   ```
+
+   > [!NOTE]
+   > Thrippy supports other cloud secret managers as well, although each one requires specific configuration.

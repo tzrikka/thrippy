@@ -2,7 +2,7 @@ package google
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"regexp"
 	"strconv"
 
@@ -97,7 +97,7 @@ func serviceKeyChecker(ctx context.Context, m map[string]string, _ *oauth.Config
 
 	matches := regexp.MustCompile(`"project_id":\s*"(.*?)"`).FindStringSubmatch(m["key"])
 	if len(matches) < 2 {
-		return "", errors.New("project ID not found in service account key")
+		return "", fmt.Errorf("project ID not found in service account key")
 	}
 
 	return links.EncodeMetadataAsJSON(oauthMetadata{

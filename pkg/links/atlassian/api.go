@@ -3,7 +3,6 @@ package atlassian
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -40,11 +39,11 @@ func AccessibleResources(ctx context.Context, accessToken string) (*CloudResourc
 
 	switch len(jsonResp) {
 	case 0:
-		return nil, errors.New("valid OAuth token with no Atlassian accessible resources")
+		return nil, fmt.Errorf("valid OAuth token with no Atlassian accessible resources")
 	case 1:
 		return &jsonResp[0], nil
 	default:
-		return nil, errors.New("multiple Atlassian accessible resources found")
+		return nil, fmt.Errorf("multiple Atlassian accessible resources found")
 	}
 }
 
@@ -61,10 +60,10 @@ func AccessibleResources(ctx context.Context, accessToken string) (*CloudResourc
 //   - https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-myself/#api-rest-api-3-myself-get
 func CurrentUser(ctx context.Context, url, email, apiToken string, jsonResp any) error {
 	if email == "" {
-		return errors.New("missing email address")
+		return fmt.Errorf("missing email address")
 	}
 	if apiToken == "" {
-		return errors.New("missing API token")
+		return fmt.Errorf("missing API token")
 	}
 
 	auth := fmt.Sprintf("Basic %s:%s", email, apiToken)

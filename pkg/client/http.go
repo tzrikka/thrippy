@@ -38,11 +38,10 @@ func HTTPRequestWithHeaders(ctx context.Context, httpMethod, url, authToken stri
 	}
 
 	if resp.StatusCode >= http.StatusBadRequest {
-		msg := resp.Status
-		if len(body) > 0 {
-			msg = fmt.Sprintf("%s: %s", msg, string(body))
+		if len(body) == 0 {
+			return nil, errors.New(resp.Status)
 		}
-		return nil, errors.New(msg)
+		return nil, fmt.Errorf("%s: %s", resp.Status, string(body))
 	}
 
 	return body, nil

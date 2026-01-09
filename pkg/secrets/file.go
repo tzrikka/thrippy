@@ -2,7 +2,6 @@ package secrets
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -151,7 +150,7 @@ func (p *fileProvider) writeTOMLFile(store map[string]string) error {
 			}
 			m, ok = subMap.(map[string]any)
 			if !ok {
-				return errors.New("unexpected type for key " + strings.Join(tomlKeys[:i+1], "/"))
+				return fmt.Errorf("unexpected type for key %s", strings.Join(tomlKeys[:i+1], "/"))
 			}
 		}
 		m[tomlKeys[3]] = v

@@ -40,7 +40,7 @@ linters:
     - predeclared
     - protogetter
     - recvcheck
-    # - revive
+    - revive
     - sloglint
     - staticcheck
     - thelper
@@ -68,8 +68,17 @@ linters:
         - unexported
     misspell:
       locale: US
+    perfsprint:
+      errorf: false
     predeclared:
       qualified-name: true
+    revive:
+      enable-default-rules: true
+      rules:
+        - name: exported
+          disabled: true
+        - name: package-comments
+          disabled: true
     sloglint:
       attr-only: true
       key-naming-case: snake

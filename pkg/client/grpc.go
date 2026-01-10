@@ -2,7 +2,7 @@ package client
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -57,7 +57,7 @@ func LinkOAuthConfig(ctx context.Context, grpcAddr string, creds credentials.Tra
 	o := oauth.FromProto(resp.GetOauthConfig())
 	if o != nil && o.Config.ClientID == "" {
 		l.Error("empty OAuth client ID")
-		return nil, errors.New("empty OAuth client ID")
+		return nil, fmt.Errorf("empty OAuth client ID")
 	}
 
 	return o, nil

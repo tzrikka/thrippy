@@ -2,7 +2,6 @@ package secrets
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -82,6 +81,11 @@ func (p *fileProvider) Delete(_ context.Context, key string) error {
 // dataFile returns the path to the app's data file.
 // It also creates an empty file if it doesn't already exist.
 func dataFile(ctx context.Context) string {
+	path, _ := xdg.FindDataFile(DataDirName, DataFileName)
+	if path != "" {
+		return path
+	}
+
 	path, err := xdg.CreateFile(xdg.DataHome, DataDirName, DataFileName)
 	if err != nil {
 		logger.FatalError(ctx, "failed to create data file", err)
@@ -151,7 +155,7 @@ func (p *fileProvider) writeTOMLFile(store map[string]string) error {
 			}
 			m, ok = subMap.(map[string]any)
 			if !ok {
-				return errors.New("unexpected type for key " + strings.Join(tomlKeys[:i+1], "/"))
+				return fmt.Errorf("unexpected type for key %s", strings.Join(tomlKeys[:i+1], "/"))
 			}
 		}
 		m[tomlKeys[3]] = v

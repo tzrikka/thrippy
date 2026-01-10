@@ -36,6 +36,7 @@ package secrets
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 
@@ -70,7 +71,7 @@ func ManagerFlags(configFilePath altsrc.StringSourcer) []cli.Flag {
 					vaultOption:    true,
 				}
 				if ok := options[v]; !ok {
-					return fmt.Errorf("unrecognized option")
+					return errors.New("unrecognized option")
 				}
 				return nil
 			},
@@ -104,7 +105,7 @@ func NewManager(ctx context.Context, cmd *cli.Command) (Manager, error) {
 	ns := cmd.String("secrets-namespace")
 
 	if provider == defaultProvider && !cmd.Bool("dev") {
-		return nil, fmt.Errorf("in-memory secrets provider allowed only with --dev flag")
+		return nil, errors.New("in-memory secrets provider allowed only with --dev flag")
 	}
 
 	slog.Info("secrets provider: " + provider)

@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -66,17 +67,17 @@ func APIBaseURL(baseURL string) string {
 func generateJWT(clientID, privateKey string) (string, error) {
 	// Input sanity checks.
 	if clientID == "" {
-		return "", fmt.Errorf("missing credential: client_id")
+		return "", errors.New("missing credential: client_id")
 	}
 	if privateKey == "" {
-		return "", fmt.Errorf("missing credential: private_key")
+		return "", errors.New("missing credential: private_key")
 	}
 
 	// Parse the private key.
 	privateKey = strings.ReplaceAll(privateKey, "\\n", "\n")
 	block, _ := pem.Decode([]byte(privateKey))
 	if block == nil || block.Type != "RSA PRIVATE KEY" {
-		return "", fmt.Errorf("failed to decode PEM private key")
+		return "", errors.New("failed to decode PEM private key")
 	}
 
 	pk, err := x509.ParsePKCS1PrivateKey(block.Bytes)

@@ -2,6 +2,7 @@ package bitbucket
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -94,7 +95,7 @@ func oauthChecker(ctx context.Context, _ map[string]string, _ *oauth.Config, t *
 	if t.AccessToken == "" {
 		ws, ok := t.Extra("webhook_secret").(string)
 		if !ok || ws == "" {
-			return "", fmt.Errorf("missing both OAuth token and 'webhook_secret'")
+			return "", errors.New("missing both OAuth token and 'webhook_secret'")
 		}
 		return "", nil
 	}

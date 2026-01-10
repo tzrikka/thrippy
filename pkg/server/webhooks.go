@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"crypto/subtle"
+	"errors"
 	"fmt"
 	"html"
 	"html/template"
@@ -355,7 +356,7 @@ func parseStateParam(state string) (id, nonce, memo string, err error) {
 
 	id, nonce, memo = s[0], s[1], s[2]
 	if id == "" || nonce == "" {
-		err = fmt.Errorf("incomplete state parameter")
+		err = errors.New("incomplete state parameter")
 		return id, nonce, memo, err
 	}
 	if _, err = shortuuid.DefaultEncoder.Decode(id); err != nil {

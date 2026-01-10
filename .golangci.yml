@@ -68,8 +68,6 @@ linters:
         - unexported
     misspell:
       locale: US
-    perfsprint:
-      errorf: false
     predeclared:
       qualified-name: true
     revive:

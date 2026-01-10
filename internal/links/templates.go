@@ -7,6 +7,7 @@ package links
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"slices"
@@ -111,7 +112,7 @@ func EncodeMetadataAsJSON(v any) (string, error) {
 // and strips any suffixes after the host address.
 func NormalizeBaseURL(baseURL string) (string, error) {
 	if baseURL == "" {
-		return "", fmt.Errorf("missing base URL")
+		return "", errors.New("missing base URL")
 	}
 
 	u, err := url.Parse(baseURL)
@@ -120,7 +121,7 @@ func NormalizeBaseURL(baseURL string) (string, error) {
 	}
 
 	if u.Host == "" {
-		return "", fmt.Errorf("invalid base URL: no host")
+		return "", errors.New("invalid base URL: no host")
 	}
 
 	u.Path = ""

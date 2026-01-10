@@ -2,6 +2,7 @@ package slack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -108,7 +109,7 @@ func govOAuthChecker(ctx context.Context, _ map[string]string, _ *oauth.Config, 
 func socketModeChecker(ctx context.Context, m map[string]string, _ *oauth.Config, _ *oauth2.Token) (string, error) {
 	appToken := m["app_token"]
 	if appToken == "" {
-		return "", fmt.Errorf("missing app-level token")
+		return "", errors.New("missing app-level token")
 	}
 
 	if err := webSocketURL(ctx, defaultBaseURL, appToken); err != nil {
@@ -120,7 +121,7 @@ func socketModeChecker(ctx context.Context, m map[string]string, _ *oauth.Config
 
 func genericChecker(ctx context.Context, botToken, baseURL string) (string, error) {
 	if botToken == "" {
-		return "", fmt.Errorf("missing bot token")
+		return "", errors.New("missing bot token")
 	}
 
 	auth, err := authTest(ctx, baseURL, botToken)

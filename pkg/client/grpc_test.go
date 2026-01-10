@@ -2,7 +2,7 @@ package client
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"net"
 	"reflect"
 	"testing"
@@ -41,7 +41,7 @@ func TestLinkOAuthConfig(t *testing.T) {
 		},
 		{
 			name:    "grpc_error",
-			respErr: fmt.Errorf("error"),
+			respErr: errors.New("error"),
 			wantErr: true,
 		},
 		{

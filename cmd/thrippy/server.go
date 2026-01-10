@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"errors"
 
 	altsrc "github.com/urfave/cli-altsrc/v3"
 	"github.com/urfave/cli-altsrc/v3/toml"
@@ -52,7 +52,7 @@ func serverCommand(configFilePath altsrc.StringSourcer) *cli.Command {
 
 func validatePort(p int) error {
 	if p < 0 || p > 65535 {
-		return fmt.Errorf("out of range [0-65535]")
+		return errors.New("out of range [0-65535]")
 	}
 	return nil
 }

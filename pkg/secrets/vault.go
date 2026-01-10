@@ -2,7 +2,7 @@ package secrets
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"strings"
 
 	vault "github.com/hashicorp/vault/api"
@@ -91,7 +91,7 @@ func (p *vaultProvider) Get(ctx context.Context, key string) (string, error) {
 	}
 	data, ok := sec.Data["value"].(string)
 	if !ok {
-		return "", fmt.Errorf("invalid data")
+		return "", errors.New("invalid data")
 	}
 	return data, nil
 }

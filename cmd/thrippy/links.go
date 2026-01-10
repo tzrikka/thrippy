@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"maps"
 	"slices"
@@ -55,7 +56,7 @@ var createLinkCommand = &cli.Command{
 			Required: true,
 			Validator: func(v string) error {
 				if _, ok := links.Templates[v]; !ok {
-					return fmt.Errorf("invalid template")
+					return errors.New("invalid template")
 				}
 				return nil
 			},
@@ -224,15 +225,15 @@ var getLinkCommand = &cli.Command{
 func checkLinkIDArg(cmd *cli.Command) error {
 	switch cmd.NArg() {
 	case 0:
-		return fmt.Errorf("missing link ID argument")
+		return errors.New("missing link ID argument")
 	case 1:
 		// OK.
 	default:
-		return fmt.Errorf("too many arguments, expecting exactly one")
+		return errors.New("too many arguments, expecting exactly one")
 	}
 
 	if _, err := shortuuid.DefaultEncoder.Decode(cmd.Args().First()); err != nil {
-		return fmt.Errorf("invalid link ID argument")
+		return errors.New("invalid link ID argument")
 	}
 	return nil
 }

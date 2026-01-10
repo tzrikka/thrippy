@@ -81,6 +81,11 @@ func (p *fileProvider) Delete(_ context.Context, key string) error {
 // dataFile returns the path to the app's data file.
 // It also creates an empty file if it doesn't already exist.
 func dataFile(ctx context.Context) string {
+	path, _ := xdg.FindDataFile(DataDirName, DataFileName)
+	if path != "" {
+		return path
+	}
+
 	path, err := xdg.CreateFile(xdg.DataHome, DataDirName, DataFileName)
 	if err != nil {
 		logger.FatalError(ctx, "failed to create data file", err)

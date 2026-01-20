@@ -83,5 +83,5 @@ In this section we will demonstrate
    vault server -dev -dev-root-token-id VAULT_PASSWORD
    ```
 
-   > [!NOTE]
-   > Thrippy supports other cloud secret managers as well, although each one requires specific configuration.
+> [!NOTE]
+> Thrippy supports other cloud secret managers as well, although each one requires specific configuration.

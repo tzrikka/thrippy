@@ -50,19 +50,17 @@ Static credentials (e.g. API keys) are set manually by the user. Dynamic credent
 
    Or download and extract the prebuilt executable file for your platform: <https://github.com/tzrikka/thrippy/releases>
 
-> [!TIP]
-> If you use `go install`, the executable file will be located here: `$(go env GOPATH)/bin`
+   (Tip: if you use `go install`, the executable file will be located here: `$(go env GOPATH)/bin`)
 
-1. Start the Thrippy server:
+2. Start the Thrippy server:
 
    ```shell
    thrippy server --dev
    ```
 
-> [!IMPORTANT]
-> In dev mode, Thrippy uses an in-memory secrets manager by default, which is destroyed when the server goes down.
+   (Important: in dev mode, Thrippy uses an in-memory secrets manager by default, which is destroyed when the server goes down!)
 
-1. Create any **static** link, based on the [documentation](https://github.com/tzrikka/thrippy/tree/main/docs)
+3. Create any **static** link, based on the [documentation](https://github.com/tzrikka/thrippy/tree/main/docs)
 
 ## Production Server Configuration
 

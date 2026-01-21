@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/lmittmann/tint"
 	"github.com/urfave/cli/v3"
 
 	"github.com/tzrikka/thrippy/pkg/secrets"
@@ -16,13 +17,14 @@ import (
 func Start(ctx context.Context, cmd *cli.Command) error {
 	var handler slog.Handler
 	if cmd.Bool("dev") {
-		handler = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-			Level:     slog.LevelDebug,
-			AddSource: true,
+		handler = tint.NewHandler(os.Stdout, &tint.Options{
+			Level:      slog.LevelDebug,
+			TimeFormat: "15:04:05.000",
+			AddSource:  true,
 		})
 	} else {
 		handler = slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
-			Level:     slog.LevelDebug,
+			Level:     slog.LevelInfo,
 			AddSource: true,
 		})
 	}

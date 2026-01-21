@@ -42,14 +42,16 @@ Static credentials (e.g. API keys) are set manually by the user. Dynamic credent
 
 ## Quickstart
 
-1. Install Thrippy:
+1. Install Thrippy with the Go language toolchain:
 
    ```shell
    go install github.com/tzrikka/thrippy
    ```
 
+   Or download and extract the prebuilt executable file for your platform: <https://github.com/tzrikka/thrippy/releases>
+
 > [!TIP]
-> The binary will be located here: `$(go env GOPATH)/bin`
+> If you use `go install`, the executable file will be located here: `$(go env GOPATH)/bin`
 
 1. Start the Thrippy server:
 
@@ -67,21 +69,3 @@ Static credentials (e.g. API keys) are set manually by the user. Dynamic credent
 - Secure secrets manager
 - [HTTP tunnel to enable OAuth 2.0 links](./docs/http_tunnel.md)
 - [m/TLS for Thrippy client/server communication](./x509/README.md)
-
-## Production Security
-
-The `--dev` flag allows users start Thrippy quickly, without configuring important security settings.
-
-In this section we will demonstrate
-
-1. Install and start HashiCorp Vault
-
-   Simple but insecure example:
-
-   ```shell
-   brew install hashicorp/tap/vault
-   vault server -dev -dev-root-token-id VAULT_PASSWORD
-   ```
-
-> [!NOTE]
-> Thrippy supports other cloud secret managers as well, although each one requires specific configuration.

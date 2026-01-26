@@ -6,7 +6,7 @@
 
 2. Left Sidebar > Apps and Features > OAuth Consumers
 
-3. Click the "Add consume" button
+3. Click the "Add consumer" button
 
    - Callback URL: `https://ADDRESS/callback`\
      (`ADDRESS` is Thrippy's [public address for HTTP webhooks](/docs/http_tunnel.md))

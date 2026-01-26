@@ -20,7 +20,7 @@
    ```shell
    thrippy set-creds <link ID> \
            --kv "base_url=https://your-domain.atlassian.net" \
-           --kv "email=..." --kv "api_token=..."
+           --kv "email=you@example.com" --kv "api_token=..."
    ```
 
 ## References

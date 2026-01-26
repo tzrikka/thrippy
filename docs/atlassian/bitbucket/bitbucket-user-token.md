@@ -18,7 +18,7 @@
 2. Set the link's static credentials
 
    ```shell
-   thrippy set-creds <link ID> --kv "email=..." --kv "api_token=..."
+   thrippy set-creds <link ID> --kv "email=you@example.com" --kv "api_token=..."
    ```
 
 ## References

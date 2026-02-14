@@ -16,7 +16,7 @@
             "type": "go",
             "request": "launch",
             "mode": "debug",
-            "program": "cmd/thrippy/main.go",
+            "program": "cmd/thrippy",
             "args": [
                 "--dev",
                 "server"
@@ -27,7 +27,7 @@
             "type": "go",
             "request": "launch",
             "mode": "debug",
-            "program": "thrippy",
+            "program": "cmd/thrippy",
             "args": [
                 "--dev",
                 "link-templates"

@@ -14,7 +14,6 @@ import (
 	"strings"
 
 	"golang.org/x/oauth2"
-	"google.golang.org/protobuf/proto"
 
 	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 	"github.com/tzrikka/thrippy/pkg/oauth"
@@ -56,7 +55,7 @@ func (t Template) CredFields() []*thrippypb.CredentialField {
 
 	fields := make([]*thrippypb.CredentialField, len(t.credFields))
 	for i, name := range t.credFields {
-		fields[i] = thrippypb.CredentialField_builder{Name: proto.String(name)}.Build()
+		fields[i] = thrippypb.CredentialField_builder{Name: new(name)}.Build()
 		if prefix, ok := strings.CutSuffix(name, "_optional"); ok {
 			name = prefix
 			fields[i].SetName(name)

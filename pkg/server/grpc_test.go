@@ -8,7 +8,6 @@ import (
 	"github.com/urfave/cli/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/protobuf/proto"
 
 	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 	intlinks "github.com/tzrikka/thrippy/internal/links"
@@ -49,17 +48,17 @@ func TestCreateLink(t *testing.T) {
 		{
 			name: "invalid_template",
 			req: thrippypb.CreateLinkRequest_builder{
-				Template: proto.String("bad-template-id"),
+				Template: new("bad-template-id"),
 			}.Build(),
 			wantErr: true,
 		},
 		{
 			name: "oauth_without_client_id",
 			req: thrippypb.CreateLinkRequest_builder{
-				Template: proto.String("generic-oauth"),
+				Template: new("generic-oauth"),
 				OauthConfig: thrippypb.OAuthConfig_builder{
-					AuthUrl:      proto.String("111"),
-					ClientSecret: proto.String("222"),
+					AuthUrl:      new("111"),
+					ClientSecret: new("222"),
 				}.Build(),
 			}.Build(),
 			wantErr: true,
@@ -67,11 +66,11 @@ func TestCreateLink(t *testing.T) {
 		{
 			name: "generic_oauth",
 			req: thrippypb.CreateLinkRequest_builder{
-				Template: proto.String("generic-oauth"),
+				Template: new("generic-oauth"),
 				OauthConfig: thrippypb.OAuthConfig_builder{
-					AuthUrl:      proto.String("111"),
-					ClientId:     proto.String("222"),
-					ClientSecret: proto.String("333"),
+					AuthUrl:      new("111"),
+					ClientId:     new("222"),
+					ClientSecret: new("333"),
 				}.Build(),
 			}.Build(),
 		},
@@ -111,13 +110,14 @@ func TestDeleteLinkOAuth(t *testing.T) {
 	defer conn.Close()
 
 	client := thrippypb.NewThrippyServiceClient(conn)
-	resp1, err := client.CreateLink(t.Context(), thrippypb.CreateLinkRequest_builder{
-		Template: proto.String("generic-oauth"),
-		OauthConfig: thrippypb.OAuthConfig_builder{
-			ClientId:     proto.String("111"),
-			ClientSecret: proto.String("222"),
-		}.Build(),
-	}.Build())
+	resp1, err := client.CreateLink(t.Context(), //nolint:staticcheck // https://github.com/golangci/golangci-lint/issues/6363
+		thrippypb.CreateLinkRequest_builder{
+			Template: new("generic-oauth"),
+			OauthConfig: thrippypb.OAuthConfig_builder{
+				ClientId:     new("111"),
+				ClientSecret: new("222"),
+			}.Build(),
+		}.Build())
 	if err != nil {
 		t.Fatalf("CreateLink() error = %v", err)
 	}
@@ -135,28 +135,28 @@ func TestDeleteLinkOAuth(t *testing.T) {
 		{
 			name: "invalid_id",
 			req: thrippypb.DeleteLinkRequest_builder{
-				LinkId: proto.String("111"),
+				LinkId: new("111"),
 			}.Build(),
 			wantErr: true,
 		},
 		{
 			name: "link_not_found_is_error",
 			req: thrippypb.DeleteLinkRequest_builder{
-				LinkId: proto.String(shortuuid.New()),
+				LinkId: new(shortuuid.New()),
 			}.Build(),
 			wantErr: true,
 		},
 		{
 			name: "link_not_found_isnt_error",
 			req: thrippypb.DeleteLinkRequest_builder{
-				LinkId:       proto.String(shortuuid.New()),
-				AllowMissing: proto.Bool(true),
+				LinkId:       new(shortuuid.New()),
+				AllowMissing: new(true),
 			}.Build(),
 		},
 		{
 			name: "happy_path",
 			req: thrippypb.DeleteLinkRequest_builder{
-				LinkId: proto.String(resp1.GetLinkId()),
+				LinkId: new(resp1.GetLinkId()),
 			}.Build(),
 		},
 	}
@@ -171,7 +171,7 @@ func TestDeleteLinkOAuth(t *testing.T) {
 				return
 			}
 
-			req3 := thrippypb.GetLinkRequest_builder{LinkId: proto.String(resp1.GetLinkId())}.Build()
+			req3 := thrippypb.GetLinkRequest_builder{LinkId: new(resp1.GetLinkId())}.Build()
 			if _, err = client.GetLink(t.Context(), req3); err == nil {
 				t.Errorf("GetLink() error = %v, wantErr true", err)
 			}
@@ -203,13 +203,14 @@ func TestGetLinkOAuth(t *testing.T) {
 	defer conn.Close()
 
 	client := thrippypb.NewThrippyServiceClient(conn)
-	resp1, err := client.CreateLink(t.Context(), thrippypb.CreateLinkRequest_builder{
-		Template: proto.String("generic-oauth"),
-		OauthConfig: thrippypb.OAuthConfig_builder{
-			ClientId:     proto.String("111"),
-			ClientSecret: proto.String("222"),
-		}.Build(),
-	}.Build())
+	resp1, err := client.CreateLink(t.Context(), //nolint:staticcheck // https://github.com/golangci/golangci-lint/issues/6363
+		thrippypb.CreateLinkRequest_builder{
+			Template: new("generic-oauth"),
+			OauthConfig: thrippypb.OAuthConfig_builder{
+				ClientId:     new("111"),
+				ClientSecret: new("222"),
+			}.Build(),
+		}.Build())
 	if err != nil {
 		t.Fatalf("CreateLink() error = %v", err)
 	}
@@ -229,21 +230,21 @@ func TestGetLinkOAuth(t *testing.T) {
 		{
 			name: "invalid_id",
 			req: thrippypb.GetLinkRequest_builder{
-				LinkId: proto.String("111"),
+				LinkId: new("111"),
 			}.Build(),
 			wantErr: true,
 		},
 		{
 			name: "link_not_found",
 			req: thrippypb.GetLinkRequest_builder{
-				LinkId: proto.String(shortuuid.New()),
+				LinkId: new(shortuuid.New()),
 			}.Build(),
 			wantErr: true,
 		},
 		{
 			name: "happy_path",
 			req: thrippypb.GetLinkRequest_builder{
-				LinkId: proto.String(resp1.GetLinkId()),
+				LinkId: new(resp1.GetLinkId()),
 			}.Build(),
 			wantID:     "111",
 			wantSecret: "222",
@@ -293,15 +294,16 @@ func TestGetLinkNonOAuth(t *testing.T) {
 	defer conn.Close()
 
 	client := thrippypb.NewThrippyServiceClient(conn)
-	resp, err := client.CreateLink(t.Context(), thrippypb.CreateLinkRequest_builder{
-		Template: proto.String("slack-bot-token"),
-	}.Build())
+	resp, err := client.CreateLink(t.Context(), //nolint:staticcheck // https://github.com/golangci/golangci-lint/issues/6363
+		thrippypb.CreateLinkRequest_builder{
+			Template: new("slack-bot-token"),
+		}.Build())
 	if err != nil {
 		t.Fatalf("CreateLink() error = %v", err)
 	}
 
 	got, err := client.GetLink(t.Context(), thrippypb.GetLinkRequest_builder{
-		LinkId: proto.String(resp.GetLinkId()),
+		LinkId: new(resp.GetLinkId()),
 	}.Build())
 	if err != nil {
 		t.Errorf("GetLink() error = %v", err)
@@ -367,9 +369,9 @@ func TestSetAndGetCredentials(t *testing.T) {
 			template: "generic-oauth",
 			req: thrippypb.SetCredentialsRequest_builder{
 				Token: thrippypb.OAuthToken_builder{
-					AccessToken:  proto.String("access_token"),
-					Expiry:       proto.String("2025-05-17T10:11:12Z"),
-					RefreshToken: proto.String("refresh_token"),
+					AccessToken:  new("access_token"),
+					Expiry:       new("2025-05-17T10:11:12Z"),
+					RefreshToken: new("refresh_token"),
 				}.Build(),
 			}.Build(),
 			want: map[string]string{
@@ -384,10 +386,10 @@ func TestSetAndGetCredentials(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			client := thrippypb.NewThrippyServiceClient(conn)
 			resp1, err := client.CreateLink(t.Context(), thrippypb.CreateLinkRequest_builder{
-				Template: proto.String(tt.template),
+				Template: new(tt.template),
 				OauthConfig: thrippypb.OAuthConfig_builder{
-					ClientId:     proto.String("111"),
-					ClientSecret: proto.String("222"),
+					ClientId:     new("111"),
+					ClientSecret: new("222"),
 				}.Build(),
 			}.Build())
 			if err != nil {
@@ -402,7 +404,7 @@ func TestSetAndGetCredentials(t *testing.T) {
 			}
 
 			got, err := client.GetCredentials(t.Context(), thrippypb.GetCredentialsRequest_builder{
-				LinkId: proto.String(resp1.GetLinkId()),
+				LinkId: new(resp1.GetLinkId()),
 			}.Build())
 			if err != nil {
 				t.Errorf("GetCredentials() error = %v", err)

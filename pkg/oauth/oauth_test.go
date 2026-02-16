@@ -23,8 +23,8 @@ func TestFromProto(t *testing.T) {
 		{
 			name: "client_id_and_secret",
 			oac: thrippypb.OAuthConfig_builder{
-				ClientId:     proto.String("id"),
-				ClientSecret: proto.String("secret"),
+				ClientId:     new("id"),
+				ClientSecret: new("secret"),
 			}.Build(),
 			want: &Config{
 				Config: &oauth2.Config{
@@ -36,8 +36,8 @@ func TestFromProto(t *testing.T) {
 		{
 			name: "auth_and_token_urls",
 			oac: thrippypb.OAuthConfig_builder{
-				AuthUrl:  proto.String("auth"),
-				TokenUrl: proto.String("token"),
+				AuthUrl:  new("auth"),
+				TokenUrl: new("token"),
 			}.Build(),
 			want: &Config{
 				Config: &oauth2.Config{
@@ -174,12 +174,12 @@ func TestConfigToProto(t *testing.T) {
 				},
 			},
 			want: thrippypb.OAuthConfig_builder{
-				AuthUrl:      proto.String("auth"),
-				TokenUrl:     proto.String("token"),
+				AuthUrl:      new("auth"),
+				TokenUrl:     new("token"),
 				AuthStyle:    proto.Int64(0),
-				ClientId:     proto.String(""),
-				ClientSecret: proto.String(""),
-				Nonce:        proto.String(""),
+				ClientId:     new(""),
+				ClientSecret: new(""),
+				Nonce:        new(""),
 			}.Build(),
 		},
 		{
@@ -191,12 +191,12 @@ func TestConfigToProto(t *testing.T) {
 				},
 			},
 			want: thrippypb.OAuthConfig_builder{
-				AuthUrl:      proto.String(""),
-				TokenUrl:     proto.String(""),
+				AuthUrl:      new(""),
+				TokenUrl:     new(""),
 				AuthStyle:    proto.Int64(0),
-				ClientId:     proto.String("id"),
-				ClientSecret: proto.String("secret"),
-				Nonce:        proto.String(""),
+				ClientId:     new("id"),
+				ClientSecret: new("secret"),
+				Nonce:        new(""),
 			}.Build(),
 		},
 		{
@@ -207,13 +207,13 @@ func TestConfigToProto(t *testing.T) {
 				},
 			},
 			want: thrippypb.OAuthConfig_builder{
-				AuthUrl:      proto.String(""),
-				TokenUrl:     proto.String(""),
+				AuthUrl:      new(""),
+				TokenUrl:     new(""),
 				AuthStyle:    proto.Int64(0),
-				ClientId:     proto.String(""),
-				ClientSecret: proto.String(""),
+				ClientId:     new(""),
+				ClientSecret: new(""),
 				Scopes:       []string{"111", "222"},
-				Nonce:        proto.String(""),
+				Nonce:        new(""),
 			}.Build(),
 		},
 		{
@@ -223,13 +223,13 @@ func TestConfigToProto(t *testing.T) {
 				AuthCodes: map[string]string{"aaa": "111", "bbb": "222"},
 			},
 			want: thrippypb.OAuthConfig_builder{
-				AuthUrl:      proto.String(""),
-				TokenUrl:     proto.String(""),
+				AuthUrl:      new(""),
+				TokenUrl:     new(""),
 				AuthStyle:    proto.Int64(0),
-				ClientId:     proto.String(""),
-				ClientSecret: proto.String(""),
+				ClientId:     new(""),
+				ClientSecret: new(""),
 				AuthCodes:    map[string]string{"aaa": "111", "bbb": "222"},
-				Nonce:        proto.String(""),
+				Nonce:        new(""),
 			}.Build(),
 		},
 		{
@@ -239,12 +239,12 @@ func TestConfigToProto(t *testing.T) {
 				Nonce:  "nonce",
 			},
 			want: thrippypb.OAuthConfig_builder{
-				AuthUrl:      proto.String(""),
-				TokenUrl:     proto.String(""),
+				AuthUrl:      new(""),
+				TokenUrl:     new(""),
 				AuthStyle:    proto.Int64(0),
-				ClientId:     proto.String(""),
-				ClientSecret: proto.String(""),
-				Nonce:        proto.String("nonce"),
+				ClientId:     new(""),
+				ClientSecret: new(""),
+				Nonce:        new("nonce"),
 			}.Build(),
 		},
 	}
@@ -334,16 +334,16 @@ func TestTokenToProto(t *testing.T) {
 			name: "empty",
 			t:    &oauth2.Token{},
 			want: thrippypb.OAuthToken_builder{
-				AccessToken: proto.String(""),
-				Expiry:      proto.String("0001-01-01T00:00:00Z"),
+				AccessToken: new(""),
+				Expiry:      new("0001-01-01T00:00:00Z"),
 			}.Build(),
 		},
 		{
 			name: "endless_access_token",
 			t:    &oauth2.Token{AccessToken: "access"},
 			want: thrippypb.OAuthToken_builder{
-				AccessToken: proto.String("access"),
-				Expiry:      proto.String("0001-01-01T00:00:00Z"),
+				AccessToken: new("access"),
+				Expiry:      new("0001-01-01T00:00:00Z"),
 			}.Build(),
 		},
 		{
@@ -353,8 +353,8 @@ func TestTokenToProto(t *testing.T) {
 				Expiry:      time.Unix(1500000005, 1234),
 			},
 			want: thrippypb.OAuthToken_builder{
-				AccessToken: proto.String("access"),
-				Expiry:      proto.String("2017-07-14T02:40:05Z"),
+				AccessToken: new("access"),
+				Expiry:      new("2017-07-14T02:40:05Z"),
 			}.Build(),
 		},
 		{
@@ -367,10 +367,10 @@ func TestTokenToProto(t *testing.T) {
 				ExpiresIn:    1234,
 			},
 			want: thrippypb.OAuthToken_builder{
-				AccessToken:  proto.String("access"),
-				Expiry:       proto.String("2017-07-14T02:40:05Z"),
-				RefreshToken: proto.String("refresh"),
-				TokenType:    proto.String("bearer"),
+				AccessToken:  new("access"),
+				Expiry:       new("2017-07-14T02:40:05Z"),
+				RefreshToken: new("refresh"),
+				TokenType:    new("bearer"),
 			}.Build(),
 		},
 	}

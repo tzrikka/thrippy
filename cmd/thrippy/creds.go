@@ -14,7 +14,6 @@ import (
 	altsrc "github.com/urfave/cli-altsrc/v3"
 	"github.com/urfave/cli-altsrc/v3/toml"
 	"github.com/urfave/cli/v3"
-	"google.golang.org/protobuf/proto"
 
 	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 	"github.com/tzrikka/thrippy/pkg/client"
@@ -53,7 +52,7 @@ func startOAuthCommand(configFilePath altsrc.StringSourcer) *cli.Command {
 
 			id := cmd.Args().First()
 			c := thrippypb.NewThrippyServiceClient(conn)
-			resp, err := c.GetLink(ctx, thrippypb.GetLinkRequest_builder{LinkId: proto.String(id)}.Build())
+			resp, err := c.GetLink(ctx, thrippypb.GetLinkRequest_builder{LinkId: new(id)}.Build())
 			if err != nil {
 				return err
 			}
@@ -109,11 +108,8 @@ var setCredsCommand = &cli.Command{
 		defer conn.Close()
 
 		c := thrippypb.NewThrippyServiceClient(conn)
-		_, err = c.SetCredentials(ctx, thrippypb.SetCredentialsRequest_builder{
-			LinkId:       proto.String(cmd.Args().First()),
-			GenericCreds: kv,
-		}.Build())
-		if err != nil {
+		id := new(cmd.Args().First())
+		if _, err = c.SetCredentials(ctx, thrippypb.SetCredentialsRequest_builder{LinkId: id, GenericCreds: kv}.Build()); err != nil {
 			return err
 		}
 
@@ -138,9 +134,8 @@ var getCredsCommand = &cli.Command{
 		defer conn.Close()
 
 		c := thrippypb.NewThrippyServiceClient(conn)
-		resp, err := c.GetCredentials(ctx, thrippypb.GetCredentialsRequest_builder{
-			LinkId: proto.String(cmd.Args().First()),
-		}.Build())
+		id := new(cmd.Args().First())
+		resp, err := c.GetCredentials(ctx, thrippypb.GetCredentialsRequest_builder{LinkId: id}.Build())
 		if err != nil {
 			return err
 		}

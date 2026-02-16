@@ -4,8 +4,6 @@ import (
 	"reflect"
 	"testing"
 
-	"google.golang.org/protobuf/proto"
-
 	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 )
 
@@ -26,18 +24,18 @@ func TestTemplateCredFields(t *testing.T) {
 			name:       "one_element",
 			credFields: []string{"one"},
 			want: []*thrippypb.CredentialField{
-				thrippypb.CredentialField_builder{Name: proto.String("one")}.Build(),
+				thrippypb.CredentialField_builder{Name: new("one")}.Build(),
 			},
 		},
 		{
 			name:       "five_simple_elements",
 			credFields: []string{"1", "2", "3", "4", "5"},
 			want: []*thrippypb.CredentialField{
-				thrippypb.CredentialField_builder{Name: proto.String("1")}.Build(),
-				thrippypb.CredentialField_builder{Name: proto.String("2")}.Build(),
-				thrippypb.CredentialField_builder{Name: proto.String("3")}.Build(),
-				thrippypb.CredentialField_builder{Name: proto.String("4")}.Build(),
-				thrippypb.CredentialField_builder{Name: proto.String("5")}.Build(),
+				thrippypb.CredentialField_builder{Name: new("1")}.Build(),
+				thrippypb.CredentialField_builder{Name: new("2")}.Build(),
+				thrippypb.CredentialField_builder{Name: new("3")}.Build(),
+				thrippypb.CredentialField_builder{Name: new("4")}.Build(),
+				thrippypb.CredentialField_builder{Name: new("5")}.Build(),
 			},
 		},
 		{
@@ -45,8 +43,8 @@ func TestTemplateCredFields(t *testing.T) {
 			credFields: []string{"name_manual"},
 			want: []*thrippypb.CredentialField{
 				thrippypb.CredentialField_builder{
-					Name:   proto.String("name"),
-					Manual: proto.Bool(true),
+					Name:   new("name"),
+					Manual: new(true),
 				}.Build(),
 			},
 		},
@@ -55,8 +53,8 @@ func TestTemplateCredFields(t *testing.T) {
 			credFields: []string{"name_optional"},
 			want: []*thrippypb.CredentialField{
 				thrippypb.CredentialField_builder{
-					Name:     proto.String("name"),
-					Optional: proto.Bool(true),
+					Name:     new("name"),
+					Optional: new(true),
 				}.Build(),
 			},
 		},
@@ -65,9 +63,9 @@ func TestTemplateCredFields(t *testing.T) {
 			credFields: []string{"name_manual_optional"},
 			want: []*thrippypb.CredentialField{
 				thrippypb.CredentialField_builder{
-					Name:     proto.String("name"),
-					Manual:   proto.Bool(true),
-					Optional: proto.Bool(true),
+					Name:     new("name"),
+					Manual:   new(true),
+					Optional: new(true),
 				}.Build(),
 			},
 		},

@@ -11,7 +11,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/proto"
 
 	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 	"github.com/tzrikka/thrippy/internal/logger"
@@ -45,7 +44,7 @@ func LinkOAuthConfig(ctx context.Context, grpcAddr string, creds credentials.Tra
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	resp, err := c.GetLink(ctx, thrippypb.GetLinkRequest_builder{LinkId: proto.String(linkID)}.Build())
+	resp, err := c.GetLink(ctx, thrippypb.GetLinkRequest_builder{LinkId: new(linkID)}.Build())
 	if err != nil {
 		if status.Code(err) != codes.NotFound {
 			l.Error("bad response from gRPC service", slog.Any("error", err), slog.String("client_method", "GetLink"))
@@ -79,7 +78,7 @@ func AddGitHubCreds(ctx context.Context, grpcAddr string, creds credentials.Tran
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	resp, err := c.GetCredentials(ctx, thrippypb.GetCredentialsRequest_builder{LinkId: proto.String(linkID)}.Build())
+	resp, err := c.GetCredentials(ctx, thrippypb.GetCredentialsRequest_builder{LinkId: new(linkID)}.Build())
 	if err != nil {
 		l.Error("bad response from gRPC service", slog.Any("error", err), slog.String("client_method", "GetCredentials"))
 		return err
@@ -89,7 +88,7 @@ func AddGitHubCreds(ctx context.Context, grpcAddr string, creds credentials.Tran
 	m["install_id"] = installID
 	m["api_base_url"] = url
 
-	req := thrippypb.SetCredentialsRequest_builder{LinkId: proto.String(linkID), GenericCreds: m}.Build()
+	req := thrippypb.SetCredentialsRequest_builder{LinkId: new(linkID), GenericCreds: m}.Build()
 	if _, err = c.SetCredentials(ctx, req); err != nil {
 		l.Error("bad response from gRPC service", slog.Any("error", err), slog.String("client_method", "SetCredentials"))
 		return err
@@ -114,7 +113,7 @@ func SetOAuthCreds(ctx context.Context, grpcAddr string, creds credentials.Trans
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	req := thrippypb.SetCredentialsRequest_builder{LinkId: proto.String(linkID), Token: oauth.TokenToProto(t)}.Build()
+	req := thrippypb.SetCredentialsRequest_builder{LinkId: new(linkID), Token: oauth.TokenToProto(t)}.Build()
 	if _, err = c.SetCredentials(ctx, req); err != nil {
 		l.Error("bad response from gRPC service", slog.Any("error", err), slog.String("client_method", "SetCredentials"))
 		return err

@@ -15,7 +15,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 
 	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 	intlinks "github.com/tzrikka/thrippy/internal/links"
@@ -97,10 +96,8 @@ func (s *grpcServer) CreateLink(ctx context.Context, in *thrippypb.CreateLinkReq
 		}
 	}
 
-	return thrippypb.CreateLinkResponse_builder{
-		LinkId:           proto.String(id),
-		CredentialFields: links.Templates[t].CredFields(),
-	}.Build(), nil
+	cfs := links.Templates[t].CredFields()
+	return thrippypb.CreateLinkResponse_builder{LinkId: new(id), CredentialFields: cfs}.Build(), nil
 }
 
 func (s *grpcServer) DeleteLink(ctx context.Context, in *thrippypb.DeleteLinkRequest) (*thrippypb.DeleteLinkResponse, error) {
@@ -171,11 +168,8 @@ func (s *grpcServer) GetLink(ctx context.Context, in *thrippypb.GetLinkRequest) 
 		return nil, err
 	}
 
-	return thrippypb.GetLinkResponse_builder{
-		Template:         proto.String(t),
-		OauthConfig:      o,
-		CredentialFields: links.Templates[t].CredFields(),
-	}.Build(), nil
+	cfs := links.Templates[t].CredFields()
+	return thrippypb.GetLinkResponse_builder{Template: new(t), OauthConfig: o, CredentialFields: cfs}.Build(), nil
 }
 
 func (s *grpcServer) SetCredentials(ctx context.Context, in *thrippypb.SetCredentialsRequest) (*thrippypb.SetCredentialsResponse, error) {

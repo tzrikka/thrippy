@@ -11,7 +11,6 @@ import (
 	"github.com/lithammer/shortuuid/v4"
 	"golang.org/x/oauth2"
 	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 
 	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 )
@@ -126,19 +125,19 @@ func (c *Config) ToProto() *thrippypb.OAuthConfig {
 	}
 
 	return thrippypb.OAuthConfig_builder{
-		AuthUrl:   proto.String(c.Config.Endpoint.AuthURL),
-		TokenUrl:  proto.String(c.Config.Endpoint.TokenURL),
-		AuthStyle: proto.Int64(int64(c.Config.Endpoint.AuthStyle)),
+		AuthUrl:   new(c.Config.Endpoint.AuthURL),
+		TokenUrl:  new(c.Config.Endpoint.TokenURL),
+		AuthStyle: new(int64(c.Config.Endpoint.AuthStyle)),
 
-		ClientId:     proto.String(c.Config.ClientID),
-		ClientSecret: proto.String(c.Config.ClientSecret),
+		ClientId:     new(c.Config.ClientID),
+		ClientSecret: new(c.Config.ClientSecret),
 
 		Scopes:    c.Config.Scopes,
 		AuthCodes: c.AuthCodes,
 
 		// Params were already injected into the URLs, so no need to store them as a map.
 
-		Nonce: proto.String(c.Nonce),
+		Nonce: new(c.Nonce),
 	}.Build()
 }
 
@@ -228,12 +227,7 @@ func TokenToProto(t *oauth2.Token) *thrippypb.OAuthToken {
 	}
 
 	t.Expiry = t.Expiry.UTC() // Whether or not it was already populated.
-
-	o := thrippypb.OAuthToken_builder{
-		AccessToken: proto.String(t.AccessToken),
-		Expiry:      proto.String(t.Expiry.Format(time.RFC3339)),
-	}.Build()
-
+	o := thrippypb.OAuthToken_builder{AccessToken: new(t.AccessToken), Expiry: new(t.Expiry.Format(time.RFC3339))}.Build()
 	if t.RefreshToken != "" {
 		o.SetRefreshToken(t.RefreshToken)
 	}

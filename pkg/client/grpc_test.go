@@ -11,7 +11,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/proto"
 
 	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 	"github.com/tzrikka/thrippy/pkg/oauth"
@@ -47,7 +46,7 @@ func TestLinkOAuthConfig(t *testing.T) {
 		{
 			name: "invalid_oauth_error",
 			resp: thrippypb.GetLinkResponse_builder{
-				Template:    proto.String("template"),
+				Template:    new("template"),
 				OauthConfig: thrippypb.OAuthConfig_builder{}.Build(),
 			}.Build(),
 			wantErr: true,
@@ -59,11 +58,11 @@ func TestLinkOAuthConfig(t *testing.T) {
 		{
 			name: "happy_path",
 			resp: thrippypb.GetLinkResponse_builder{
-				Template: proto.String("template"),
+				Template: new("template"),
 				OauthConfig: thrippypb.OAuthConfig_builder{
-					AuthUrl:      proto.String("111"),
-					ClientId:     proto.String("222"),
-					ClientSecret: proto.String("333"),
+					AuthUrl:      new("111"),
+					ClientId:     new("222"),
+					ClientSecret: new("333"),
 				}.Build(),
 			}.Build(),
 			want: &oauth.Config{

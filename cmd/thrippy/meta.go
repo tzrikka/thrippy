@@ -9,7 +9,6 @@ import (
 	"sort"
 
 	"github.com/urfave/cli/v3"
-	"google.golang.org/protobuf/proto"
 
 	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 	"github.com/tzrikka/thrippy/pkg/client"
@@ -32,9 +31,7 @@ var getMetaCommand = &cli.Command{
 		defer conn.Close()
 
 		c := thrippypb.NewThrippyServiceClient(conn)
-		resp, err := c.GetMetadata(ctx, thrippypb.GetMetadataRequest_builder{
-			LinkId: proto.String(cmd.Args().First()),
-		}.Build())
+		resp, err := c.GetMetadata(ctx, thrippypb.GetMetadataRequest_builder{LinkId: new(cmd.Args().First())}.Build())
 		if err != nil {
 			return err
 		}

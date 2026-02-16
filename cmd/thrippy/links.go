@@ -10,7 +10,6 @@ import (
 
 	"github.com/lithammer/shortuuid/v4"
 	"github.com/urfave/cli/v3"
-	"google.golang.org/protobuf/proto"
 
 	thrippypb "github.com/tzrikka/thrippy-api/thrippy/v1"
 	"github.com/tzrikka/thrippy/pkg/client"
@@ -125,10 +124,8 @@ var createLinkCommand = &cli.Command{
 		}
 
 		c := thrippypb.NewThrippyServiceClient(conn)
-		resp, err := c.CreateLink(ctx, thrippypb.CreateLinkRequest_builder{
-			Template:    proto.String(cmd.String("template")),
-			OauthConfig: o,
-		}.Build())
+		t := new(cmd.String("template"))
+		resp, err := c.CreateLink(ctx, thrippypb.CreateLinkRequest_builder{Template: t, OauthConfig: o}.Build())
 		if err != nil {
 			return err
 		}
@@ -161,11 +158,9 @@ var deleteLinkCommand = &cli.Command{
 		defer conn.Close()
 
 		c := thrippypb.NewThrippyServiceClient(conn)
-		_, err = c.DeleteLink(ctx, thrippypb.DeleteLinkRequest_builder{
-			LinkId:       proto.String(cmd.Args().First()),
-			AllowMissing: proto.Bool(cmd.Bool("allow-missing")),
-		}.Build())
-		if err != nil {
+		id := new(cmd.Args().First())
+		am := new(cmd.Bool("allow-missing"))
+		if _, err = c.DeleteLink(ctx, thrippypb.DeleteLinkRequest_builder{LinkId: id, AllowMissing: am}.Build()); err != nil {
 			return err
 		}
 
@@ -191,9 +186,7 @@ var getLinkCommand = &cli.Command{
 		defer conn.Close()
 
 		c := thrippypb.NewThrippyServiceClient(conn)
-		resp, err := c.GetLink(ctx, thrippypb.GetLinkRequest_builder{
-			LinkId: proto.String(cmd.Args().First()),
-		}.Build())
+		resp, err := c.GetLink(ctx, thrippypb.GetLinkRequest_builder{LinkId: new(cmd.Args().First())}.Build())
 		if err != nil {
 			return err
 		}

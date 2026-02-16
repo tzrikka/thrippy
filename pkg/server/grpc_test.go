@@ -110,13 +110,14 @@ func TestDeleteLinkOAuth(t *testing.T) {
 	defer conn.Close()
 
 	client := thrippypb.NewThrippyServiceClient(conn)
-	resp1, err := client.CreateLink(t.Context(), thrippypb.CreateLinkRequest_builder{
-		Template: new("generic-oauth"),
-		OauthConfig: thrippypb.OAuthConfig_builder{
-			ClientId:     new("111"),
-			ClientSecret: new("222"),
-		}.Build(),
-	}.Build())
+	resp1, err := client.CreateLink(t.Context(), //nolint:staticcheck // https://github.com/golangci/golangci-lint/issues/6363
+		thrippypb.CreateLinkRequest_builder{
+			Template: new("generic-oauth"),
+			OauthConfig: thrippypb.OAuthConfig_builder{
+				ClientId:     new("111"),
+				ClientSecret: new("222"),
+			}.Build(),
+		}.Build())
 	if err != nil {
 		t.Fatalf("CreateLink() error = %v", err)
 	}
@@ -202,13 +203,14 @@ func TestGetLinkOAuth(t *testing.T) {
 	defer conn.Close()
 
 	client := thrippypb.NewThrippyServiceClient(conn)
-	resp1, err := client.CreateLink(t.Context(), thrippypb.CreateLinkRequest_builder{
-		Template: new("generic-oauth"),
-		OauthConfig: thrippypb.OAuthConfig_builder{
-			ClientId:     new("111"),
-			ClientSecret: new("222"),
-		}.Build(),
-	}.Build())
+	resp1, err := client.CreateLink(t.Context(), //nolint:staticcheck // https://github.com/golangci/golangci-lint/issues/6363
+		thrippypb.CreateLinkRequest_builder{
+			Template: new("generic-oauth"),
+			OauthConfig: thrippypb.OAuthConfig_builder{
+				ClientId:     new("111"),
+				ClientSecret: new("222"),
+			}.Build(),
+		}.Build())
 	if err != nil {
 		t.Fatalf("CreateLink() error = %v", err)
 	}
@@ -292,9 +294,10 @@ func TestGetLinkNonOAuth(t *testing.T) {
 	defer conn.Close()
 
 	client := thrippypb.NewThrippyServiceClient(conn)
-	resp, err := client.CreateLink(t.Context(), thrippypb.CreateLinkRequest_builder{
-		Template: new("slack-bot-token"),
-	}.Build())
+	resp, err := client.CreateLink(t.Context(), //nolint:staticcheck // https://github.com/golangci/golangci-lint/issues/6363
+		thrippypb.CreateLinkRequest_builder{
+			Template: new("slack-bot-token"),
+		}.Build())
 	if err != nil {
 		t.Fatalf("CreateLink() error = %v", err)
 	}

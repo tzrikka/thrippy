@@ -20,7 +20,7 @@ func HTTPRequest(ctx context.Context, httpMethod, url, authToken string) ([]byte
 }
 
 func HTTPRequestWithHeaders(ctx context.Context, httpMethod, url, authToken string, headers map[string]string) ([]byte, error) {
-	req, cancel, err := constructRequest(ctx, httpMethod, url, authToken, headers)
+	req, cancel, err := ConstructRequest(ctx, httpMethod, url, authToken, headers)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func HTTPRequestWithHeaders(ctx context.Context, httpMethod, url, authToken stri
 	return body, nil
 }
 
-func constructRequest(ctx context.Context, method, url, token string, headers map[string]string) (*http.Request, context.CancelFunc, error) {
+func ConstructRequest(ctx context.Context, method, url, token string, headers map[string]string) (*http.Request, context.CancelFunc, error) {
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	req, err := http.NewRequestWithContext(ctx, method, url, http.NoBody)
 	if err != nil {

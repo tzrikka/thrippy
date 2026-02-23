@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM alpine AS builder
+FROM alpine:latest AS builder
 
 RUN addgroup -S -g 1000 appgroup && \
     adduser  -S -u 1000 -D -H -G appgroup appuser && \

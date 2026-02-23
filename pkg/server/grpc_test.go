@@ -110,7 +110,7 @@ func TestDeleteLinkOAuth(t *testing.T) {
 	defer conn.Close()
 
 	client := thrippypb.NewThrippyServiceClient(conn)
-	resp1, err := client.CreateLink(t.Context(), //nolint:staticcheck // https://github.com/golangci/golangci-lint/issues/6363
+	resp1, err := client.CreateLink(t.Context(),
 		thrippypb.CreateLinkRequest_builder{
 			Template: new("generic-oauth"),
 			OauthConfig: thrippypb.OAuthConfig_builder{
@@ -203,7 +203,7 @@ func TestGetLinkOAuth(t *testing.T) {
 	defer conn.Close()
 
 	client := thrippypb.NewThrippyServiceClient(conn)
-	resp1, err := client.CreateLink(t.Context(), //nolint:staticcheck // https://github.com/golangci/golangci-lint/issues/6363
+	resp1, err := client.CreateLink(t.Context(),
 		thrippypb.CreateLinkRequest_builder{
 			Template: new("generic-oauth"),
 			OauthConfig: thrippypb.OAuthConfig_builder{
@@ -294,7 +294,7 @@ func TestGetLinkNonOAuth(t *testing.T) {
 	defer conn.Close()
 
 	client := thrippypb.NewThrippyServiceClient(conn)
-	resp, err := client.CreateLink(t.Context(), //nolint:staticcheck // https://github.com/golangci/golangci-lint/issues/6363
+	resp, err := client.CreateLink(t.Context(),
 		thrippypb.CreateLinkRequest_builder{
 			Template: new("slack-bot-token"),
 		}.Build())

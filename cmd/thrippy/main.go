@@ -45,6 +45,7 @@ func main() {
 			startOAuthCommand(path),
 			getCredsCommand,
 			getMetaCommand,
+			healthCheckCommand(path),
 		},
 		Flags:                 flags(path),
 		EnableShellCompletion: true,

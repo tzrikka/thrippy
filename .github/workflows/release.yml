@@ -9,6 +9,7 @@ on:
 permissions:
   contents: write # GoReleaser
   packages: write # Docker
+  actions: read # Syft
   # Attestation
   id-token: write
   attestations: write
@@ -28,14 +29,15 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@v0 # https://github.com/marketplace/actions/anchore-sbom-action
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v7 # https://github.com/marketplace/actions/goreleaser-action
         with:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate artifact attestation
+      - name: Generate attestation for archives
         uses: actions/attest-build-provenance@v3 # https://github.com/marketplace/actions/attest-build-provenance
         with:
           subject-checksums: ./dist/thrippy_${{ github.ref_name }}_checksums.txt
@@ -69,9 +71,14 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Generate package attestation
-        uses: actions/attest-build-provenance@v3 # https://github.com/marketplace/actions/attest-build-provenance
+      - name: Generate attestation for Docker image
+        uses: actions/attest-build-provenance@v3
         with:
           subject-name: ghcr.io/${{ github.repository }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
+      - name: Generate SBOM for Docker image
+        uses: anchore/sbom-action@v0
+        with:
+          image: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+          dependency-snapshot: true

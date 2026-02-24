@@ -9,9 +9,10 @@ on:
 permissions:
   contents: write # GoReleaser
   packages: write # Docker
-  id-token: write # Attestation
-  attestations: write # Attestation
-  artifact-metadata: write # Attestation
+  # Attestation
+  id-token: write
+  attestations: write
+  artifact-metadata: write
 
 jobs:
   publish-release:
@@ -61,7 +62,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           context: .
           push: true
-          sbom: true
+          sbom: false
+          provenance: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha

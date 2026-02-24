@@ -29,8 +29,6 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Install Syft
-        uses: anchore/sbom-action/download-syft@v0 # https://github.com/marketplace/actions/anchore-sbom-action
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v7 # https://github.com/marketplace/actions/goreleaser-action
         with:
@@ -70,15 +68,15 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
       - name: Generate attestation for Docker image
         uses: actions/attest-build-provenance@v3
         with:
           subject-name: ghcr.io/${{ github.repository }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
-      - name: Generate SBOM for Docker image
-        uses: anchore/sbom-action@v0
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0 # https://github.com/marketplace/actions/anchore-sbom-action
         with:
           image: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
           dependency-snapshot: true

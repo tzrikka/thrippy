@@ -15,7 +15,3 @@ builds:
 
 checksum:
   name_template: "{{.ProjectName}}_v{{.Version}}_checksums.txt"
-
-sboms:
-  - artifacts: archive
-    disable: false

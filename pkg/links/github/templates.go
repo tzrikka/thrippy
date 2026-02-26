@@ -1,4 +1,4 @@
-//nolint:errcheck
+//nolint:errcheck // No need to check type assertions here, as they are guaranteed by the GitHub API.
 package github
 
 import (

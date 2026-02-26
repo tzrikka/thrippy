@@ -28,6 +28,7 @@ linters:
     - gosmopolitan
     - govet
     - iface
+    - importas
     - ineffassign
     - intrange
     - mirror
@@ -35,6 +36,7 @@ linters:
     - modernize
     - musttag
     - noctx
+    - nolintlint
     - nosprintfhostport
     - perfsprint
     - predeclared
@@ -44,7 +46,9 @@ linters:
     - sloglint
     - staticcheck
     - thelper
+    - tparallel
     - unconvert
+    - unparam
     - unused
     - usestdlibvars
     - usetesting
@@ -69,8 +73,24 @@ linters:
         - identical
         - unused
         - unexported
+    importas:
+      no-extra-aliases: true
+      alias:
+        - pkg: github.com/tzrikka/thrippy-api/thrippy/v1
+          alias: thrippypb
+        - pkg: github.com/tzrikka/thrippy/internal/links
+          alias: intlinks
+        - pkg: github.com/urfave/cli-altsrc/v3
+          alias: altsrc
+        - pkg: github.com/hashicorp/vault/api
+          alias: vault
+        - pkg: google.golang.org/api/oauth2/v2
+          alias: googleoauth2
     misspell:
       locale: US
+    nolintlint:
+      allow-unused: false
+      require-explanation: true
     predeclared:
       qualified-name: true
     revive:

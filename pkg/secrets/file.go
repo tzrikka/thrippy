@@ -26,7 +26,7 @@ type fileProvider struct {
 	mu   sync.RWMutex
 }
 
-func newFileProvider(ctx context.Context) (Manager, error) {
+func newFileProvider(ctx context.Context) (Manager, error) { //nolint:unparam // Special case compared to other providers.
 	return &fileProvider{path: dataFile(ctx)}, nil
 }
 

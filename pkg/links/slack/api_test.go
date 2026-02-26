@@ -1,4 +1,3 @@
-//nolint:dupl
 package slack
 
 import (
@@ -14,34 +13,67 @@ type httpTestResponse struct {
 	Response string `json:"response,omitempty"`
 }
 
-func TestGet(t *testing.T) {
+func TestGetPost(t *testing.T) {
 	tests := []struct {
 		name        string
+		funcName    string
 		startServer bool
 		respBody    string
 		wantErr     bool
 		wantResp    string
 	}{
+		// Get.
 		{
-			name:        "happy_path",
+			name:        "get_happy_path",
+			funcName:    "get",
 			startServer: true,
 			respBody:    `{"ok": true, "response": "response"}`,
 			wantResp:    "response",
 		},
 		{
-			name:        "bad_response",
+			name:        "get_bad_response",
+			funcName:    "get",
 			startServer: true,
 			respBody:    "bad",
 			wantErr:     true,
 		},
 		{
 			name:        "slack_not_ok",
+			funcName:    "get",
 			startServer: true,
 			respBody:    `{"ok": false}`,
 		},
 		{
-			name:    "server_not_responding",
-			wantErr: true,
+			name:     "get_server_not_responding",
+			funcName: "get",
+			wantErr:  true,
+		},
+
+		// Post.
+		{
+			name:        "post_happy_path",
+			funcName:    "post",
+			startServer: true,
+			respBody:    `{"ok": true, "response": "response"}`,
+			wantResp:    "response",
+		},
+		{
+			name:        "post_bad_response",
+			funcName:    "post",
+			startServer: true,
+			respBody:    "bad",
+			wantErr:     true,
+		},
+		{
+			name:        "post_slack_not_ok",
+			funcName:    "post",
+			startServer: true,
+			respBody:    `{"ok": false}`,
+		},
+		{
+			name:     "post_server_not_responding",
+			funcName: "post",
+			wantErr:  true,
 		},
 	}
 
@@ -53,66 +85,19 @@ func TestGet(t *testing.T) {
 			}
 			defer s.Close()
 
+			fn := get
+			if tt.funcName == "post" {
+				fn = post
+			}
+
 			got := &httpTestResponse{}
-			err := get(t.Context(), s.URL, "token", got)
+			err := fn(t.Context(), s.URL, "token", got)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("get() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("%s() error = %v, wantErr %v", tt.funcName, err, tt.wantErr)
 				return
 			}
 			if tt.wantResp != "" && got.Response != tt.wantResp {
-				t.Errorf("get() response = %v, want %q", got, tt.wantResp)
-			}
-		})
-	}
-}
-
-func TestPost(t *testing.T) {
-	tests := []struct {
-		name        string
-		startServer bool
-		respBody    string
-		wantErr     bool
-		wantResp    string
-	}{
-		{
-			name:        "happy_path",
-			startServer: true,
-			respBody:    `{"ok": true, "response": "response"}`,
-			wantResp:    "response",
-		},
-		{
-			name:        "bad_response",
-			startServer: true,
-			respBody:    "bad",
-			wantErr:     true,
-		},
-		{
-			name:        "slack_not_ok",
-			startServer: true,
-			respBody:    `{"ok": false}`,
-		},
-		{
-			name:    "server_not_responding",
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := httptest.NewUnstartedServer(handler(t, tt.respBody))
-			if tt.startServer {
-				s.Start()
-			}
-			defer s.Close()
-
-			got := &httpTestResponse{}
-			err := post(t.Context(), s.URL, "token", got)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("post() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if tt.wantResp != "" && got.Response != tt.wantResp {
-				t.Errorf("post() response = %v, want %q", got, tt.wantResp)
+				t.Errorf("%s() response = %v, want %q", tt.funcName, got, tt.wantResp)
 			}
 		})
 	}

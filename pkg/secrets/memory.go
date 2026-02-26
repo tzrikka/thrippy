@@ -14,7 +14,7 @@ type inMemoryProvider struct {
 	mu    sync.RWMutex
 }
 
-func newInMemoryProvider() (Manager, error) {
+func newInMemoryProvider() (Manager, error) { //nolint:unparam // Special case compared to other providers.
 	return &inMemoryProvider{store: make(map[string]string)}, nil
 }
 

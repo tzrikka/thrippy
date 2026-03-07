@@ -26,6 +26,7 @@ import (
 )
 
 const (
+	maxSize = 1 << 20 // 1 MiB.
 	timeout = 3 * time.Second
 )
 
@@ -109,6 +110,7 @@ func (s *httpServer) oauthStartHandler(w http.ResponseWriter, r *http.Request) {
 	l.Info("received HTTP request")
 
 	// Extract the link ID and nonce parameters from the request's query or body.
+	r.Body = http.MaxBytesReader(w, r.Body, maxSize)
 	if err := r.ParseForm(); err != nil {
 		l.Warn("bad request: form parsing error", slog.Any("error", err))
 		htmlResponse(w, http.StatusBadRequest, "Form parsing error")
@@ -164,6 +166,7 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	l := slog.With(slog.String("http_method", r.Method), slog.String("url_path", r.URL.EscapedPath()))
 	l.Info("received HTTP request")
 
+	r.Body = http.MaxBytesReader(w, r.Body, maxSize)
 	if err := r.ParseForm(); err != nil {
 		l.Warn("bad request: form parsing error", slog.Any("error", err))
 		htmlResponse(w, http.StatusBadRequest, "Form parsing error")
@@ -223,6 +226,7 @@ func (s *httpServer) oauthExchangeHandler(w http.ResponseWriter, r *http.Request
 	if setupAction == "request" {
 		l.Warn("GitHub app installation requested by user who can't approve it")
 		htmlResponse(w, http.StatusForbidden, "Installation must be approved by an organization owner")
+		return
 	}
 
 	// Special case: GitHub apps that use generated JWTs don't require a

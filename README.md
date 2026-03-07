@@ -48,9 +48,11 @@ Static credentials (e.g. API keys) are set manually by the user. Dynamic credent
    go install github.com/tzrikka/thrippy
    ```
 
+   (Tip: if you use `go install`, the executable file will be located here: `$(go env GOPATH)/bin`)
+
    Or download and extract the prebuilt executable file for your platform: <https://github.com/tzrikka/thrippy/releases>
 
-   (Tip: if you use `go install`, the executable file will be located here: `$(go env GOPATH)/bin`)
+   Or pull the prebuilt Docker image: `ghcr.io/tzrikka/thrippy:latest`
 
 2. Start the Thrippy server:
 

@@ -1,6 +1,7 @@
 /dist/
 /thrippy
 /x509/*.pem
+/x509/*.srl
 
 ### https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
 

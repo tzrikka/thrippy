@@ -1,7 +1,9 @@
-This directory enables TLS and mTLS in gRPC connections, based on: \
-https://github.com/grpc/grpc-go/blob/master/examples/data/x509/README.md
+# X.509 Certificates for gRPC
 
-## Option 1: Unauthenticated & Unncrypted
+This directory enables TLS and mTLS in gRPC connections, based on: \
+<https://github.com/grpc/grpc-go/blob/master/examples/data/x509/README.md>
+
+## Option 1: Unauthenticated & Unencrypted
 
 This is supported only for the sake of simplicity during development and tests. It is unsafe in production!
 
@@ -21,16 +23,16 @@ In this mode, all gRPC traffic is encrypted, but only the server identity is aut
 
    ```toml
    [grpc.server]
-   server_cert = "<absolute path>/server_cert.pem"
-   server_key = "<absolute path>/server_key.pem"
+   server_cert = "<absolute path>/thrippy_server_cert.pem"
+   server_key = "<absolute path>/thrippy_server_key.pem"
    ```
 
 3. Configure the Thrippy client, using the server's CA public key (also in the file `${XDG_CONFIG_HOME}/thrippy/config.toml`):
 
    ```toml
    [grpc.client]
-   server_ca_cert = "<absolute path>/server_ca_cert.pem"
-   server_name_override = "x.test.example.com"
+   server_ca_cert = "<absolute path>/thrippy_server_ca_cert.pem"
+   server_name_override = "thrippy.example.com"
    ```
 
 > [!NOTE]
@@ -50,19 +52,19 @@ In this mode, all gRPC traffic is encrypted, and the identities of both sides ar
 
    ```toml
    [grpc.server]
-   client_ca_cert = "<absolute path>/client_ca_cert.pem"
-   server_cert = "<absolute path>/server_cert.pem"
-   server_key = "<absolute path>/server_key.pem"
+   client_ca_cert = "<absolute path>/thrippy_client_ca_cert.pem"
+   server_cert = "<absolute path>/thrippy_server_cert.pem"
+   server_key = "<absolute path>/thrippy_server_key.pem"
    ```
 
 3. Configure the Thrippy client, using its public and private keys, and the **server's** CA public key (also in the file `${XDG_CONFIG_HOME}/thrippy/config.toml`):
 
    ```toml
    [grpc.client]
-   client_cert = "<absolute path>/client_cert.pem"
-   client_key = "<absolute path>/client_key.pem"
-   server_ca_cert = "<absolute path>/server_ca_cert.pem"
-   server_name_override = "x.test.example.com"
+   client_cert = "<absolute path>/thrippy_client_cert.pem"
+   client_key = "<absolute path>/thrippy_client_key.pem"
+   server_ca_cert = "<absolute path>/thrippy_server_ca_cert.pem"
+   server_name_override = "thrippy.example.com"
    ```
 
 > [!NOTE]

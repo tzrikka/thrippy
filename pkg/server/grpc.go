@@ -128,21 +128,24 @@ func (s *grpcServer) DeleteLink(ctx context.Context, in *thrippypb.DeleteLinkReq
 		return nil, status.Error(codes.NotFound, "link not found")
 	}
 
+	// All key deletions are best-effort (they may not exist), except for the link template.
+	var errs []string
 	if err := s.sm.Delete(ctx, id+"/creds"); err != nil {
-		l.Error("secrets manager delete error: creds", slog.Any("error", err))
-		return nil, status.Error(codes.Internal, "secrets manager delete error: creds")
+		l.Warn("secrets manager delete error", slog.Any("error", err), slog.String("suffix", "creds"))
+		errs = append(errs, "creds")
 	}
 	if err := s.sm.Delete(ctx, id+"/meta"); err != nil {
-		l.Error("secrets manager delete error: meta", slog.Any("error", err))
-		return nil, status.Error(codes.Internal, "secrets manager delete error: meta")
+		l.Warn("secrets manager delete error", slog.Any("error", err), slog.String("suffix", "meta"))
+		errs = append(errs, "meta")
 	}
 	if err := s.sm.Delete(ctx, id+"/oauth"); err != nil {
-		l.Error("secrets manager delete error: oauth", slog.Any("error", err))
-		return nil, status.Error(codes.Internal, "secrets manager delete error: oauth")
+		l.Warn("secrets manager delete error", slog.Any("error", err), slog.String("suffix", "oauth"))
+		errs = append(errs, "oauth")
 	}
 	if err := s.sm.Delete(ctx, id+"/template"); err != nil {
-		l.Error("secrets manager delete error: template", slog.Any("error", err))
-		return nil, status.Error(codes.Internal, "secrets manager delete error: template")
+		l.Error("secrets manager delete error", slog.Any("error", err), slog.String("suffix", "template"))
+		errs = append(errs, "template")
+		return nil, status.Error(codes.Internal, "secrets manager delete error: "+strings.Join(errs, ", "))
 	}
 
 	return &thrippypb.DeleteLinkResponse{}, nil

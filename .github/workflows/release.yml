@@ -38,7 +38,7 @@ jobs:
       # - name: Generate attestation for binaries
       #   uses: actions/attest@v4 # https://github.com/marketplace/actions/generate-generic-attestations
       #   with:
-      #     subject-checksums: ./dist/revchat_${{ github.ref_name }}_checksums.txt
+      #     subject-checksums: ./dist/thrippy_${{ github.ref_name }}_checksums.txt
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v4 # https://github.com/marketplace/actions/docker-login

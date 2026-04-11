@@ -28,13 +28,13 @@ const (
 )
 
 func main() {
-	bi, _ := debug.ReadBuildInfo()
+	info, _ := debug.ReadBuildInfo()
 	path := configFile()
 
 	cmd := &cli.Command{
 		Name:    "thrippy",
 		Usage:   "Manage third-party auth configs and tokens",
-		Version: bi.Main.Version,
+		Version: info.Main.Version,
 		Commands: []*cli.Command{
 			serverCommand(path),
 			linkTemplatesCommand,
